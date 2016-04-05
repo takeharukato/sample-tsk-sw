@@ -48,5 +48,5 @@ user_init(void) {
 	wque_init_wait_queue(&wque);
 	thr_create_thread(&thrA, NULL, threadA, NULL);
 	thr_create_thread(&thrB, NULL, threadB, NULL);
-	thr_create_thread(&thrC, NULL, threadC, 0x5a5a5a5a5a);
+	thr_create_thread(&thrC, NULL, threadC, (void *)0x5a5a5a5a5a);
 }

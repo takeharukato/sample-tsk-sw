@@ -38,18 +38,18 @@ typedef struct _descriptor_tbl{
 
 typedef struct _x86_64_tss {
         uint32_t       tss_rsvd0;
-        uint64_t       tss_rsp0 __packed;      /* kernel stack pointer ring 0 */
-        uint64_t       tss_rsp1 __packed;      /* kernel stack pointer ring 1 */
-        uint64_t       tss_rsp2 __packed;      /* kernel stack pointer ring 2 */
+        uint64_t       tss_rsp0 __attribute__  ((packed));      /* kernel stack pointer ring 0 */
+        uint64_t       tss_rsp1 __attribute__  ((packed));      /* kernel stack pointer ring 1 */
+        uint64_t       tss_rsp2 __attribute__  ((packed));      /* kernel stack pointer ring 2 */
         uint32_t       tss_rsvd1;
         uint32_t       tss_rsvd2;
-        uint64_t       tss_ist1 __packed;      /* Interrupt stack table 1 */
-        uint64_t       tss_ist2 __packed;      /* Interrupt stack table 2 */
-        uint64_t       tss_ist3 __packed;      /* Interrupt stack table 3 */
-        uint64_t       tss_ist4 __packed;      /* Interrupt stack table 4 */
-        uint64_t       tss_ist5 __packed;      /* Interrupt stack table 5 */
-        uint64_t       tss_ist6 __packed;      /* Interrupt stack table 6 */
-        uint64_t       tss_ist7 __packed;      /* Interrupt stack table 7 */
+        uint64_t       tss_ist1 __attribute__  ((packed));      /* Interrupt stack table 1 */
+        uint64_t       tss_ist2 __attribute__  ((packed));      /* Interrupt stack table 2 */
+        uint64_t       tss_ist3 __attribute__  ((packed));      /* Interrupt stack table 3 */
+        uint64_t       tss_ist4 __attribute__  ((packed));      /* Interrupt stack table 4 */
+        uint64_t       tss_ist5 __attribute__  ((packed));      /* Interrupt stack table 5 */
+        uint64_t       tss_ist6 __attribute__  ((packed));      /* Interrupt stack table 6 */
+        uint64_t       tss_ist7 __attribute__  ((packed));      /* Interrupt stack table 7 */
         uint32_t       tss_rsvd3;
         uint32_t       tss_rsvd4;
         uint16_t       tss_rsvd5;
