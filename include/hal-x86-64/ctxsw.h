@@ -29,7 +29,8 @@ hal_do_context_switch(void **prev, void **next) {
 	"pushq %%r13\n\t"
 	"pushq %%r14\n\t"
 	"pushq %%r15\n\t"
-	"pushq $1f\n\t"
+	"movabsq $1f, %%r11\n\t"
+	"pushq %%r11\n\t"
 	"movq %%rsp, (%%rcx)\n\t"
 	"movq (%%rdx), %%rsp\n\t"
 	"ret\n\t"
@@ -42,7 +43,8 @@ hal_do_context_switch(void **prev, void **next) {
 	"popq %%rbx\n\t"
 	"popfq\n\t"
 	: /* no output */
-	: "c"(prev), "d"(next) );
+	: "c"(prev), "d"(next) 
+	: "r11" );
 }
 void __start_thread(void);
 void hal_setup_thread_function(struct _thread *, void (*fn)(void *), void *);
