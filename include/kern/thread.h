@@ -1,0 +1,103 @@
+/**********************************************************************/
+/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
+/*  Copyright 2001 Takeharu KATO                                      */
+/*                                                                    */
+/*  thread definitions                                                */
+/*                                                                    */
+/**********************************************************************/
+#if !defined(_KERN_THREAD_H)
+#define _KERN_THREAD_H
+
+#include "kern/kern_types.h"
+#include "kern/list.h"
+#include "hal/hal_types.h"
+#include "hal/addrinfo.h"
+
+/** スレッドの状態
+ */
+#define THR_TSTATE_RUN    (0)  /*< ランニング中 */
+#define THR_TSTATE_WAIT   (1)  /*< 資源待ち中   */
+#define THR_TSTATE_EXIT   (2)  /*< 終了中   */
+#define THR_TSTATE_DEAD   (3)  /*< 終了待ち中   */
+
+typedef uint64_t  preempt_state_t;  /*< スレッドディスパッチ許可状態  */
+
+/** ディスパッチ許可状態
+ */
+#define THR_DISPATCH_ENABLE   ((preempt_state_t)(0x0))  /*< ディスパッチ許可       */
+#define THR_DISPATCH_DISABLE  ((preempt_state_t)(0x1))  /*< ディスパッチ禁止       */
+#define THR_DISPATCH_DELAYED  ((preempt_state_t)(0x2))  /*< 遅延ディスパッチ予約中 */
+#define THR_DISPATCH_MASK  ((preempt_state_t)(THR_DISPATCH_DISABLE|THR_DISPATCH_DELAYED)) /*< 状態マスク */
+
+/** スレッド属性情報
+ */
+typedef struct _thread_attr{
+	void         *stack_top;  /*< スタックの先頭アドレス                  */
+	void             *stack;  /*< プロセススイッチ時のスタックポインタ    */
+	size_t       stack_size;  /*< スタックサイズ                          */
+	int                prio;  /*< 優先度                                  */
+}thread_attr_t;
+
+/** スレッド属性情報初期化子
+    @param[in] stk      スタックの先頭アドレス
+    @param[in] stk_size スタックのサイズ
+ */
+#define THR_ATTR_INITIALIZER(stk, stk_size) {			\
+	.stack = TRUNCATE_ALIGN(stk + stk_size - sizeof(thread_info_t) - 1, stk_size), \
+	.stack_size = stk_size,			\
+	}
+
+
+struct _thread_ready_queue;
+
+/** スレッド管理情報
+ */
+typedef struct _thread{
+	thr_state_t        status;  /*< スレッド状態                */
+	tid_t                 tid;  /*< スレッドID                  */
+	list_t               link;  /*< キューへのリンク            */
+	list_t           mgr_link;  /*< スレッド管理用リンク        */
+	struct _thread_ready_queue *rdq;  /*< レディーキュー              */
+	exit_code_t     exit_code;  /*< 終了コード                  */
+	thread_attr_t        attr;  /*< 属性情報                    */
+	message_buffer_t  msg_buf;  /*< メッセージ送信情報          */
+	wait_queue_t      recv_wq;  /*< メッセージ受信待ちキュー    */
+	wait_queue_t      send_wq;  /*< メッセージ送信者待ちキュー  */
+	list_head_t      recv_que;  /*< メッセージキュー            */
+}thread_t;
+
+#define THR_THREAD_INFO_MAGIC                  (0xdeadbeef)  /*< スタックの底を示すマジック番号  */
+/** スレッドがレディキューにつながっているか確認する
+ */
+#define THR_THREAD_ON_RDQ(thr) (thr->rdq != NULL)
+/** スレッド管理情報(スタック部分)
+ */
+typedef struct _thread_info{
+	preempt_state_t	preempt;   /*< ディスパッチ禁止状態管理情報   */
+	addr_t          magic;     /*< スタックの底を表すマジック番号 */
+}thread_info_t;
+
+/** スレッドキュー
+ */
+typedef struct _thread_queue{
+	list_head_t head;    /*< スレッドキューのヘッド  */
+}thread_queue_t;
+
+thread_info_t *thr_refer_thread_info(thread_t *);
+void thr_thread_switch(thread_t *, thread_t *);
+void thr_unlink_thread(thread_t *);
+int thr_create_thread(thread_t **, thread_attr_t *, void (*start)(void *), void *);
+void thr_exit_thread(int );
+int thr_destroy_thread(thread_t *);
+void thr_thread_start(void (*)(void *), void   *);
+tid_t thr_get_tid(thread_t *);
+tid_t thr_get_current_tid(void);
+
+void thr_init_thread_queue(thread_queue_t *);
+void thr_add_thread_queue(thread_queue_t *, thread_t *);
+void thr_remove_thread_queue(thread_queue_t *, thread_t *);
+int thr_thread_queue_empty(thread_queue_t *);
+thread_t *thr_thread_queue_get_top(thread_queue_t *);
+
+int thr_can_receive_message(thread_t *);
+#endif  /*  _KERN_THREAD_H */

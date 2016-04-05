@@ -1,0 +1,34 @@
+#
+# For a description of the syntax of this configuration file,
+# see extra/config/Kconfig-language.txt
+#
+
+mainmenu "Kernel Configuration"
+
+config CONFIG_HAL
+	bool "Hardware Abstraction Layer(HAL)"
+	default n
+	help
+	  If you wish to build the kernel for real hardware, then answer Y here.
+
+config CONFIG_ID_BITMAP_UNIT
+	int "ID bitmap unit"
+	default 4096
+	range 64 4096
+	help
+	  This sets the value of ID bitmap size.
+
+config CONFIG_HEAP_SIZE
+	int "heap memory size(UNIT:MB)"
+	default 2
+	range 1 4
+	help
+	  This sets the value of kernel heap memory size
+
+config CONFIG_KSTACK_PAGE_NR
+	int "kernel stack pages(UNIT:pages-nr)"
+	default 1
+	range 1 4
+	help
+	  This sets the value of kernel stack size
+

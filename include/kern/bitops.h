@@ -1,0 +1,17 @@
+/**********************************************************************/
+/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
+/*  Copyright 2001 Takeharu KATO                                      */
+/*                                                                    */
+/*  bit operations                                                    */
+/*                                                                    */
+/**********************************************************************/
+#if !defined(_KERN_BITOPS_H)
+#define _KERN_BITOPS_H
+
+#include "kern/kern_types.h"
+
+int  find_msr_bit_in_size(size_t );
+int  find_lsr_bit_in_size(size_t );
+int  find_msr_bit(int );
+int  find_lsr_bit(int );
+#endif  /*  _KERN_BITOPS_H  */
