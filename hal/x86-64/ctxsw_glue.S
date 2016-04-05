@@ -5,9 +5,9 @@
 /*  thread context handling routines for x86-64 ABI                   */
 /*                                                                    */
 /**********************************************************************/
-#define THR_FUNCTION_OFFSET 16  /*< スタック内での関数アドレス格納位置  */
-#define THR_ARG_OFFSET      24  /*< スタック内での引数格納位置          */
-
+#define THR_FUNCTION_OFFSET  8  /*< スタック内での関数アドレス格納位置  */
+#define THR_ARG_OFFSET      16  /*< スタック内での引数格納位置          */
+#define	ENOEXEC		 8	/* Exec format error */
 .text
 
 	.globl	__start_thread, thr_thread_start
@@ -18,11 +18,10 @@
 	thread_start関数を呼び出す.
  */
 __start_thread:
-	pushq  	%rbp
-	mov    	%rsp,%rbp
-	movq  THR_FUNCTION_OFFSET(%rbp), %rdi
-	movq  THR_ARG_OFFSET(%rbp), %rsi
-	callq	thr_thread_start
-	/* Never return here */
-	leaveq
-	retq
+	movq  THR_FUNCTION_OFFSET(%rsp), %rdi
+	movq  THR_ARG_OFFSET(%rsp), %rsi
+	movabsq $thr_thread_start, %r11
+	jmp *%r11
+	movq	$ENOEXEC, %rdi
+	retq  /* jump to thr_exit_thread */
+	
