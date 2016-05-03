@@ -21,8 +21,10 @@ select_next_thread(void) {
 
 	psw_disable_interrupt(&psw);
 	next = rdq_find_runnable_thread(&rd_queue);
+
+	/* 実行可能なスレッドがなければ, アイドルスレッドを選択  */	
 	if (next == NULL)
-		next = idle_refer_idle_thread();  /* 実行可能なスレッドがなければ, アイドルスレッドを選択  */	
+		next = idle_refer_idle_thread(); 
 out:
 	psw_restore_interrupt(&psw);
 

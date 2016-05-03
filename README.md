@@ -22,18 +22,12 @@ make <ENTER>
 ***
 
 ##実行例
-本サンプルを実行するとスレッド間でお互いにメッセージ交換（整数を交換）を行うdemoが動作します。
----
-threadA Send : 1
-threadB Recv : 1
-threadB Send : 11
-threadC
-threadA Recv : 11
-threadA Send : 12
-threadB Recv : 12
-threadB Send : 22
-.
-.
-.
----
+本サンプルを実行すると2つのスレッドが自身のスレッド名を画面に表示しな
+がらお互いに動作を切り替える様子が観察できます。
 
+```
+threadA
+threadB
+threadA
+threadB
+```
