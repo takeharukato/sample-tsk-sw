@@ -1,0 +1,18 @@
+config CONFIG_HAL_CFLAGS
+       prompt "CFLAGS for Hardware Abstraction Layer"
+       string
+       default "-mgeneral-regs-only -mcpu=cortex-a53+nofp  -fno-pic -static -fno-builtin -fno-strict-aliasing" 
+       depends on CONFIG_HAL
+
+config CONFIG_HAL_LDFLAGS
+       string
+       default "-z max-page-size=0x1000 --build-id=none"
+       depends on CONFIG_HAL
+
+config CONFIG_HAL_OPT_FLAGS
+       prompt "Additional optimize flags for HAL"
+       string 
+       default ""
+       depends on CONFIG_HAL
+
+

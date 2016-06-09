@@ -19,7 +19,7 @@ start_obj += kern/main.o
 ${mconf}:
 	${MAKE} -C tools
 
-menuconfig:configs/Config.in ${mconf}
+menuconfig:hal configs/Config.in ${mconf}
 	${RM} include/autoconf.h
 	${mconf} configs/Config.in || :
 
@@ -28,19 +28,29 @@ include/autoconf.h: .config
 	${RM} -f $@
 	tools/kconfig/conf-header.sh .config > $@
 
-${targets}:include/autoconf.h subsystem
-ifeq ($(CONFIG_HAL),y)
-	${CC} ${CFLAGS} -nostdlib  -T hal/hal/kernel.lds  -o $@.elf ${start_obj} ${kernlibs}
+kernel: kernel.elf kernel.asm
 	${CP} $@.elf $@.tmp
 	${STRIP} $@.tmp
 	${OBJCOPY} -O binary $@.tmp $@
 	${RM} $@.tmp
+
+kernel.asm: kernel.elf
+	${RM} $@
+	${OBJDUMP} -S $< > $@
+
+kernel.elf:include/autoconf.h subsystem
+ifeq ($(CONFIG_HAL),y)
+	${LD} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
+		-nostdlib -T hal/hal/kernel.lds			\
+		-o $@ ${start_obj} 				\
+		--start-group ${kernlibs} ${hallibs} --end-group
 else
 	${CC} ${CFLAGS} -o $@ ${start_obj} ${kernlibs}
 endif
 hal:
 	${MAKE} -C include hal
 	${MAKE} -C hal hal
+	${MAKE} -C configs hal
 
 subsystem: hal
 	for dir in ${subdirs} ; do \
@@ -51,10 +61,14 @@ clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\
 	done
-	${RM} *.o ${targets} *.tmp *.elf
+	${RM} *.o ${targets} *.tmp *.elf *.asm
 
 distclean:clean
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} distclean ;\
 	done
-	${RM}  *~ .config* _config
+	${RM}  *~ .config* _config GPATH GRTAGS GSYMS GTAGS
+
+gtags:
+	${GTAGS} -v
+

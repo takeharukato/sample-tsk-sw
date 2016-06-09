@@ -1,0 +1,14 @@
+config CONFIG_HAL_CFLAGS
+       prompt "CFLAGS for Hardware Abstraction Layer"
+       string
+       default "-ffreestanding -m64 -mcmodel=large -mno-red-zone -mno-aes -mno-avx -mno-mmx -mno-sse -msoft-float -fno-asynchronous-unwind-tables -fno-omit-frame-pointer -fno-optimize-sibling-calls" 
+
+config CONFIG_HAL_LDFLAGS
+       string
+       default "-z max-page-size=0x1000 --build-id=none"
+
+config CONFIG_HAL_OPT_FLAGS
+       prompt "Additional optimize flags for HAL"
+       string 
+       default "-mtune=generic"
+
