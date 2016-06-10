@@ -50,7 +50,6 @@ hal_setup_thread_function(struct _thread *thr, void (*fn)(void *), void *arg) {
 	*sp = (addr_t)fn; /* x0 */
 
 	attr->stack = sp;                 /* スタックポインタを更新する  */
-	kprintf("thr %d sp=%p\n", thr->tid, attr->stack);
 }
 
 
