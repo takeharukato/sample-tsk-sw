@@ -1,7 +1,7 @@
 タスクスイッチのサンプルプログラム
 ## 本プログラムについて
 
-本プログラムは, X86-64でのタスク（スレッド）切り替えの例を示した
+本プログラムは, X86-64/aarch64でのタスク（スレッド）切り替えの例を示した
 サンプルプログラムです。
 
 ## コンパイル手順
@@ -30,4 +30,45 @@ threadA
 threadB
 threadA
 threadB
+```
+
+## aarch64での実行手順
+Linux用のaarch64のクロスコンパイラ
+(aarch64-none-linux-gnueabi-gcc/aarch64-none-linux-gnueabi-ldなど)への
+パスを環境変数PATHに設定し,
+
+```shell-session
+export  CROSS_COMPILE=aarch64-none-linux-gnueabi-
+export CPU=aarch64
+```
+を実行して環境変数を設定した上で,
+
+```shell-session
+make menuconfig
+make
+```
+を実行すると```kernel.elf```というaarch64用のサンプルプログラムが生成
+されます。
+
+```shell-session
+qemu-system-aarch64 -M virt -cpu cortex-a57 -nographic  -kernel
+kernel.elf
+```
+を実行することで, QEmuのaarch64システムシミュレータ上でタスク切り替え
+処理が実行されます。
+
+```shell-session:実行例
+$ qemu-system-aarch64 -M virt -cpu cortex-a57 -nographic  -kernel
+kernel.elf
+boot
+threadA
+threadB
+threadC
+threadA
+threadB
+threadA
+threadB
+threadA
+threadB
+...
 ```
