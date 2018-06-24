@@ -6,7 +6,11 @@
 /*                                                                    */
 /**********************************************************************/
 #include <stdint.h>
+
 #include "kern/kconsole.h"
+#include "kern/main.h"
+#include "kern/printf.h"
+
 #include "hal/hal.h"
 
 static kconsole_t uart_console = KCONSOLE_INITILIZER(uart_console);

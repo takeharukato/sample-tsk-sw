@@ -1,0 +1,51 @@
+\documentclass[a4j,10pt,oneside,openany]{jsbook}
+%
+\usepackage{amsmath,amssymb}  %数式
+\usepackage{graphicx,xcolor}  %グラフィックと色
+\usepackage{ascmac}           %pLaTeXマクロ
+\usepackage{makeidx}          %索引
+\usepackage{url}              %文献参照用にURLを記載可能にする
+
+%
+\makeindex                    %索引用にidxファイルを出力する
+%
+%
+\setlength{\textwidth}{\fullwidth}
+\setlength{\textheight}{44\baselineskip}
+\addtolength{\textheight}{\topskip}
+\setlength{\voffset}{-0.6in}
+%
+\title{サンプル}
+\author{加藤丈治}
+\date{2018年6月}
+\begin{document}
+%
+%
+\maketitle
+\frontmatter           %ページ番号はローマ数字, 章番号を付けない
+\tableofcontents       %目次
+\listoftables          %表目次
+\listoffigures         %図目次
+%
+%
+\mainmatter
+%\include{intro}      %序論
+
+%\include{chap1}      %1章
+参考文献\index{さんこうぶんけん@参考文献}の例
+\nocite{*}
+%
+%付録
+%
+\appendix
+\include{appa} %付録A
+\backmatter           %章番号を付けない
+\include{atogaki} %後書き
+
+\bibliography{os-references} 
+\bibliographystyle{junsrt} 
+
+\newpage
+\printindex
+
+\end{document}

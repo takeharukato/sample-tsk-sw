@@ -57,6 +57,15 @@ subsystem: hal
 	${MAKE} -C $${dir} ;\
 	done
 
+run: hal kernel
+	${MAKE} -C hal/hal $@ ;\
+
+run-debug: hal kernel
+	${MAKE} -C hal/hal $@ ;\
+
+docs:
+	${MAKE} -C docs ;\
+
 clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\
