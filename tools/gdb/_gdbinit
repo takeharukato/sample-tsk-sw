@@ -1,0 +1,35 @@
+define ia_target
+set architecture i386:x86-64:intel
+end
+
+define remote_target
+target remote localhost:1234
+end
+
+define load_symbol
+symbol-file kernel-dbg.elf
+end
+
+define six
+si
+x /i $pc
+end
+
+define set_aarch64_vectors
+b _el1_user_sync
+b _el1_user_irq
+b _el1_user_fiq
+b _el1_user_error
+b _el1_sync
+b _el1_irq
+b _el1_fiq
+b _el1_error
+b _el0_sync64
+b _el0_irq64
+b _el0_fiq64
+b _el0_error64
+b _el0_sync32
+b _el0_irq32
+b _el0_fiq32
+b _el0_error32
+end
