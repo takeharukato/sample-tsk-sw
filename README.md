@@ -38,14 +38,21 @@ Linux用のaarch64のクロスコンパイラ
 パスを環境変数PATHに設定し,
 
 ```shell-session
-export  CROSS_COMPILE=aarch64-none-linux-gnueabi-
+export CROSS_COMPILE=aarch64-none-linux-gnueabi-
 export CPU=aarch64
 ```
 を実行して環境変数を設定した上で,
 
 ```shell-session
 make menuconfig
-make
+```
+を実行し, ``Hardware Abstraction Layer(HAL)''の項目をYに設定し, 
+左端の選択表示部分が, [*] になることを確認して, Exitを選択, コンフィグ
+レーション情報を保存してください。
+
+その後,
+```shell-session
+make menuconfig
 ```
 を実行すると```kernel.elf```というaarch64用のサンプルプログラムが生成
 されます。
