@@ -77,3 +77,5 @@ hal/x86-64/cpuid-intel-table.c
 hal/x86-64/apentry-asm.S
 asm-offset.s
 asm-offset.h
+build.log
+configs/hal

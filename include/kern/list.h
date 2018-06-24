@@ -43,7 +43,7 @@ void list_del(list_t *);
 void init_list_node(list_t *);
 void init_list_head(list_head_t *);
 
-static inline
+static inline int
 list_is_linked(list_t *node) {
 	return !( (node->prev == node) && (node->next == node) );
 }

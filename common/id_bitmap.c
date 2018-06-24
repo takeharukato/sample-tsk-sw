@@ -76,7 +76,7 @@ reserve_id(id_bitmap_t *idmap, obj_id_t id) {
 out:
 	psw_restore_interrupt(&psw);
 
-	return;
+	return rc;
 }
 
 /** IDビットマップの初期化

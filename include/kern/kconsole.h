@@ -40,4 +40,5 @@ void kcls(void);
 void klocate(int, int);
 int register_kconsole(kconsole_t *);
 void unregister_kconsole(kconsole_t *);
+void init_pseudo_console(void);
 #endif  /*  _HAL_KCONSOLE_H   */
