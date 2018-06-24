@@ -1,0 +1,7 @@
+1. delayの導入
+   既存delay処理のマクロ化
+   
+2. EL1(OS)への移行処理の追加[済み]
+   https://qiita.com/kaizen_nagoya/items/9a0bd8a725de62682602
+   https://groups.google.com/a/chromium.org/forum/#!topic/chromium-os-reviews/6tnea0ZUi6w
+3. 既存delay処理の置き換え
