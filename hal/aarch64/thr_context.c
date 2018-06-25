@@ -49,7 +49,13 @@ hal_setup_thread_function(struct _thread *thr, void (*fn)(void *), void *arg) {
 	*sp-- = (addr_t)0;
 	*sp-- = (addr_t)arg;
 	*sp-- = (addr_t)fn; /* x0 */
-	*sp = 0xdeadbeef; /* dummy */
+	/*
+	 * AArch64では, スタックは16バイト境界であることを保証する必要があるため
+	 * ダミー領域を用意する
+	 * Procedure Call Standard for the ARM 64-bit Architecture(AArch64)
+	 * 5.2.2.2 Stack constraints at a public interface 参照
+	 */
+	*sp = (addr_t)0xdeadbeef; /* スレッド初期化時のdummy値 */
 	attr->stack = sp;                 /* スタックポインタを更新する  */
 }
 
