@@ -69,7 +69,7 @@ distclean:clean
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} distclean ;\
 	done
-	${RM}  *~ .config* _config GPATH GRTAGS GSYMS GTAGS
+	${RM}  *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
 
 gtags:
 	${GTAGS} -v

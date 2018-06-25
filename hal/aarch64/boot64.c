@@ -34,6 +34,8 @@ boot_panic(const char *string) {
 void 
 boot_main(void) {
 
+	hal_setup_vector();
+
 	uart_console.putchar = kputchar;
 	register_kconsole(&uart_console);
 

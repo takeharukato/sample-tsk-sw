@@ -8,7 +8,7 @@ QEMU_DBG_OPT := -S -gdb tcp::1234
 
 CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
-objects = kconsole.o psw.o thr_context.o ctxsw.o
+objects = kconsole.o psw.o thr_context.o ctxsw.o exception.o vector.o
 ifeq ($(CONFIG_HAL),y)
 objects += boot.o boot64.o #machdep.o segment.o
 endif
