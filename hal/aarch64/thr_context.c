@@ -48,8 +48,8 @@ hal_setup_thread_function(struct _thread *thr, void (*fn)(void *), void *arg) {
 	*sp-- = (addr_t)0;
 	*sp-- = (addr_t)0;
 	*sp-- = (addr_t)arg;
-	*sp = (addr_t)fn; /* x0 */
-
+	*sp-- = (addr_t)fn; /* x0 */
+	*sp = 0xdeadbeef; /* dummy */
 	attr->stack = sp;                 /* スタックポインタを更新する  */
 }
 

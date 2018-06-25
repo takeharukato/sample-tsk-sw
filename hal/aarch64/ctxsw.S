@@ -33,7 +33,7 @@ hal_do_context_switch:
 	stp	x5, x6, [sp, #-16]!
 	stp	x3, x4, [sp, #-16]!
 	stp	x1, x2, [sp, #-16]!		
-	str	x0, [sp, #-8]!
+	stp	xzr,x0, [sp, #-16]!
 
 	# Switch stack
 	mov	x19, sp
@@ -42,7 +42,7 @@ hal_do_context_switch:
 	mov	sp, x19
 
 	# Next Thread
-	ldr	x0, [sp], #8
+	ldp	x1, x0, [sp], #16  /* x1 is used for dummy  */
 	ldp	x1, x2, [sp], #16
 	ldp	x3, x4, [sp], #16	
 	ldp	x5, x6, [sp], #16
