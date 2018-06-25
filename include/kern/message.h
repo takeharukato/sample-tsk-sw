@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Inter thread message                                              */
+/*  Inter thread communication                                        */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_KERN_MESSAGE_H)
@@ -10,20 +11,20 @@
 #include "kern/kern_types.h"
 #include "kern/wqueue.h"
 
-#define MSG_ENT_NR      (7)  /*< ¥á¥Ã¥»¡¼¥¸¥Ð¥Ã¥Õ¥¡¤Î¥¨¥ó¥È¥ê¿ô  */
+#define MSG_ENT_NR      (7)  /*< ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒãƒƒãƒ•ã‚¡ã®ã‚¨ãƒ³ãƒˆãƒªæ•°  */
 
-#define MSG_RECV_ANY    (0)  /*< Ç¤°Õ¤Î¥¹¥ì¥Ã¥É¤«¤é¤Î¥á¥Ã¥»¡¼¥¸¤ò¼õ¤±ÉÕ¤±¤ë  */
+#define MSG_RECV_ANY    (0)  /*< ä»»æ„ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‹ã‚‰ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å—ã‘ä»˜ã‘ã‚‹  */
 
 typedef struct _message{
-	msg_ent_t    buf[MSG_ENT_NR]; /*< ¥á¥Ã¥»¡¼¥¸ËÜÂÎ                 */
+	msg_ent_t    buf[MSG_ENT_NR]; /*< ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸æœ¬ä½“                 */
 }message_t;
 
 typedef struct _message_buffer{
-	tid_t         sender;        /*< Á÷¿®¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥ÉID       */
-	tid_t       receiver;        /*< ¼õ¿®¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥ÉID       */
-	message_t        msg;        /*< ¥á¥Ã¥»¡¼¥¸ËÜÂÎ                 */
-	wait_queue_t      wq;        /*< ¥¹¥ì¥Ã¥ÉÂÔ¤Á¥­¥å¡¼             */
-	list_t          link;        /*< ¼õ¿®¥á¥Ã¥»¡¼¥¸¥­¥å¡¼¤Ø¤Î¥ê¥ó¥¯ */
+	tid_t         sender;        /*< é€ä¿¡ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ID       */
+	tid_t       receiver;        /*< å—ä¿¡ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ID       */
+	message_t        msg;        /*< ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸æœ¬ä½“                 */
+	wait_queue_t      wq;        /*< ã‚¹ãƒ¬ãƒƒãƒ‰å¾…ã¡ã‚­ãƒ¥ãƒ¼             */
+	list_t          link;        /*< å—ä¿¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚­ãƒ¥ãƒ¼ã¸ã®ãƒªãƒ³ã‚¯ */
 }message_buffer_t;
 
 void msg_init_message_buffer(message_buffer_t *);

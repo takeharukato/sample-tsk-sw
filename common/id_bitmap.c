@@ -1,18 +1,19 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ID�ӥåȥޥå���� s                                              */
+/*  ID bitmap operations                                              */
 /*                                                                    */
 /**********************************************************************/
 
 #include "kern/kernel.h"
 
-/** ID�ӥåȥޥå���ζ���ID������
-    @param[in] idmap ID�ޥåפΥ��ɥ쥹
-    @param[in] idp ��������ID���ֵѤ����ΰ�
-    @retval 0  ���ｪλ
-    @retval ENOENT ���Ѳ�ǽ��ID���ʤ�
+/** IDビットマップ中の空きIDを得る
+    @param[in] idmap IDマップのアドレス
+    @param[in] idp 獲得したIDを返却する領域
+    @retval 0  正常終了
+    @retval ENOENT 利用可能なIDがない
  */
 int
 get_new_id(id_bitmap_t *idmap, obj_id_t *idp) {
@@ -34,9 +35,9 @@ get_new_id(id_bitmap_t *idmap, obj_id_t *idp) {
 	return ENOENT;
 }
 
-/** ID�ӥåȥޥåפ�ID���ֵѤ���
-    @param[in] idmap ID�ޥåפΥ��ɥ쥹
-    @param[in] id    �ֵѤ���ID
+/** IDビットマップにIDを返却する
+    @param[in] idmap IDマップのアドレス
+    @param[in] id    返却するID
  */
 void
 put_id(id_bitmap_t *idmap, obj_id_t id) {
@@ -52,11 +53,11 @@ put_id(id_bitmap_t *idmap, obj_id_t id) {
 	return;
 }
 
-/** ID�ӥåȥޥåפ�ID��ͽ�󤹤�
-    @param[in] idmap ID�ޥåפΥ��ɥ쥹
-    @param[in] id    ͽ�󤹤�ID
-    @retval 0     �����ͽ�󤷤�
-    @retval EBUSY ���˻��Ѥ���Ƥ���
+/** IDビットマップのIDを予約する
+    @param[in] idmap IDマップのアドレス
+    @param[in] id    予約するID
+    @retval 0     正常に予約した
+    @retval EBUSY 既に使用されている
  */
 int
 reserve_id(id_bitmap_t *idmap, obj_id_t id) {
@@ -79,8 +80,8 @@ out:
 	return rc;
 }
 
-/** ID�ӥåȥޥåפν����
-    @param[in] idmap ID�ӥåȥޥåפΥ��ɥ쥹
+/** IDビットマップの初期化
+    @param[in] idmap IDビットマップのアドレス
  */
 void
 init_idmap(id_bitmap_t *idmap){

@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥«¡¼¥Í¥ë¥³¥ó¥½¡¼¥ë½èÍý                                            */
+/*  Kernel console                                                    */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_KCONSOLE_H)
@@ -10,12 +11,12 @@
 #include "kern/list.h"
 
 typedef struct _kconsole{
-	list_t           link;      /*< ¥³¥ó¥½¡¼¥ë¥ê¥¹¥È       */
-	int                 x;      /*< ½ÐÎÏ¥«¡¼¥½¥ëXºÂÉ¸°ÌÃÖ  */
-	int                 y;      /*< ½ÐÎÏ¥«¡¼¥½¥ëYºÂÉ¸°ÌÃÖ  */
-	void (*putchar)(int );      /*< °ìÊ¸»ú½ÐÎÏ             */
-	void (*cls)(void);          /*< ²èÌÌ¥¯¥ê¥¢             */
-	void (*locate)(int , int);  /*< ¥«¡¼¥½¥ë°ÜÆ°           */
+	list_t           link;      /*< ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ãƒªã‚¹ãƒˆ       */
+	int                 x;      /*< å‡ºåŠ›ã‚«ãƒ¼ã‚½ãƒ«Xåº§æ¨™ä½ç½®  */
+	int                 y;      /*< å‡ºåŠ›ã‚«ãƒ¼ã‚½ãƒ«Yåº§æ¨™ä½ç½®  */
+	void (*putchar)(int );      /*< ä¸€æ–‡å­—å‡ºåŠ›             */
+	void (*cls)(void);          /*< ç”»é¢ã‚¯ãƒªã‚¢             */
+	void (*locate)(int , int);  /*< ã‚«ãƒ¼ã‚½ãƒ«ç§»å‹•           */
 }kconsole_t;
 
 typedef struct _kconsole_list{

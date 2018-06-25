@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥¹¥ì¥Ã¥É²ó¼ı½èÍı                                                  */
+/*  Clean up thread resources                                         */
 /*                                                                    */
 /**********************************************************************/
 
@@ -11,8 +12,8 @@
 static thread_t *reaper_thread;
 static reaper_thread_info_t reaper_info;
 
-/** ¥¹¥ì¥Ã¥É²ó¼ı¥¹¥ì¥Ã¥É
-    @note ½ªÎ»¤·¤¿¥¹¥ì¥Ã¥É¤Î²ó¼ı¤ò¹Ô¤¦
+/** ã‚¹ãƒ¬ãƒƒãƒ‰å›åã‚¹ãƒ¬ãƒƒãƒ‰
+    @note çµ‚äº†ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã®å›åã‚’è¡Œã†
  */
 static void
 reaper(void *nouse) {
@@ -23,19 +24,19 @@ reaper(void *nouse) {
 	for(;;) {
 		psw_disable_interrupt(&psw);
 		/*
-		 * ½ªÎ»¤·¤¿¥¹¥ì¥Ã¥É¤òÇË´ş¤¹¤ë
+		 * çµ‚äº†ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ç ´æ£„ã™ã‚‹
 		 */
 		while (!thr_thread_queue_empty(&(reaper_info.reaper_queue))) {
 
 			thr = thr_thread_queue_get_top(&(reaper_info.reaper_queue));
 			thr_destroy_thread(thr);
 		}
-		wque_wait_on_queue(&(reaper_info.wq));  /*  ¼¡¤ÎÍ×µá¤¬¤¯¤ë¤Ş¤ÇµÙÌ²¤¹¤ë  */
+		wque_wait_on_queue(&(reaper_info.wq));  /*  æ¬¡ã®è¦æ±‚ãŒãã‚‹ã¾ã§ä¼‘çœ ã™ã‚‹  */
 		psw_restore_interrupt(&psw);
 	}
 }
-/** ½ªÎ»¾õÂÖ¤Î¥¹¥ì¥Ã¥É¤òÅĞÏ¿¤¹¤ë
-    @param[in] thr ½ªÎ»¤·¤¿¥¹¥ì¥Ã¥É
+/** çµ‚äº†çŠ¶æ…‹ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ç™»éŒ²ã™ã‚‹
+    @param[in] thr çµ‚äº†ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰
  */
 void
 reaper_add_exit_thread(thread_t *thr) {
@@ -44,36 +45,36 @@ reaper_add_exit_thread(thread_t *thr) {
 	psw_disable_interrupt(&psw);
 	if (thr->status != THR_TSTATE_EXIT)
 		goto out;
-	thr->status = THR_TSTATE_DEAD;  /* ¥¹¥ì¥Ã¥É¾ğÊó¤òÇË´ş²ÄÇ½¤Ê¾õÂÖ¤ËÁ«°Ü¤¹¤ë    */
+	thr->status = THR_TSTATE_DEAD;  /* ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±ã‚’ç ´æ£„å¯èƒ½ãªçŠ¶æ…‹ã«é·ç§»ã™ã‚‹    */
 
-	thr_add_thread_queue(&(reaper_info.reaper_queue), thr);  /*< ¥­¥å¡¼¤ËÄÉ²Ã    */
-	wque_wakeup(&(reaper_info.wq));                          /*< ¥¹¥ì¥Ã¥É¤òµ¯¾²  */
+	thr_add_thread_queue(&(reaper_info.reaper_queue), thr);  /*< ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ     */
+	wque_wakeup(&(reaper_info.wq));                          /*< ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’èµ·åºŠ  */
 out:
 	psw_restore_interrupt(&psw);
 }
 
-/** ²ó¼ı¥¹¥ì¥Ã¥É¤Î½é´ü²½
+/** å›åã‚¹ãƒ¬ãƒƒãƒ‰ã®åˆæœŸåŒ–
  */
 void
 reaper_init_thread(void){
 	thread_attr_t attr;
 
 	/*
-	 * ´ÉÍı¾ğÊó½é´ü²½
+	 * ç®¡ç†æƒ…å ±åˆæœŸåŒ–
 	 */
 	thr_init_thread_queue(&(reaper_info.reaper_queue));
 	wque_init_wait_queue(&(reaper_info.wq));
 	
 	/*
-	 * ¥¹¥ì¥Ã¥ÉÀ¸À®
+	 * ã‚¹ãƒ¬ãƒƒãƒ‰ç”Ÿæˆ
 	 */
 	memset(&attr, 0, sizeof(thread_attr_t));
 
-	attr.prio = REAPER_THREAD_PRIO;  /*< Í¥ÀèÅÙÉÕ¤­¤Î¥·¥¹¥Æ¥à¥×¥í¥»¥¹  */
-	thrmgr_reserve_threadid(REAPER_THREAD_TID); /*< ¥¹¥ì¥Ã¥ÉID¤òÍ½Ìó¤¹¤ë  */
+	attr.prio = REAPER_THREAD_PRIO;  /*< å„ªå…ˆåº¦ä»˜ãã®ã‚·ã‚¹ãƒ†ãƒ ãƒ—ãƒ­ã‚»ã‚¹  */
+	thrmgr_reserve_threadid(REAPER_THREAD_TID); /*< ã‚¹ãƒ¬ãƒƒãƒ‰IDã‚’äºˆç´„ã™ã‚‹  */
 
 	thr_create_thread(&reaper_thread, &attr, reaper, NULL);
 
-	thrmgr_put_threadid(reaper_thread->tid);  /*< ¼«Æ°ÀßÄê¤µ¤ì¤¿ID¤òÊÖµÑ¤¹¤ë  */
-	reaper_thread->tid = REAPER_THREAD_TID;   /*< ¥¹¥ì¥Ã¥ÉID¤òÀßÄê¤¹¤ë  */
+	thrmgr_put_threadid(reaper_thread->tid);  /*< è‡ªå‹•è¨­å®šã•ã‚ŒãŸIDã‚’è¿”å´ã™ã‚‹  */
+	reaper_thread->tid = REAPER_THREAD_TID;   /*< ã‚¹ãƒ¬ãƒƒãƒ‰IDã‚’è¨­å®šã™ã‚‹  */
 }

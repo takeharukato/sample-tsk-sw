@@ -1,17 +1,18 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  wait queue relevant routines                                      */
+/*  wait queue                                                        */
 /*                                                                    */
 /**********************************************************************/
 
 #include "kern/kernel.h"
 
-/** スレッドを待ちキューに追加する
-    @param[in] wq  待ちキュー
-    @param[in] ep  待ちキューのエントリ
-    @param[in] thr 待ち状態に入れるスレッド
+/** Add a thread into a wait queue
+    @param[in] wq  wait queue
+    @param[in] ep  entry of a wait queue
+    @param[in] thr thread which to be wait state
  */
 void 
 wque_add_thread(wait_queue_t *wq, wait_queue_entry_t *ep, struct _thread  *thr){
@@ -28,9 +29,9 @@ wque_add_thread(wait_queue_t *wq, wait_queue_entry_t *ep, struct _thread  *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** 待ちキューからエントリを取り除く
-    @param[in] wq  待ちキュー
-    @param[in] ep 待ちキューのエントリ
+/** Remove a entry from a wait queue
+    @param[in] wq  wait queue
+    @param[in] ep  wait queue entry
  */
 void 
 wque_remove_entry(wait_queue_t *wq, wait_queue_entry_t *ep){
@@ -45,10 +46,8 @@ wque_remove_entry(wait_queue_t *wq, wait_queue_entry_t *ep){
 	psw_restore_interrupt(&psw);
 }
 
-/** 待ちキューを初期化する
-    @param[in] wq  待ちキュー
-    @param[in] ent 待ちキューのエントリ
-    @param[in] thr 待ち状態に入れるスレッド
+/** Initialize a wait queue
+    @param[in] wq  wait queue
  */
 void 
 wque_init_wait_queue(wait_queue_t *wq) {
@@ -59,8 +58,8 @@ wque_init_wait_queue(wait_queue_t *wq) {
 	psw_restore_interrupt(&psw);
 }
 
-/** 自スレッドを待ちキューを指定して事象を待ち合わせる
-    @param[in] wq  待ちキュー
+/** Wait an event associated to a wait queue
+    @param[in] wq  wait queue
  */
 void 
 wque_wait_on_queue(wait_queue_t *wq) {
@@ -83,8 +82,8 @@ wque_wait_on_queue(wait_queue_t *wq) {
 	psw_restore_interrupt(&psw);
 }
 
-/** 待ちキューで休眠しているスレッドを起床する
-    @param[in] wq  待ちキュー
+/** Wake up all the threads in a wait queue
+    @param[in] wq  wait queue
  */
 void 
 wque_wakeup(wait_queue_t *wq) {
@@ -105,10 +104,10 @@ wque_wakeup(wait_queue_t *wq) {
 	psw_restore_interrupt(&psw);
 }
 
-/** ウエイトキューが空であることを確認する
-    @param[in] wq ウエイトキュー
-    @retval 真 ウエイトキューが空である
-    @retval 偽 ウエイトキューが空でない
+/** Confirm the spcified wait queue is empty
+    @param[in] wq wait queue
+    @retval True The wait queue is empty
+    @retval False The wait queue contains some threads.
  */
 int  
 is_wque_empty(wait_queue_t *wq) {

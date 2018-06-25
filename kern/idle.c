@@ -1,18 +1,19 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É                                                  */
+/*  Idle thread                                                       */
 /*                                                                    */
 /**********************************************************************/
 
 #include "kern/kernel.h"
 
-static thread_t idle_thread;        /* ¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó            */
-thread_t *current = &idle_thread;   /* ¥«¥ì¥ó¥È¤Î½é´üÃÍ¤ò¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É¤ËÀßÄê¤¹¤ë  */
+static thread_t idle_thread;        /* ã‚¢ã‚¤ãƒ‰ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±            */
+thread_t *current = &idle_thread;   /* ã‚«ãƒ¬ãƒ³ãƒˆã®åˆæœŸå€¤ã‚’ã‚¢ã‚¤ãƒ‰ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã«è¨­å®šã™ã‚‹  */
 
-/** ¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É
-    @note ½ªÎ»¤·¤¿¥¹¥ì¥Ã¥É¤Î²ó¼ı¤ò¹Ô¤¦
+/** ã‚¢ã‚¤ãƒ‰ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰
+    @note çµ‚äº†ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã®å›åã‚’è¡Œã†
  */
 void
 do_idle_loop(void) {
@@ -24,7 +25,7 @@ do_idle_loop(void) {
 	}
 }
 
-/** ¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤òÊÖµÑ¤¹¤ë
+/** ã‚¢ã‚¤ãƒ‰ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã‚’è¿”å´ã™ã‚‹
  */
 thread_t *
 idle_refer_idle_thread(void) {
@@ -32,7 +33,7 @@ idle_refer_idle_thread(void) {
 	return &idle_thread;
 }
 
-/** ¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É¤Î½é´ü²½
+/** ã‚¢ã‚¤ãƒ‰ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã®åˆæœŸåŒ–
  */
 void
 idle_init_idle(void){

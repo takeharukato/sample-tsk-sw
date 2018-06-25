@@ -1,15 +1,16 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥Ò¡¼¥×Æâ¥á¥â¥ê¥Á¥ã¥ó¥¯(Buddy¥¢¥ë¥´¥ê¥º¥à¤Ë¤è¤ë¥á¥â¥ê´ÉÍı)         */
+/*  Buddy memory allocator                                            */
 /*                                                                    */
 /**********************************************************************/
 #include <errno.h>
 
 #include "kern/kernel.h"
 
-/** ¶õ¤­¥Á¥ã¥ó¥¯¤Î¥µ¥¤¥º¤¬¥ê¥¹¥È¤ËÀÜÂ³²ÄÇ½¤«³ÎÇ§¤¹¤ë
+/** ç©ºããƒãƒ£ãƒ³ã‚¯ã®ã‚µã‚¤ã‚ºãŒãƒªã‚¹ãƒˆã«æ¥ç¶šå¯èƒ½ã‹ç¢ºèªã™ã‚‹
  */
 static int
 is_chunk_linkable(chunk_t *c) {
@@ -19,12 +20,12 @@ is_chunk_linkable(chunk_t *c) {
 	idx = find_msr_bit_in_size(CHUNK_AREA_SIZE(c));
 	
 	if ( (CHUNK_AREA_SIZE(c) == 0) || ( !CHUNK_IS_ROUNDUP(c) ) )  {
-		rc = EINVAL;  /* ¥µ¥¤¥º¤¬, 0¤Ş¤¿¤Ï, ³ä¤êÅö¤ÆÃ±°Ì¤Î2ÑÑ¤Ë¤Ê¤Ã¤Æ¤¤¤Ê¤¤  */
+		rc = EINVAL;  /* ã‚µã‚¤ã‚ºãŒ, 0ã¾ãŸã¯, å‰²ã‚Šå½“ã¦å˜ä½ã®2å†ªã«ãªã£ã¦ã„ãªã„  */
 		goto out;
 	}
 
 	if ( idx > FREE_CHUNK_LIST_NR ) {
-		rc = E2BIG;  /* ¥µ¥¤¥º¤¬Âç¤­¤¹¤®¤ë  */
+		rc = E2BIG;  /* ã‚µã‚¤ã‚ºãŒå¤§ãã™ãã‚‹  */
 		goto out;
 	}
 
@@ -33,11 +34,11 @@ out:
 	return rc;
 }
 
-/** ¶õ¤­¥ê¥¹¥È¤Ë¶õ¤­ÎÎ°è¤¬¤¢¤ë¤«Ä´¤Ù¤ë
-    @param[in] hp  ¥Ò¡¼¥×´ÉÍı¾ğÊó
-    @param[in] idx ¶õ¤­¥ê¥¹¥È¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹
-    @retval ¿¿ ¶õ¤­¥ê¥¹¥È¤Ë¶õ¤­ÎÎ°è¤¬¤¢¤ë
-    @retval µ¶ ¶õ¤­¥ê¥¹¥È¤Ë¶õ¤­ÎÎ°è¤¬¤Ê¤¤
+/** ç©ºããƒªã‚¹ãƒˆã«ç©ºãé ˜åŸŸãŒã‚ã‚‹ã‹èª¿ã¹ã‚‹
+    @param[in] hp  ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
+    @param[in] idx ç©ºããƒªã‚¹ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+    @retval çœŸ ç©ºããƒªã‚¹ãƒˆã«ç©ºãé ˜åŸŸãŒã‚ã‚‹
+    @retval å½ ç©ºããƒªã‚¹ãƒˆã«ç©ºãé ˜åŸŸãŒãªã„
  */
 static inline int
 has_free_chunk(heap_t *hp, int idx) {
@@ -47,12 +48,12 @@ has_free_chunk(heap_t *hp, int idx) {
 }
 
 
-/** ¶õ¤­¥Á¥ã¥ó¥¯¤ò¥¢¥ê¡¼¥Ê¤Î¶õ¤­¥Á¥ã¥ó¥¯¥ê¥¹¥È¤ËÄÉ²Ã¤¹¤ë
-    @param[in]             c ¥Á¥ã¥ó¥¯¾ğÊó
-    @retval 0 Àµ¾ï¤Ë¥ê¥¹¥È¤ËÄÉ²Ã¤Ç¤­¤¿
-    @retval EINVAL ¥µ¥¤¥º¤¬, 0¤Ş¤¿¤Ï, ³ä¤êÅö¤ÆÃ±°Ì¤Î2ÑÑ¤Ë¤Ê¤Ã¤Æ¤¤¤Ê¤¤ 
-    @retval E2BIG  ¥µ¥¤¥º¤¬Âç¤­¤¹¤®¤ë
-    (EINVAL, E2BIG¤Ï, is_chunk_linkable¤«¤é¤ÎÊÖµÑÃÍ)
+/** ç©ºããƒãƒ£ãƒ³ã‚¯ã‚’ã‚¢ãƒªãƒ¼ãƒŠã®ç©ºããƒãƒ£ãƒ³ã‚¯ãƒªã‚¹ãƒˆã«è¿½åŠ ã™ã‚‹
+    @param[in]             c ãƒãƒ£ãƒ³ã‚¯æƒ…å ±
+    @retval 0 æ­£å¸¸ã«ãƒªã‚¹ãƒˆã«è¿½åŠ ã§ããŸ
+    @retval EINVAL ã‚µã‚¤ã‚ºãŒ, 0ã¾ãŸã¯, å‰²ã‚Šå½“ã¦å˜ä½ã®2å†ªã«ãªã£ã¦ã„ãªã„ 
+    @retval E2BIG  ã‚µã‚¤ã‚ºãŒå¤§ãã™ãã‚‹
+    (EINVAL, E2BIGã¯, is_chunk_linkableã‹ã‚‰ã®è¿”å´å€¤)
  */
 static int
 add_free_chunk(chunk_t *c) {
@@ -62,7 +63,7 @@ add_free_chunk(chunk_t *c) {
 	free_chunks_t *free_list;
 
 	rc = is_chunk_linkable(c);
-	if (rc != 0)  /* ¥Õ¥ê¡¼¥ê¥¹¥È¤ÎÀÜÂ³¾ò·ï¤Ë¤¢¤Ã¤Æ¤¤¤Ê¤¤  */
+	if (rc != 0)  /* ãƒ•ãƒªãƒ¼ãƒªã‚¹ãƒˆã®æ¥ç¶šæ¡ä»¶ã«ã‚ã£ã¦ã„ãªã„  */
 		goto out;
 
 	hp = CHUNK2HEAP(c);
@@ -70,9 +71,9 @@ add_free_chunk(chunk_t *c) {
 	idx = size2index(CHUNK_AREA_SIZE(c));
 	
 	/*
-	 * ¶õ¤­ÎÎ°è¥ê¥¹¥È¤Ë¤Ä¤Ê¤°
+	 * ç©ºãé ˜åŸŸãƒªã‚¹ãƒˆã«ã¤ãªã
 	 */
-	/* TODO:¶õ¤­ÎÎ°è¾ğÊó¤ÎÇÓÂ¾¤¬É¬Í×  */
+	/* TODO:ç©ºãé ˜åŸŸæƒ…å ±ã®æ’ä»–ãŒå¿…è¦  */
 	list_add(&free_list->flist[idx], &c->free);
 	free_list->bitmap |=  (flist_bitmap_t)(1 << idx);
 
@@ -81,12 +82,12 @@ out:
 	return rc;
 }
 
-/** ¥Á¥ã¥ó¥¯¤ò¥¢¥ê¡¼¥Ê¤Î¶õ¤­¥Á¥ã¥ó¥¯¥ê¥¹¥È¤«¤é³°¤¹
-    @param[in]             c ¥Á¥ã¥ó¥¯¾ğÊó
-    @retval 0 Àµ¾ï¤Ë¥ê¥¹¥È¤«¤é³°¤·¤¿
-    @retval EINVAL ¥µ¥¤¥º¤¬, 0¤Ş¤¿¤Ï, ³ä¤êÅö¤ÆÃ±°Ì¤Î2ÑÑ¤Ë¤Ê¤Ã¤Æ¤¤¤Ê¤¤ 
-    @retval E2BIG  ¥µ¥¤¥º¤¬Âç¤­¤¹¤®¤ë
-    (EINVAL, E2BIG¤Ï, is_chunk_linkable¤«¤é¤ÎÊÖµÑÃÍ)
+/** ãƒãƒ£ãƒ³ã‚¯ã‚’ã‚¢ãƒªãƒ¼ãƒŠã®ç©ºããƒãƒ£ãƒ³ã‚¯ãƒªã‚¹ãƒˆã‹ã‚‰å¤–ã™
+    @param[in]             c ãƒãƒ£ãƒ³ã‚¯æƒ…å ±
+    @retval 0 æ­£å¸¸ã«ãƒªã‚¹ãƒˆã‹ã‚‰å¤–ã—ãŸ
+    @retval EINVAL ã‚µã‚¤ã‚ºãŒ, 0ã¾ãŸã¯, å‰²ã‚Šå½“ã¦å˜ä½ã®2å†ªã«ãªã£ã¦ã„ãªã„ 
+    @retval E2BIG  ã‚µã‚¤ã‚ºãŒå¤§ãã™ãã‚‹
+    (EINVAL, E2BIGã¯, is_chunk_linkableã‹ã‚‰ã®è¿”å´å€¤)
  */
 static int
 remove_free_chunk(chunk_t *c) {
@@ -96,7 +97,7 @@ remove_free_chunk(chunk_t *c) {
 	free_chunks_t *free_list;
 
 	rc = is_chunk_linkable(c);
-	if (rc != 0)  /* ¥Õ¥ê¡¼¥ê¥¹¥È¤ÎÀÜÂ³¾ò·ï¤Ë¤¢¤Ã¤Æ¤¤¤Ê¤¤  */
+	if (rc != 0)  /* ãƒ•ãƒªãƒ¼ãƒªã‚¹ãƒˆã®æ¥ç¶šæ¡ä»¶ã«ã‚ã£ã¦ã„ãªã„  */
 		goto out;
 
 	hp = CHUNK2HEAP(c);
@@ -104,9 +105,9 @@ remove_free_chunk(chunk_t *c) {
 	idx = size2index(CHUNK_AREA_SIZE(c));
 	
 	/*
-	 * ¶õ¤­ÎÎ°è¥ê¥¹¥È¤«¤é³°¤¹
+	 * ç©ºãé ˜åŸŸãƒªã‚¹ãƒˆã‹ã‚‰å¤–ã™
 	 */
-	/* TODO:¶õ¤­ÎÎ°è¾ğÊó¤ÎÇÓÂ¾¤¬É¬Í×  */
+	/* TODO:ç©ºãé ˜åŸŸæƒ…å ±ã®æ’ä»–ãŒå¿…è¦  */
 	list_del(&c->free);
 	if (list_is_empty(&free_list->flist[idx]))
 		free_list->bitmap &= ~((flist_bitmap_t)( 1 << idx ));
@@ -116,11 +117,11 @@ out:
 	return rc;
 }
 
-/** ¶õ¤­¥ê¥¹¥È¤ÎÀèÆ¬Í×ÁÇ¤ò¼è¤ê½Ğ¤¹
-    @param[in] hp  ¥Ò¡¼¥×´ÉÍı¾ğÊó
-    @param[in] idx ¶õ¤­¥ê¥¹¥È¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹
-    @retval ÈóNULL ¶õ¤­¥ê¥¹¥È¤ÎÀèÆ¬¥Á¥ã¥ó¥¯
-    @retval NULL   ¶õ¤­¥Á¥ã¥ó¥¯¤¬»ØÄê¤µ¤ì¤¿¥¤¥ó¥Ç¥¯¥¹¤Î¥ê¥¹¥È¤ËÂ¸ºß¤·¤Ê¤¤
+/** ç©ºããƒªã‚¹ãƒˆã®å…ˆé ­è¦ç´ ã‚’å–ã‚Šå‡ºã™
+    @param[in] hp  ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
+    @param[in] idx ç©ºããƒªã‚¹ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+    @retval éNULL ç©ºããƒªã‚¹ãƒˆã®å…ˆé ­ãƒãƒ£ãƒ³ã‚¯
+    @retval NULL   ç©ºããƒãƒ£ãƒ³ã‚¯ãŒæŒ‡å®šã•ã‚ŒãŸã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã®ãƒªã‚¹ãƒˆã«å­˜åœ¨ã—ãªã„
  */
 static chunk_t *
 get_first_chunk(heap_t *hp, int idx) {
@@ -137,13 +138,13 @@ get_first_chunk(heap_t *hp, int idx) {
 	return c;
 }
 
-/** chunk¤ÎÎÎ°èÄ¹¤ò½Ì¾®¤¹¤ë
-    @param[in]             c ¥Á¥ã¥ó¥¯¾ğÊó
-    @param[in] new_area_size ¥Á¥ã¥ó¥¯¤Î¥¨¥ê¥¢¥µ¥¤¥º
-    @retval 0      Àµ¾ï½ªÎ»
-    @retval ENOSPC ÎÎ°è¤Î½Ì¾®¤Ë¼ºÇÔ¤·¤¿
-    @note chunk¤Î¥æ¡¼¥¶¥á¥â¥ê¥µ¥¤¥º¤òÊÑ¹¹¤¹¤ë¾ì¹ç¤Ï, resize_chunk¤ò»ÈÍÑ¤·,
-    ËÜ´Ø¿ô¤òÄ¾ÀÜ»ÈÍÑ¤·¤Ê¤¤¤³¤È.
+/** chunkã®é ˜åŸŸé•·ã‚’ç¸®å°ã™ã‚‹
+    @param[in]             c ãƒãƒ£ãƒ³ã‚¯æƒ…å ±
+    @param[in] new_area_size ãƒãƒ£ãƒ³ã‚¯ã®ã‚¨ãƒªã‚¢ã‚µã‚¤ã‚º
+    @retval 0      æ­£å¸¸çµ‚äº†
+    @retval ENOSPC é ˜åŸŸã®ç¸®å°ã«å¤±æ•—ã—ãŸ
+    @note chunkã®ãƒ¦ãƒ¼ã‚¶ãƒ¡ãƒ¢ãƒªã‚µã‚¤ã‚ºã‚’å¤‰æ›´ã™ã‚‹å ´åˆã¯, resize_chunkã‚’ä½¿ç”¨ã—,
+    æœ¬é–¢æ•°ã‚’ç›´æ¥ä½¿ç”¨ã—ãªã„ã“ã¨.
  */
 static int
 chunk_shrink_size(chunk_t *c, size_t new_area_size, chunk_t **new_chunk_p) {
@@ -153,41 +154,41 @@ chunk_shrink_size(chunk_t *c, size_t new_area_size, chunk_t **new_chunk_p) {
 	size_t free_area_size;
 
 	next = CHUNK_NEXT(c);
-	free_area_size = CHUNK_AREA_SIZE(c) - new_area_size;  /*  ½Ì¾®¤Ë¤è¤Ã¤Æ¤Ç¤­¤¿¶õ¤­ÎÎ°è¤Î¥µ¥¤¥º */
+	free_area_size = CHUNK_AREA_SIZE(c) - new_area_size;  /*  ç¸®å°ã«ã‚ˆã£ã¦ã§ããŸç©ºãé ˜åŸŸã®ã‚µã‚¤ã‚º */
 
-	if ( free_area_size < ALLOC_UNIT_SHIFT ) {  /*  ÎÎ°è¤Î½Ì¾®¤¬¤Ç¤­¤Ê¤¤¾ì¹ç  */
+	if ( free_area_size < ALLOC_UNIT_SHIFT ) {  /*  é ˜åŸŸã®ç¸®å°ãŒã§ããªã„å ´åˆ  */
 		rc = ENOSPC;
 		goto out;
 	}
 
-	if (CHUNK_IS_FREE(c))  /*  ¶õ¤­¥Á¥ã¥ó¥¯¤Î¾ì¹ç¤Ï, ¥µ¥¤¥º¤¬ÊÑ¹¹¤µ¤ì¤ë¤Î¤Ç, ¥ê¥¹¥È¤«¤é³°¤¹  */
+	if (CHUNK_IS_FREE(c))  /*  ç©ºããƒãƒ£ãƒ³ã‚¯ã®å ´åˆã¯, ã‚µã‚¤ã‚ºãŒå¤‰æ›´ã•ã‚Œã‚‹ã®ã§, ãƒªã‚¹ãƒˆã‹ã‚‰å¤–ã™  */
 		remove_free_chunk(c);
 
 	/*
-	 ÎÎ°è½Ì¾®Á°
+	 é ˜åŸŸç¸®å°å‰
 	 |             |                |
-	 |<-----c----->|<-¼¡¤Î¥Á¥ã¥ó¥¯->|
+	 |<-----c----->|<-æ¬¡ã®ãƒãƒ£ãƒ³ã‚¯->|
 	 |             |                |
-	 ÎÎ°è½Ì¾®¸å
+	 é ˜åŸŸç¸®å°å¾Œ
 	 |     |       |                |
-	 |<-c->|<-new->|<-¼¡¤Î¥Á¥ã¥ó¥¯->|
+	 |<-c->|<-new->|<-æ¬¡ã®ãƒãƒ£ãƒ³ã‚¯->|
 	 |     |       |                |
-	 [¥Á¥ã¥ó¥¯¤Î¥ê¥¹¥È¾ğÊó]
-	 new->prev = ½Ì¾®¸å¤Îc¤Î¥¨¥ê¥¢¥µ¥¤¥º
-	 new->next = ¿·µ¬¤Ë¤Ç¤­¤¿¥Á¥ã¥ó¥¯¤Î¥¨¥ê¥¢¥µ¥¤¥º
+	 [ãƒãƒ£ãƒ³ã‚¯ã®ãƒªã‚¹ãƒˆæƒ…å ±]
+	 new->prev = ç¸®å°å¾Œã®cã®ã‚¨ãƒªã‚¢ã‚µã‚¤ã‚º
+	 new->next = æ–°è¦ã«ã§ããŸãƒãƒ£ãƒ³ã‚¯ã®ã‚¨ãƒªã‚¢ã‚µã‚¤ã‚º
 	 */
-	new = (chunk_t *)(((void *)c) + new_area_size);  /*  ½Ì¾®¤Ë¤è¤Ã¤Æ¤Ç¤­¤¿¶õ¤­ÎÎ°è  */
-	CHUNK_INIT(new, free_area_size);                 /*  ½Ì¾®¤Ë¤è¤Ã¤Æ¤Ç¤­¤¿¶õ¤­ÎÎ°è¤Î¾ğÊó¤ò¥»¥Ã¥È¤¹¤ë  */
-	new->prev_size = new_area_size;                  /*  ½Ì¾®¸å¤Î¥µ¥¤¥ºÁ°¤ÎÎÎ°è¤Ëc¤ÎÀèÆ¬¥¢¥É¥ì¥¹¤¬Â¸ºß¤¹¤ë  */
-	CHUNK_MAKE_FREE(new);                            /* ¶õ¤­ÎÎ°è¤ËÀßÄê¤¹¤ë  */		
+	new = (chunk_t *)(((void *)c) + new_area_size);  /*  ç¸®å°ã«ã‚ˆã£ã¦ã§ããŸç©ºãé ˜åŸŸ  */
+	CHUNK_INIT(new, free_area_size);                 /*  ç¸®å°ã«ã‚ˆã£ã¦ã§ããŸç©ºãé ˜åŸŸã®æƒ…å ±ã‚’ã‚»ãƒƒãƒˆã™ã‚‹  */
+	new->prev_size = new_area_size;                  /*  ç¸®å°å¾Œã®ã‚µã‚¤ã‚ºå‰ã®é ˜åŸŸã«cã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒå­˜åœ¨ã™ã‚‹  */
+	CHUNK_MAKE_FREE(new);                            /* ç©ºãé ˜åŸŸã«è¨­å®šã™ã‚‹  */		
 
-	next->prev_size = free_area_size;                /* Á°Êı¥İ¥¤¥ó¥¿¤ò¹¹¿·¤¹¤ë  */
+	next->prev_size = free_area_size;                /* å‰æ–¹ãƒã‚¤ãƒ³ã‚¿ã‚’æ›´æ–°ã™ã‚‹  */
 
-	CHUNK_SET_AREA_SIZE(new, free_area_size);        /* ¿·µ¬¶õ¤­ÎÎ°è¤Î¥¨¥ê¥¢¥µ¥¤¥º¤òÀßÄê¤¹¤ë  */
-	CHUNK_SET_AREA_SIZE(c, new_area_size);           /* ½Ì¾®¸å¤Î¥µ¥¤¥º¸å¤í¤Ë¿·µ¬¶õ¤­ÎÎ°è¤¬Â¸ºß¤¹¤ë  */
-	*new_chunk_p = new;                              /* ¿·µ¬¶õ¤­ÎÎ°è¤òÊÖµÑ¤¹¤ë  */
+	CHUNK_SET_AREA_SIZE(new, free_area_size);        /* æ–°è¦ç©ºãé ˜åŸŸã®ã‚¨ãƒªã‚¢ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹  */
+	CHUNK_SET_AREA_SIZE(c, new_area_size);           /* ç¸®å°å¾Œã®ã‚µã‚¤ã‚ºå¾Œã‚ã«æ–°è¦ç©ºãé ˜åŸŸãŒå­˜åœ¨ã™ã‚‹  */
+	*new_chunk_p = new;                              /* æ–°è¦ç©ºãé ˜åŸŸã‚’è¿”å´ã™ã‚‹  */
 
-	if (CHUNK_IS_FREE(c))  /*  ¥µ¥¤¥º¤¬ÊÑ¹¹¤µ¤ì¤¿¤Î¤Ç, ¥ê¥¹¥È¤Ë¤Ä¤Ê¤®Ä¾¤¹  */
+	if (CHUNK_IS_FREE(c))  /*  ã‚µã‚¤ã‚ºãŒå¤‰æ›´ã•ã‚ŒãŸã®ã§, ãƒªã‚¹ãƒˆã«ã¤ãªãç›´ã™  */
 		add_free_chunk(c);
 
 	rc = 0;
@@ -196,8 +197,8 @@ out:
 	return rc;
 }
 
-/** ¶õ¤­¥Á¥ã¥ó¥¯¤ò16¤Î2¤Î¤Ù¤­¾è¤ËÊ¬³ä¤¹¤ë
-    @param[in] c ¥Á¥ã¥ó¥¯´ÉÍı¾ğÊó¤Î¥¢¥É¥ì¥¹
+/** ç©ºããƒãƒ£ãƒ³ã‚¯ã‚’16ã®2ã®ã¹ãä¹—ã«åˆ†å‰²ã™ã‚‹
+    @param[in] c ãƒãƒ£ãƒ³ã‚¯ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 static void
 fixup_chunk(chunk_t *c) {
@@ -205,9 +206,9 @@ fixup_chunk(chunk_t *c) {
 	size_t        size;
 	chunk_t *new_chunk;
 
-	/* ¸½ºß¤Î¥µ¥¤¥º¤ò³äÅö¤ÆÃ±°Ì¤Î2ÑÑ¤ËÀÚ¤êµÍ¤á¤¿ÎÎ°è(CHUNK_TRANC_SIZE(c))¤ò
-	 * ¸½ºß¤Î¥Á¥ã¥ó¥¯¤Î¸å¤í¤Ë¤Ä¤¯¤ë¤³¤È¤Ç, ³äÅö¤ÆÃ±°Ì¤Î2ÑÑ¤Ç¥Á¥ã¥ó¥¯¤ò·ë¹ç¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë.
-	 * ¤³¤Î¤¿¤á¤Ë, ¸½ºß¤Î¥¨¥ê¥¢¥µ¥¤¥º¤ò¸å¤í¤ËºîÀ®¤¹¤ëÎÎ°èÊ¬¤À¤±½Ì¾®¤¹¤ë.
+	/* ç¾åœ¨ã®ã‚µã‚¤ã‚ºã‚’å‰²å½“ã¦å˜ä½ã®2å†ªã«åˆ‡ã‚Šè©°ã‚ãŸé ˜åŸŸ(CHUNK_TRANC_SIZE(c))ã‚’
+	 * ç¾åœ¨ã®ãƒãƒ£ãƒ³ã‚¯ã®å¾Œã‚ã«ã¤ãã‚‹ã“ã¨ã§, å‰²å½“ã¦å˜ä½ã®2å†ªã§ãƒãƒ£ãƒ³ã‚¯ã‚’çµåˆã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹.
+	 * ã“ã®ãŸã‚ã«, ç¾åœ¨ã®ã‚¨ãƒªã‚¢ã‚µã‚¤ã‚ºã‚’å¾Œã‚ã«ä½œæˆã™ã‚‹é ˜åŸŸåˆ†ã ã‘ç¸®å°ã™ã‚‹.
 	 */
 	for(rc = 0, size = CHUNK_AREA_SIZE(c);
 	    (!CHUNK_IS_ROUNDUP(c)) && (size > ALLOC_UNIT_SHIFT);
@@ -218,11 +219,11 @@ fixup_chunk(chunk_t *c) {
 	}
 	
 }
-/** ¥Á¥ã¥ó¥¯¤ÎÎÎ°èÄ¹¤òÊÑ¹¹¤¹¤ë
-    @param[in] c ¥Á¥ã¥ó¥¯´ÉÍı¾ğÊó¤Î¥¢¥É¥ì¥¹
-    @param[in] s ÊÑ¹¹¸å¤Î¥Á¥ã¥ó¥¯¤Î¥¨¥ê¥¢¥µ¥¤¥º
-    @retval 0      Àµ¾ï½ªÎ»
-    @retval ENOSPC ÎÎ°è¤Î½Ì¾®¤Ë¼ºÇÔ¤·¤¿(chunk_shrink_size¤«¤éÊÖµÑ)
+/** ãƒãƒ£ãƒ³ã‚¯ã®é ˜åŸŸé•·ã‚’å¤‰æ›´ã™ã‚‹
+    @param[in] c ãƒãƒ£ãƒ³ã‚¯ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] s å¤‰æ›´å¾Œã®ãƒãƒ£ãƒ³ã‚¯ã®ã‚¨ãƒªã‚¢ã‚µã‚¤ã‚º
+    @retval 0      æ­£å¸¸çµ‚äº†
+    @retval ENOSPC é ˜åŸŸã®ç¸®å°ã«å¤±æ•—ã—ãŸ(chunk_shrink_sizeã‹ã‚‰è¿”å´)
  */
 static int 
 resize_chunk(chunk_t *c, size_t s) {
@@ -232,12 +233,12 @@ resize_chunk(chunk_t *c, size_t s) {
 	size_t old_area_size;
 
 	new_area_size = size2alloc(s);
-	if ( CHUNK_AREA_SIZE(c) > new_area_size ) {  /*  ÎÎ°è¤ò½Ì¾®¤¹¤ë¾ì¹ç  */
+	if ( CHUNK_AREA_SIZE(c) > new_area_size ) {  /*  é ˜åŸŸã‚’ç¸®å°ã™ã‚‹å ´åˆ  */
 		rc = chunk_shrink_size(c, new_area_size, &new_chunk);
 		if (rc != 0)
 			goto out;
 		if (!CHUNK_IS_ROUNDUP(new_chunk)) {
-			fixup_chunk(new_chunk); /*  ¶õ¤­¥Á¥ã¥ó¥¯¤ò³äÅö¤ÆÃ±°Ì¤Î2ÑÑ¤ÇÀ°Íı¤¹¤ë  */
+			fixup_chunk(new_chunk); /*  ç©ºããƒãƒ£ãƒ³ã‚¯ã‚’å‰²å½“ã¦å˜ä½ã®2å†ªã§æ•´ç†ã™ã‚‹  */
 		}
 		if ( CHUNK_IS_FREE(new_chunk) && (!list_is_linked(&new_chunk->free)) )
 			add_free_chunk(new_chunk);
@@ -248,13 +249,13 @@ resize_chunk(chunk_t *c, size_t s) {
 out:
 	return rc;
 }
-/** ¶õ¤­ÎÎ°è¤ò³ÍÆÀ¤¹¤ë
-    @param[in] hp ¶õ¤­ÎÎ°è¤ò³ÍÆÀ¤¹¤ë¥Ò¡¼¥×
-    @param[in] s  ¥æ¡¼¥¶ÎÎ°è³ÍÆÀ¥µ¥¤¥º
-    @param[in] cp ³ÍÆÀ¤·¤¿¥Á¥ã¥ó¥¯¤ò»Ø¤·¼¨¤¹¥İ¥¤¥ó¥¿ÊÑ¿ô¤Î¥¢¥É¥ì¥¹
-    @retval      0 Àµ¾ï½ªÎ»
-    @retval ENOMEM ¶õ¤­¥á¥â¥ê¤¬¤Ê¤¤
-    @retval ENOSPC ¶õ¤­¥á¥â¥ê¤Î½Ì¾®²½¤Ë¼ºÇÔ¤·¤¿
+/** ç©ºãé ˜åŸŸã‚’ç²å¾—ã™ã‚‹
+    @param[in] hp ç©ºãé ˜åŸŸã‚’ç²å¾—ã™ã‚‹ãƒ’ãƒ¼ãƒ—
+    @param[in] s  ãƒ¦ãƒ¼ã‚¶é ˜åŸŸç²å¾—ã‚µã‚¤ã‚º
+    @param[in] cp ç²å¾—ã—ãŸãƒãƒ£ãƒ³ã‚¯ã‚’æŒ‡ã—ç¤ºã™ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @retval      0 æ­£å¸¸çµ‚äº†
+    @retval ENOMEM ç©ºããƒ¡ãƒ¢ãƒªãŒãªã„
+    @retval ENOSPC ç©ºããƒ¡ãƒ¢ãƒªã®ç¸®å°åŒ–ã«å¤±æ•—ã—ãŸ
  */
 int
 get_free_chunk(heap_t *hp, size_t s, chunk_t **cp) {
@@ -266,26 +267,26 @@ get_free_chunk(heap_t *hp, size_t s, chunk_t **cp) {
 
 	psw_disable_interrupt(&psw);
 	/*
-	 * ¶õ¤­¥Á¥ã¥ó¥¯¥ê¥¹¥È¤«¤é¤Î³ÍÆÀ¤ò»î¤ß¤ë
+	 * ç©ºããƒãƒ£ãƒ³ã‚¯ãƒªã‚¹ãƒˆã‹ã‚‰ã®ç²å¾—ã‚’è©¦ã¿ã‚‹
 	 */
 	alloc_size = size2alloc(CALC_AREA_SIZE(s));
 	for(idx = size2index(alloc_size);
 	    !has_free_chunk(hp, idx); 
 	    ++idx) {
 		if (idx >= FREE_CHUNK_LIST_NR) {
-			rc = ENOMEM;  /*  ¶õ¤­ÎÎ°è¤¬Â¸ºß¤·¤Ê¤¤  */
+			rc = ENOMEM;  /*  ç©ºãé ˜åŸŸãŒå­˜åœ¨ã—ãªã„  */
 			goto error_out;
 		}
 	}
 	c = get_first_chunk(hp, idx);	
 
 	rc = 0;
-	CHUNK_MAKE_USED(c);     /* »ÈÍÑÃæ¤Ë¤¹¤ë        */
+	CHUNK_MAKE_USED(c);     /* ä½¿ç”¨ä¸­ã«ã™ã‚‹        */
 	if ( CHUNK_AREA_SIZE(c) ==  alloc_size ) {
-		goto out;  /*  Í×µá¥µ¥¤¥ºÊ¬¤ÎÎÎ°è¤òÀÚ¤ê½Ğ¤·¤¿  */
+		goto out;  /*  è¦æ±‚ã‚µã‚¤ã‚ºåˆ†ã®é ˜åŸŸã‚’åˆ‡ã‚Šå‡ºã—ãŸ  */
 	}
 
-	rc = resize_chunk(c, alloc_size);  /* ¥µ¥¤¥º¤ò½Ì¾®²½¤¹¤ë  */
+	rc = resize_chunk(c, alloc_size);  /* ã‚µã‚¤ã‚ºã‚’ç¸®å°åŒ–ã™ã‚‹  */
 
 out:
 	psw_restore_interrupt(&psw);
@@ -296,12 +297,12 @@ error_out:
 	psw_restore_interrupt(&psw);
 	return rc;
 }
-/** ¥Á¥ã¥ó¥¯¤ò³«Êü¤¹¤ë
-    @param[in] c ³«Êü¤¹¤ë¥Á¥ã¥ó¥¯
-    @retval 0 Àµ¾ï½ªÎ»
-    @retval EINVAL ¥µ¥¤¥º¤¬, 0¤Ş¤¿¤Ï, ³ä¤êÅö¤ÆÃ±°Ì¤Î2ÑÑ¤Ë¤Ê¤Ã¤Æ¤¤¤Ê¤¤ 
-    @retval E2BIG  ¥µ¥¤¥º¤¬Âç¤­¤¹¤®¤ë
-    (EINVAL, E2BIG¤Ï, remove_free_chunk¤«¤é¤ÎÊÖµÑÃÍ)
+/** ãƒãƒ£ãƒ³ã‚¯ã‚’é–‹æ”¾ã™ã‚‹
+    @param[in] c é–‹æ”¾ã™ã‚‹ãƒãƒ£ãƒ³ã‚¯
+    @retval 0 æ­£å¸¸çµ‚äº†
+    @retval EINVAL ã‚µã‚¤ã‚ºãŒ, 0ã¾ãŸã¯, å‰²ã‚Šå½“ã¦å˜ä½ã®2å†ªã«ãªã£ã¦ã„ãªã„ 
+    @retval E2BIG  ã‚µã‚¤ã‚ºãŒå¤§ãã™ãã‚‹
+    (EINVAL, E2BIGã¯, remove_free_chunkã‹ã‚‰ã®è¿”å´å€¤)
  */
 int
 free_chunk(chunk_t *c) {
@@ -318,17 +319,17 @@ free_chunk(chunk_t *c) {
 	       CHUNK_IS_FREE(buddy) && CHUNK_BUDDY_MATCHED(self) ;
 	     buddy = CHUNK_GET_BUDDY(self) ) {
 
-		rc = remove_free_chunk(buddy);  /*  ¥Ğ¥Ç¥£¤ò¶õ¤­¥ê¥¹¥È¤«¤éºï½ü  */
-		if (rc != 0)  /*  ºï½ü¼ºÇÔ¤Ë¤Ä¤­ÅÓÃæ¤Ş¤Ç·ë¹ç¤·¤¿¥Á¥ã¥ó¥¯¤ò¥Õ¥ê¡¼¥ê¥¹¥È¤ËÀÜÂ³  */
+		rc = remove_free_chunk(buddy);  /*  ãƒãƒ‡ã‚£ã‚’ç©ºããƒªã‚¹ãƒˆã‹ã‚‰å‰Šé™¤  */
+		if (rc != 0)  /*  å‰Šé™¤å¤±æ•—ã«ã¤ãé€”ä¸­ã¾ã§çµåˆã—ãŸãƒãƒ£ãƒ³ã‚¯ã‚’ãƒ•ãƒªãƒ¼ãƒªã‚¹ãƒˆã«æ¥ç¶š  */
 			goto free_out;
 
-		self = CHUNK_GET_EVEN_SIDE(self);  /*  self¤ò¶ö¿ôÂ¦¤Î¥Á¥ã¥ó¥¯¤Ë¹¹¿·  */
+		self = CHUNK_GET_EVEN_SIDE(self);  /*  selfã‚’å¶æ•°å´ã®ãƒãƒ£ãƒ³ã‚¯ã«æ›´æ–°  */
 
-		/*  ¥Á¥ã¥ó¥¯¤ò·ë¹ç  */
+		/*  ãƒãƒ£ãƒ³ã‚¯ã‚’çµåˆ  */
 		CHUNK_SET_AREA_SIZE(self, CHUNK_AREA_SIZE(self) * 2);
 
 		if ( CHUNK_IS_LAST(self) )
-			break;  /*  ·ë¹ç¤·¤¿¥Á¥ã¥ó¥¯¤¬ºÇ½ª¥Á¥ã¥ó¥¯¤Ê¤éÈ´¤±¤ë  */
+			break;  /*  çµåˆã—ãŸãƒãƒ£ãƒ³ã‚¯ãŒæœ€çµ‚ãƒãƒ£ãƒ³ã‚¯ãªã‚‰æŠœã‘ã‚‹  */
 	}
 
 	rc = 0;
@@ -340,9 +341,9 @@ free_out:
 	return rc;
 }
 
-/** ¥Ò¡¼¥×¤Ë½é´ü¥Á¥ã¥ó¥¯¤òÀßÄê¤¹¤ë
-    @param[in] hp ¥Ò¡¼¥×´ÉÍı¾ğÊó
-    @param[in] s  ½é´ü¥Á¥ã¥ó¥¯¤ÎÂç¤­¤µ
+/** ãƒ’ãƒ¼ãƒ—ã«åˆæœŸãƒãƒ£ãƒ³ã‚¯ã‚’è¨­å®šã™ã‚‹
+    @param[in] hp ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
+    @param[in] s  åˆæœŸãƒãƒ£ãƒ³ã‚¯ã®å¤§ãã•
  */
 void
 setup_heap_chunks(heap_t *hp, size_t s) {

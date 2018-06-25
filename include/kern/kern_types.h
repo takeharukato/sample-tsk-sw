@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  type definitions                                                  */
 /*                                                                    */
@@ -10,12 +11,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define BIT_PER_BYTE       (8)  /*<  ¥Ð¥¤¥È¥Þ¥·¥ó¤òÁÛÄê              */
+#define BIT_PER_BYTE       (8)  /*<  ãƒã‚¤ãƒˆãƒžã‚·ãƒ³ã‚’æƒ³å®š              */
 
-typedef uint64_t         obj_id_t;  /*< ID¾ðÊó                       */
-typedef uint64_t      exit_code_t;  /*< ¥¹¥ì¥Ã¥É½ªÎ»¥³¡¼¥É           */
-typedef int           thr_state_t;  /*< ¥¹¥ì¥Ã¥É¾õÂÖ                 */
-typedef char *            caddr_t;  /*< ¥³¥¢¥¢¥É¥ì¥¹¤ò¼¨¤¹·¿         */
-typedef uint64_t        msg_ent_t;  /*< ¥á¥Ã¥»¡¼¥¸1¥¨¥ó¥È¥ê¤Î¥µ¥¤¥º  */
-typedef obj_id_t            tid_t;  /*< ¥¹¥ì¥Ã¥ÉID    */
+typedef uint64_t         obj_id_t;  /*< IDæƒ…å ±                       */
+typedef uint64_t      exit_code_t;  /*< ã‚¹ãƒ¬ãƒƒãƒ‰çµ‚äº†ã‚³ãƒ¼ãƒ‰           */
+typedef int           thr_state_t;  /*< ã‚¹ãƒ¬ãƒƒãƒ‰çŠ¶æ…‹                 */
+typedef char *            caddr_t;  /*< ã‚³ã‚¢ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ç¤ºã™åž‹         */
+typedef uint64_t        msg_ent_t;  /*< ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸1ã‚¨ãƒ³ãƒˆãƒªã®ã‚µã‚¤ã‚º  */
+typedef obj_id_t            tid_t;  /*< ã‚¹ãƒ¬ãƒƒãƒ‰ID    */
 #endif  /*  _KERN_KERN_TYPES_H  */

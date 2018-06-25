@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  low level screen manipulation                                     */
 /*                                                                    */
@@ -31,10 +32,10 @@ raw_locate(int x,int y) {
 
 	psw_disable_interrupt(&psw);	
 
-	xpos = x; /*  À‹≈ˆ§œ, ∞˙øÙ•¡•ß•√•Ø§Ú§∑§ §§§»§ﬁ§∫§§  */
+	xpos = x; /*  Êú¨ÂΩì„ÅØ, ÂºïÊï∞„ÉÅ„Çß„ÉÉ„ÇØ„Çí„Åó„Å™„ÅÑ„Å®„Åæ„Åö„ÅÑ  */
 	ypos = y;
 
-	/* •´°º•Ω•Î∞‹∆∞  */
+	/* „Ç´„Éº„ÇΩ„É´ÁßªÂãï  */
 
 	out_port_byte (MC6845_INDEX_REG, 0x0F); /* set low-order address of cursor */
 	out_port_byte (MC6845_DATA_REG, (unsigned char)(vram_pos & 0xFF)); 
@@ -55,14 +56,14 @@ raw_do_scroll(void) {
 	psw_disable_interrupt(&psw);
 	for(cx = 0; cx < COLUMNS; ++cx) {
 		for(cy = 0; cy < LINES-1; ++cy) {
-			/*  ∫«¥¸§Œ1π‘§ÚΩ¸§§§∆…Ωº®  */
+			/*  ÊúÄÊúü„ÅÆ1Ë°å„ÇíÈô§„ÅÑ„Å¶Ë°®Á§∫  */
 			*(video + (cx + cy * COLUMNS) * 2)  = *(video + (cx + (cy+1) * COLUMNS) * 2) ;
 			*(video + (cx + cy * COLUMNS) * 2 + 1) = *(video + (cx + (cy + 1) * COLUMNS) * 2 + 1) ;
 	
 		}
 	}
 
-	for(cx = 0; cx < COLUMNS; ++cx) { /*  π‘•Ø•Í•¢  */
+	for(cx = 0; cx < COLUMNS; ++cx) { /*  Ë°å„ÇØ„É™„Ç¢  */
 		raw_locate(cx,LINES-1);
 		*(video + (cx + (LINES-1) * COLUMNS) * 2) =  0x0;
 		*(video + (cx + (LINES-1) * COLUMNS) * 2 + 1) = ATTRIBUTE;
@@ -70,13 +71,13 @@ raw_do_scroll(void) {
 
 	psw_restore_interrupt(&psw);
 
-	/* •´°º•Ω•Î∞‹∆∞  */
+	/* „Ç´„Éº„ÇΩ„É´ÁßªÂãï  */
 	raw_locate(0,LINES-1);
 }
 
 
 /* 
- *  ≤ËÃÃæ√µÓ¥ÿøÙ
+ *  ÁîªÈù¢Ê∂àÂéªÈñ¢Êï∞
  */
 static void
 raw_cls (void) {
@@ -87,11 +88,11 @@ raw_cls (void) {
 
 	psw_disable_interrupt(&psw);
 	for (i = 0; i < COLUMNS * LINES * 2; i++)
-		*(video + i) = 0; 	/*  •÷•È•Û•Ø§ÚΩÒ§≠π˛§‡  */
+		*(video + i) = 0; 	/*  „Éñ„É©„É≥„ÇØ„ÇíÊõ∏„ÅçËæº„ÇÄ  */
 
 	psw_restore_interrupt(&psw);
 
-	raw_locate(0,0); /*  •›•∏•∑•Á•Û§ÚÃ·§π  */
+	raw_locate(0,0); /*  „Éù„Ç∏„Ç∑„Éß„É≥„ÇíÊàª„Åô  */
 
 	return;
 }

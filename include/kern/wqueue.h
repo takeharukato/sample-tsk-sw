@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  wait queue definitions                                            */
 /*                                                                    */
@@ -11,15 +12,15 @@
 
 struct _thread;
 
-/** ¥¦¥¨¥¤¥È¥­¥å¡¼
+/** ã‚¦ã‚¨ã‚¤ãƒˆã‚­ãƒ¥ãƒ¼
  */
 typedef struct _wait_queue{
-	list_head_t head;   /*< ÂÔ¤Á¥­¥å¡¼¤Î¥Ø¥Ã¥É  */
+	list_head_t head;   /*< å¾…ã¡ã‚­ãƒ¥ãƒ¼ã®ãƒ˜ãƒƒãƒ‰  */
 }wait_queue_t;
 
 typedef struct _wait_queue_entry{
-	list_t          link;   /*< ÂÔ¤Á¥­¥å¡¼¥Ø¥Ã¥É¤Ø¤Î¥ê¥ó¥¯   */
-	struct _thread  *thr;   /*< ¥¹¥ì¥Ã¥É´ÉÍý¾ðÊó¤Ø¤Î¥Ý¥¤¥ó¥¿ */
+	list_t          link;   /*< å¾…ã¡ã‚­ãƒ¥ãƒ¼ãƒ˜ãƒƒãƒ‰ã¸ã®ãƒªãƒ³ã‚¯   */
+	struct _thread  *thr;   /*< ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã¸ã®ãƒã‚¤ãƒ³ã‚¿ */
 }wait_queue_entry_t;
 
 

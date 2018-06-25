@@ -1,13 +1,14 @@
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Processor Status Word制御                                         */
+/*  Processor Status Word                                             */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_PSW_H)
 #define  _HAL_PSW_H 
-#include "param.h"
+#include "kern/param.h"
+#include "hal/aarch64.h"
 
 typedef uint64_t psw_t;  /*< プロセサステータスワード  */
 
@@ -15,22 +16,21 @@ typedef uint64_t psw_t;  /*< プロセサステータスワード  */
 
 /** CPUへの割り込みを無条件に許可する
  */
-#define __psw_enable_interrupt()     do{                     \
-		__asm__ __volatile__ ("msr daifclr, #2\n\t");	     \
+#define __psw_enable_interrupt()     do{				\
+      __asm__ __volatile__ ("msr daifclr, %0\n\t" : : "i"(AARCH64_DAIF_IRQ)); \
     }while(0)
 /** CPUへの割り込みを無条件に禁止する
  */
-#define __psw_disable_interrupt()     do{                     \
-		__asm__ __volatile__ ("msr daifset, #2\n\t");	      \
+#define __psw_disable_interrupt()     do{				\
+	__asm__ __volatile__ ("msr daifset, %0\n\t" : : "i"(AARCH64_DAIF_IRQ)); \
     }while(0)
 
 
 /** PSWを保存する
     @param[in] psw PSW保存用の変数
  */
-#define __save_psw(psw)  do{				\
-       __asm__ __volatile__ ("mrs %0, daif\n\t"         \
-	   :"=r"(psw));					\
+#define __save_psw(psw)  do{				    \
+     __asm__ __volatile__ ("mrs %0, daif\n\t":"=r"(psw));   \
     }while(0)
 
 /** PSWを復元する

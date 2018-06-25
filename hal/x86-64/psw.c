@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  Processor Status Word                                             */
 /*                                                                    */
@@ -8,8 +9,8 @@
 
 #include "kern/kernel.h"
 
-/** CPU¥ì¥Ù¥ë¤Ç³ä¹ş¤ß¤ò¶Ø»ß¤¹¤ë
-    @param[in] pswp ³ä¤ê¹ş¤ß¶Ø»ßÁ°¤Î¥×¥í¥»¥µ¥¹¥Æ¡¼¥¿¥¹¥ï¡¼¥ÉÊÖµÑ°è
+/** CPUãƒ¬ãƒ™ãƒ«ã§å‰²è¾¼ã¿ã‚’ç¦æ­¢ã™ã‚‹
+    @param[in] pswp å‰²ã‚Šè¾¼ã¿ç¦æ­¢å‰ã®ãƒ—ãƒ­ã‚»ã‚µã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ¯ãƒ¼ãƒ‰è¿”å´åŸŸ
  */
 void
 psw_disable_interrupt(psw_t *pswp) {
@@ -19,8 +20,8 @@ psw_disable_interrupt(psw_t *pswp) {
 	*pswp = psw;
 }
 
-/** CPU¥ì¥Ù¥ë¤Ç³ä¹ş¤ß¾õÂÖ¤òÉü¸µ¤¹¤ë
-    @param[in] pswp ¥×¥í¥»¥µ¥¹¥Æ¡¼¥¿¥¹¥ï¡¼¥ÉÊÖµÑ°è
+/** CPUãƒ¬ãƒ™ãƒ«ã§å‰²è¾¼ã¿çŠ¶æ…‹ã‚’å¾©å…ƒã™ã‚‹
+    @param[in] pswp ãƒ—ãƒ­ã‚»ã‚µã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ¯ãƒ¼ãƒ‰è¿”å´åŸŸ
  */
 void
 psw_restore_interrupt(psw_t *pswp) {

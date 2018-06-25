@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  main routine                                                      */
 /*                                                                    */
@@ -8,7 +9,7 @@
 
 #include "kern/kernel.h"
 
-/** ¥«¡¼¥Í¥ë¤Î½é´ü²½
+/** ã‚«ãƒ¼ãƒãƒ«ã®åˆæœŸåŒ–
  */
 void
 kern_init(void) {

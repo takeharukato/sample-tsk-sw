@@ -1,7 +1,6 @@
 top=.
 include Makefile.inc
 targets=kernel
-headers=param.h list.h	heap.h chunk.h malloc.h 
 
 subdirs=common kern hal user
 cleandirs=include ${subdirs} tools configs

@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*   relevant routines                                 */
+/*  Architechture specific types for AArch64                          */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_TYPES_H)
@@ -10,5 +11,5 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef uint64_t addr_t;  /*  •¢•…•Ï•π§Ú¿∞øÙ∑ø§«…Ω§π√Õ  */
+typedef uint64_t addr_t;  /*  „Ç¢„Éâ„É¨„Çπ„ÇíÊï¥Êï∞Âûã„ÅßË°®„ÅôÂÄ§  */
 #endif  /*  _KERN_TYPES_H   */

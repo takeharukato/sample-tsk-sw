@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥¹¥±¥¸¥å¡¼¥é                                                      */
+/*  Thread scheduler                                                  */
 /*                                                                    */
 /**********************************************************************/
 
@@ -10,9 +11,9 @@
 
 static thread_ready_queue_t rd_queue;
 
-/** ¼Â¹Ô²ÄÇ½¤Ê¥¹¥ì¥Ã¥É¤òÁªÂò¤¹¤ë
-    @retval NULL ¥¹¥±¥¸¥å¡¼¥ë²ÄÇ½¤Ê¥¹¥ì¥Ã¥É¤¬¤¤¤Ê¤¤(¥ì¥Ç¥£¡¼¥­¥å¡¼¤¬¶õ)
-    @retval ¼¡¤ËÆ°ºî¤µ¤»¤ë¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** å®Ÿè¡Œå¯èƒ½ãªã‚¹ãƒ¬ãƒƒãƒ‰ã‚’é¸æŠã™ã‚‹
+    @retval NULL ã‚¹ã‚±ã‚¸ãƒ¥ãƒ¼ãƒ«å¯èƒ½ãªã‚¹ãƒ¬ãƒƒãƒ‰ãŒã„ãªã„(ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ãŒç©º)
+    @retval æ¬¡ã«å‹•ä½œã•ã›ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 static thread_t *
 select_next_thread(void) {
@@ -22,7 +23,7 @@ select_next_thread(void) {
 	psw_disable_interrupt(&psw);
 	next = rdq_find_runnable_thread(&rd_queue);
 
-	/* ¼Â¹Ô²ÄÇ½¤Ê¥¹¥ì¥Ã¥É¤¬¤Ê¤±¤ì¤Ğ, ¥¢¥¤¥É¥ë¥¹¥ì¥Ã¥É¤òÁªÂò  */	
+	/* å®Ÿè¡Œå¯èƒ½ãªã‚¹ãƒ¬ãƒƒãƒ‰ãŒãªã‘ã‚Œã°, ã‚¢ã‚¤ãƒ‰ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’é¸æŠ  */	
 	if (next == NULL)
 		next = idle_refer_idle_thread(); 
 out:
@@ -31,19 +32,19 @@ out:
 	return next;
 }
 
-/** ¥¹¥ì¥Ã¥É¤ò¥¹¥±¥¸¥å¡¼¥ë²ÄÇ½¤Ë¤¹¤ë
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ã‚¹ã‚±ã‚¸ãƒ¥ãƒ¼ãƒ«å¯èƒ½ã«ã™ã‚‹
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void
 sched_set_ready(thread_t *thr) {
 	psw_t psw;
 
 	psw_disable_interrupt(&psw);
-	rdq_add_thread(&rd_queue, thr);  /* ¥ì¥Ç¥£¡¼¥­¥å¡¼¤ËÄÉ²Ã¤¹¤ë  */
+	rdq_add_thread(&rd_queue, thr);  /* ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ ã™ã‚‹  */
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥ì¥Ç¥£¡¼¥­¥å¡¼¤ò²óÅ¾¤¹¤ë
+/** ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‚’å›è»¢ã™ã‚‹
  */
 void
 sched_rotate_queue(void) {
@@ -54,7 +55,7 @@ sched_rotate_queue(void) {
 	psw_restore_interrupt(&psw);	
 }
 
-/** ¥¹¥±¥¸¥å¡¼¥éËÜÂÎ
+/** ã‚¹ã‚±ã‚¸ãƒ¥ãƒ¼ãƒ©æœ¬ä½“
  */
 void
 sched_schedule(void) {
@@ -65,7 +66,7 @@ sched_schedule(void) {
 
 	prev = current;
 	next = select_next_thread(); 
-	if (prev == next) {/* ¥Ç¥£¥¹¥Ñ¥Ã¥Á¤¹¤ëÉ¬Í×¤Ê¤·  */
+	if (prev == next) {/* ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒã™ã‚‹å¿…è¦ãªã—  */
 		goto out;
 	}
 	current = next;
@@ -76,7 +77,7 @@ out:
 	psw_restore_interrupt(&psw);	
 }
 
-/** ¥¹¥±¥¸¥å¡¼¥é¤Î½é´ü²½
+/** ã‚¹ã‚±ã‚¸ãƒ¥ãƒ¼ãƒ©ã®åˆæœŸåŒ–
  */
 void
 sched_init(void) {

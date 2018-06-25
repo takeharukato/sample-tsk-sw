@@ -1,16 +1,17 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥Ò¡¼¥×´ÉÍý                                                        */
+/*  Heap mamager                                                      */
 /*                                                                    */
 /**********************************************************************/
 #include "kern/kernel.h"
 
-static heap_t global_heap = HEAP_INITIALIZER(global_heap, HEAP_SIZE);  /*< Âç°è¥Ò¡¼¥×  */
+static heap_t global_heap = HEAP_INITIALIZER(global_heap, HEAP_SIZE);  /*< å¤§åŸŸãƒ’ãƒ¼ãƒ—  */
 
-/** ¥Õ¥ê¡¼¥ê¥¹¥È¤ò½é´ü²½¤¹¤ë
-    @param[in] fc ¥Õ¥ê¡¼¥ê¥¹¥È¾ðÊó¤Î¥¢¥É¥ì¥¹
+/** ãƒ•ãƒªãƒ¼ãƒªã‚¹ãƒˆã‚’åˆæœŸåŒ–ã™ã‚‹
+    @param[in] fc ãƒ•ãƒªãƒ¼ãƒªã‚¹ãƒˆæƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 static void
 init_free_chunk_bitmap(free_chunks_t *fc) {
@@ -25,9 +26,9 @@ init_free_chunk_bitmap(free_chunks_t *fc) {
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥Ò¡¼¥×´ÉÍý¾ðÊó¤ò½é´ü²½¤¹¤ë
-    @param[in] hp   ¥Ò¡¼¥×´ÉÍý¾ðÊó¤Î¥¢¥É¥ì¥¹
-    @param[in] size ¥Ò¡¼¥×ÎÎ°èÄ¹
+/** ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±ã‚’åˆæœŸåŒ–ã™ã‚‹
+    @param[in] hp   ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] size ãƒ’ãƒ¼ãƒ—é ˜åŸŸé•·
  */
 static void
 init_heap_node(heap_t *hp, size_t size) {
@@ -46,9 +47,9 @@ init_heap_node(heap_t *hp, size_t size) {
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥á¥â¥ê¥µ¥¤¥º¤«¤é¥Ó¥Ã¥È¥Þ¥Ã¥×¤Î¥¤¥ó¥Ç¥¯¥¹¤ò»»½Ð¤¹¤ë
-    @param[in] size ³ÍÆÀ¥á¥â¥ê¥µ¥¤¥º
-    @return ¥Ó¥Ã¥È¥Þ¥Ã¥×¤Î¥¤¥ó¥Ç¥¯¥¹
+/** ãƒ¡ãƒ¢ãƒªã‚µã‚¤ã‚ºã‹ã‚‰ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—ã®ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã‚’ç®—å‡ºã™ã‚‹
+    @param[in] size ç²å¾—ãƒ¡ãƒ¢ãƒªã‚µã‚¤ã‚º
+    @return ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—ã®ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹
  */
 int
 size2index(size_t size) {
@@ -56,12 +57,12 @@ size2index(size_t size) {
 	size_t alloc_size;
 	size_t       mask;
 
-	alloc_size = roundup_size(size); /* Í×µá¥á¥â¥ê¥µ¥¤¥º¤ò¥á¥â¥ê³ä¤êÅö¤ÆÃ±°Ì¤ÇÀÚ¤ê¾å¤²¤ë  */
+	alloc_size = roundup_size(size); /* è¦æ±‚ãƒ¡ãƒ¢ãƒªã‚µã‚¤ã‚ºã‚’ãƒ¡ãƒ¢ãƒªå‰²ã‚Šå½“ã¦å˜ä½ã§åˆ‡ã‚Šä¸Šã’ã‚‹  */
 
-	idx = find_msr_bit_in_size(alloc_size) - INDEX_SHIFT; /* ºÇ¾å°Ì¥Ó¥Ã¥È¤ò¸µ¤Ë¥¤¥ó¥Ç¥¯¥¹°ÌÃÖ¤ò»»½Ð  */
+	idx = find_msr_bit_in_size(alloc_size) - INDEX_SHIFT; /* æœ€ä¸Šä½ãƒ“ãƒƒãƒˆã‚’å…ƒã«ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ä½ç½®ã‚’ç®—å‡º  */
 
         /*
-	 * ºÇ¾å°Ì¥Ó¥Ã¥È°Ê³°¤¬Î©¤Ã¤Æ¤¤¤¿¤é£±¤ÄÂç¤­¤¤¥µ¥¤¥º¤ò³ä¤êÅö¤Æ¤ë  
+	 * æœ€ä¸Šä½ãƒ“ãƒƒãƒˆä»¥å¤–ãŒç«‹ã£ã¦ã„ãŸã‚‰ï¼‘ã¤å¤§ãã„ã‚µã‚¤ã‚ºã‚’å‰²ã‚Šå½“ã¦ã‚‹  
 	 */
 	mask = index2size(idx) - 1;  
 	if (alloc_size & mask)
@@ -70,8 +71,8 @@ size2index(size_t size) {
 	return idx;
 }
 
-/** ¥Ò¡¼¥×Æâ¤Î¥Á¥ã¥ó¥¯¤Î¾õÂÖ¤òÉ½¼¨¤¹¤ë
-    @param[in] hp ¥Ò¡¼¥×´ÉÍý¾ðÊó
+/** ãƒ’ãƒ¼ãƒ—å†…ã®ãƒãƒ£ãƒ³ã‚¯ã®çŠ¶æ…‹ã‚’è¡¨ç¤ºã™ã‚‹
+    @param[in] hp ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
  */
 void
 print_chunks(heap_t *hp) {
@@ -97,8 +98,8 @@ print_chunks(heap_t *hp) {
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥á¥¤¥ó¥Ò¡¼¥×¤Î´ÉÍý¾ðÊó¤òÊÖµÑ¤¹¤ë
-    @return ¥á¥¤¥ó¥Ò¡¼¥×¤Î´ÉÍý¾ðÊó¤Î¥¢¥É¥ì¥¹
+/** ãƒ¡ã‚¤ãƒ³ãƒ’ãƒ¼ãƒ—ã®ç®¡ç†æƒ…å ±ã‚’è¿”å´ã™ã‚‹
+    @return ãƒ¡ã‚¤ãƒ³ãƒ’ãƒ¼ãƒ—ã®ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 heap_t *
 refer_main_heap(void) {
@@ -106,7 +107,7 @@ refer_main_heap(void) {
 	return &global_heap;
 }
 
-/** ¥á¥¤¥ó¥Ò¡¼¥×¤Î´ÉÍý¾ðÊó¤ò½é´ü²½¤¹¤ë
+/** ãƒ¡ã‚¤ãƒ³ãƒ’ãƒ¼ãƒ—ã®ç®¡ç†æƒ…å ±ã‚’åˆæœŸåŒ–ã™ã‚‹
  */
 void
 init_heap(void) {

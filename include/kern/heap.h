@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  heap management relevant routines                                 */
 /*                                                                    */
@@ -10,38 +11,38 @@
 #include <stdint.h>
 
 #include "kern/kern_types.h"
-#include "param.h"
+#include "kern/param.h"
 #include "kern/list.h"
 
-typedef uint32_t flist_bitmap_t;                                    /*< ¥Ó¥Ã¥È¥Þ¥Ã¥×¤Î¥Ç¡¼¥¿·¿  */
+typedef uint32_t flist_bitmap_t;                                    /*< ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—ã®ãƒ‡ãƒ¼ã‚¿åž‹  */
 
-#define FREE_CHUNK_LIST_NR (sizeof(flist_bitmap_t) * BIT_PER_BYTE)  /*< ¶õ¤­¥Á¥ã¥ó¥¯¥ê¥¹¥È¤Î¿ô  */
+#define FREE_CHUNK_LIST_NR (sizeof(flist_bitmap_t) * BIT_PER_BYTE)  /*< ç©ºããƒãƒ£ãƒ³ã‚¯ãƒªã‚¹ãƒˆã®æ•°  */
 
 struct _chunk;
 
-/** ¶õ¤­¥Á¥ã¥ó¥¯´ÉÍý¥ê¥¹¥È
+/** ç©ºããƒãƒ£ãƒ³ã‚¯ç®¡ç†ãƒªã‚¹ãƒˆ
  */
 typedef struct _free_chunks{
-	flist_bitmap_t                 bitmap;   /*< ¶õ¤­¥ê¥¹¥È¤Î¥Ó¥Ã¥È¥Þ¥Ã¥×  */
-	list_head_t flist[FREE_CHUNK_LIST_NR];   /*< ¶õ¤­¥Á¥ã¥ó¥¯¤Î¥ê¥¹¥È      */
+	flist_bitmap_t                 bitmap;   /*< ç©ºããƒªã‚¹ãƒˆã®ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—  */
+	list_head_t flist[FREE_CHUNK_LIST_NR];   /*< ç©ºããƒãƒ£ãƒ³ã‚¯ã®ãƒªã‚¹ãƒˆ      */
 }free_chunks_t;
 
-/** ¥Ò¡¼¥×´ÉÍý¾ðÊó
+/** ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
  */
 typedef struct _heap{
-	list_t             list;            /*< ¥Ò¡¼¥×¤Î¥ê¥ó¥¯¾ðÊó    */
-	free_chunks_t   fchunks;            /*< ¶õ¤­¥Á¥ã¥ó¥¯´ÉÍý¾ðÊó  */
-	struct _chunk    *chunk;            /*< ÀèÆ¬¥Á¥ã¥ó¥¯          */
-	size_t             size;            /*< ¥Ò¡¼¥×¥µ¥¤¥º          */
-	uint8_t heap[HEAP_SIZE];            /*< ¥Ò¡¼¥×                */
+	list_t             list;            /*< ãƒ’ãƒ¼ãƒ—ã®ãƒªãƒ³ã‚¯æƒ…å ±    */
+	free_chunks_t   fchunks;            /*< ç©ºããƒãƒ£ãƒ³ã‚¯ç®¡ç†æƒ…å ±  */
+	struct _chunk    *chunk;            /*< å…ˆé ­ãƒãƒ£ãƒ³ã‚¯          */
+	size_t             size;            /*< ãƒ’ãƒ¼ãƒ—ã‚µã‚¤ã‚º          */
+	uint8_t heap[HEAP_SIZE];            /*< ãƒ’ãƒ¼ãƒ—                */
 }heap_t;
 
 typedef struct _heap_info{
-	list_head_t list;                   /*< ¥Ò¡¼¥×¤Î¥ê¥¹¥È        */
+	list_head_t list;                   /*< ãƒ’ãƒ¼ãƒ—ã®ãƒªã‚¹ãƒˆ        */
 }heap_info_t;
 
-/** ¥Ò¡¼¥×´ÉÍý¾ðÊó¤Î½é´ü²½»Ø¼¨»Ò
-    @param[in] var ¥Ò¡¼¥×´ÉÍý¾ðÊó¤ÎÊÑ¿ôÌ¾
+/** ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±ã®åˆæœŸåŒ–æŒ‡ç¤ºå­
+    @param[in] var ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±ã®å¤‰æ•°å
  */
 #define HEAP_INITIALIZER(var, sz) {		\
 	.list = {&((var).list), &((var).list)},	\
@@ -51,16 +52,16 @@ typedef struct _heap_info{
 	.heap = {0, },			        \
  }
 
-/** ¶õ¤­¥Á¥ã¥ó¥¯´ÉÍý¾ðÊó¤ò¼èÆÀ¤¹¤ë
-    @param[in] h ¥Ò¡¼¥×´ÉÍý¾ðÊó
-    @retval ¶õ¤­¥Á¥ã¥ó¥¯´ÉÍý¾ðÊó¤Î¥¢¥É¥ì¥¹
+/** ç©ºããƒãƒ£ãƒ³ã‚¯ç®¡ç†æƒ…å ±ã‚’å–å¾—ã™ã‚‹
+    @param[in] h ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
+    @retval ç©ºããƒãƒ£ãƒ³ã‚¯ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 #define GET_FREE_CHUNK_LIST(h)						\
 	((free_chunks_t *)(&((h)->fchunks)))
 
-/** ¥Ò¡¼¥×¤ÎÂç¤­¤µ¤ò»²¾È¤¹¤ë
-    @param[in] h ¥Ò¡¼¥×´ÉÍý¾ðÊó
-    @retval ¥Ò¡¼¥×¤ÎÂç¤­¤µ
+/** ãƒ’ãƒ¼ãƒ—ã®å¤§ãã•ã‚’å‚ç…§ã™ã‚‹
+    @param[in] h ãƒ’ãƒ¼ãƒ—ç®¡ç†æƒ…å ±
+    @retval ãƒ’ãƒ¼ãƒ—ã®å¤§ãã•
  */
 #define GET_HEAP_SIZE(h)						\
 	((h)->size)

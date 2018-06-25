@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  thread ready queue                                                */
 /*                                                                    */
@@ -8,9 +9,9 @@
 
 #include "kern/kernel.h"
 
-/** ¥ì¥Ç¥£¡¼¥­¥å¡¼¤Ë¥¹¥ì¥Ã¥É¤òÄÉ²Ã¤¹¤ë
-    @param[in] rdq ÄÉ²ÃÀè¤Î¥ì¥Ç¥£¡¼¥­¥å¡¼
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’è¿½åŠ ã™ã‚‹
+    @param[in] rdq è¿½åŠ å…ˆã®ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void 
 rdq_add_thread(thread_ready_queue_t *rdq, thread_t *thr){
@@ -24,10 +25,10 @@ rdq_add_thread(thread_ready_queue_t *rdq, thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥ì¥Ç¥£¡¼¥­¥å¡¼¤«¤é¥¹¥ì¥Ã¥É¤òºï½ü¤¹¤ë
-    @param[in] rdq ºï½ü¸µ¤Î¥ì¥Ç¥£¡¼¥­¥å¡¼
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
-    @note ¥Ş¥ë¥Á¥×¥í¥»¥µ²½¤ò¹ÍÎ¸¤·¤Æ, ¥ì¥Ç¥£¡¼¥­¥å¡¼¤ò°ú¿ô¤Ë»ØÄê¤¹¤ë¤è¤¦¤Ë¤·¤Æ¤¤¤ë
+/** ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‹ã‚‰ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‰Šé™¤ã™ã‚‹
+    @param[in] rdq å‰Šé™¤å…ƒã®ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
+    @note ãƒãƒ«ãƒãƒ—ãƒ­ã‚»ã‚µåŒ–ã‚’è€ƒæ…®ã—ã¦, ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‚’å¼•æ•°ã«æŒ‡å®šã™ã‚‹ã‚ˆã†ã«ã—ã¦ã„ã‚‹
  */
 void 
 rdq_remove_thread(thread_ready_queue_t *rdq, thread_t *thr){
@@ -42,8 +43,8 @@ rdq_remove_thread(thread_ready_queue_t *rdq, thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥æ¡¼¥¶¥¹¥ì¥Ã¥É¤Î¥ì¥Ç¥£¡¼¥­¥å¡¼¤ò²óÅ¾¤¹¤ë
-    @param[in] rdq ²óÅ¾¤¹¤ë¥ì¥Ç¥£¡¼¥­¥å¡¼
+/** ãƒ¦ãƒ¼ã‚¶ã‚¹ãƒ¬ãƒƒãƒ‰ã®ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‚’å›è»¢ã™ã‚‹
+    @param[in] rdq å›è»¢ã™ã‚‹ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼
  */
 void 
 rdq_rotate_queue(thread_ready_queue_t *rdq) {
@@ -54,10 +55,10 @@ rdq_rotate_queue(thread_ready_queue_t *rdq) {
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥ì¥Ç¥£¡¼¥­¥å¡¼¤«¤éÆ°ºî²ÄÇ½¤Ê¥¹¥ì¥Ã¥É¤ò¼èÆÀ¤¹¤ë
-    @param[in] rdq ¥ì¥Ç¥£¡¼¥­¥å¡¼
-    @retval NULL ¥ì¥Ç¥£¡¼¥­¥å¡¼¤¬¶õ¤À¤Ã¤¿
-    @retval ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤Î¥¢¥É¥ì¥¹ ¥ì¥Ç¥£¡¼¥­¥å¡¼Ãæ¤Î¼Â¹Ô²ÄÇ½¥¹¥ì¥Ã¥É
+/** ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‹ã‚‰å‹•ä½œå¯èƒ½ãªã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å–å¾—ã™ã‚‹
+    @param[in] rdq ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼
+    @retval NULL ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ãŒç©ºã ã£ãŸ
+    @retval ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ä¸­ã®å®Ÿè¡Œå¯èƒ½ã‚¹ãƒ¬ãƒƒãƒ‰
  */
 thread_t *
 rdq_find_runnable_thread(thread_ready_queue_t *rdq){
@@ -81,15 +82,15 @@ out:
 	return thr;
 }
 
-/** ¥ì¥Ç¥£¡¼¥­¥å¡¼¤ò½é´ü²½¤¹¤ë
-    @param[in] que ¥ì¥Ç¥£¡¼¥­¥å¡¼´ÉÍı¾ğÊó
+/** ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‚’åˆæœŸåŒ–ã™ã‚‹
+    @param[in] que ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ç®¡ç†æƒ…å ±
  */
 void
 rdq_init_ready_queue(thread_ready_queue_t *que) {
 	int i;
 
-	que->bitmap = 0;  /*< Æ°ºî²ÄÇ½¤Ê¥¹¥ì¥Ã¥É¤¬¤Ê¤¤¾õÂÖ¤Ê¤Î¤Ç0¤ËÀßÄê¤¹¤ë  */
+	que->bitmap = 0;  /*< å‹•ä½œå¯èƒ½ãªã‚¹ãƒ¬ãƒƒãƒ‰ãŒãªã„çŠ¶æ…‹ãªã®ã§0ã«è¨­å®šã™ã‚‹  */
 	for(i = 0; i < RDQ_PRIORITY_MAX; ++i){
-		init_list_head(&que->head[i]);  /*< ³ÆÍ¥ÀèÅÙ¤Î¥­¥å¡¼¤ò½é´ü²½¤¹¤ë  */
+		init_list_head(&que->head[i]);  /*< å„å„ªå…ˆåº¦ã®ã‚­ãƒ¥ãƒ¼ã‚’åˆæœŸåŒ–ã™ã‚‹  */
 	}
 }

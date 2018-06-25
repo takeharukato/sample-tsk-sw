@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  64bit boot code                                                   */
 /*                                                                    */
@@ -11,7 +12,7 @@
 #define CHECK_FLAG(flags,bit)   \
 	((flags) & (1 << (bit))) /* Check if the bit BIT in FLAGS is set. */
 
-/** �ѥ˥å��ؿ�
+/** パニック関数
  */
 static void
 boot_panic(const char *string) {
@@ -19,7 +20,7 @@ boot_panic(const char *string) {
 	kprintf ("boot panic : %s \n", string);
 	while(1);
 }
-/** �֡��ȥإå���ɽ��
+/** ブートヘッダを表示
  */
 static void
 show_boot_headers(multiboot_info_t *mbi) {
@@ -81,7 +82,7 @@ show_boot_headers(multiboot_info_t *mbi) {
 
 	return ;
 }
-/** 64bit �⡼�ɤǤΥ֡��ȥ��å�
+/** 64bit モードでのブートアップ
  */
 void 
 boot_main(unsigned long magic, unsigned long addr) {

@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  list relevant routines                                            */
+/*  list data structure                                               */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_KERN_LIST_H)
@@ -10,24 +11,24 @@
 
 #include "kern/kern_types.h"
 
-/** ¥ê¥¹¥È¥¨¥ó¥È¥ê
+/** ãƒªã‚¹ãƒˆã‚¨ãƒ³ãƒˆãƒª
  */
 typedef struct _list{
-	struct _list *prev;       /*<  Á°¤ÎÎÎ°è¤Ø¤Î¥Ý¥¤¥ó¥¿  */
-	struct _list *next;       /*<  ¼¡¤ÎÎÎ°è¤Ø¤Î¥Ý¥¤¥ó¥¿  */
+	struct _list *prev;       /*<  å‰ã®é ˜åŸŸã¸ã®ãƒã‚¤ãƒ³ã‚¿  */
+	struct _list *next;       /*<  æ¬¡ã®é ˜åŸŸã¸ã®ãƒã‚¤ãƒ³ã‚¿  */
 }list_t;
 
-/** ¥ê¥¹¥È¥Ø¥Ã¥É
+/** ãƒªã‚¹ãƒˆãƒ˜ãƒƒãƒ‰
  */
 typedef struct _list_head{
-	struct _list *prev;       /*<  Á°¤ÎÎÎ°è¤Ø¤Î¥Ý¥¤¥ó¥¿  */
-	struct _list *next;       /*<  ¼¡¤ÎÎÎ°è¤Ø¤Î¥Ý¥¤¥ó¥¿  */
+	struct _list *prev;       /*<  å‰ã®é ˜åŸŸã¸ã®ãƒã‚¤ãƒ³ã‚¿  */
+	struct _list *next;       /*<  æ¬¡ã®é ˜åŸŸã¸ã®ãƒã‚¤ãƒ³ã‚¿  */
 }list_head_t;
 
-/** ¥ê¥¹¥È¤«¤é¹½Â¤ÂÎ¤Ø¤Î¥Ý¥¤¥ó¥¿¤òÆÀ¤ë
-    @param[in] p ¥ê¥¹¥È¥á¥ó¥Ð¤Î¥¢¥É¥ì¥¹
-    @param[in] t ¹½Â¤ÂÎ¤Î·¿
-    @param[in] m t¤Î¹½Â¤ÂÎÃæ¤Î¥ê¥¹¥È¥á¥ó¥Ð¤Î¥á¥ó¥ÐÌ¾
+/** ãƒªã‚¹ãƒˆã‹ã‚‰æ§‹é€ ä½“ã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’å¾—ã‚‹
+    @param[in] p ãƒªã‚¹ãƒˆãƒ¡ãƒ³ãƒã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] t æ§‹é€ ä½“ã®åž‹
+    @param[in] m tã®æ§‹é€ ä½“ä¸­ã®ãƒªã‚¹ãƒˆãƒ¡ãƒ³ãƒã®ãƒ¡ãƒ³ãƒå
  */
 #define CONTAINER_OF(p, t, m)			\
 	((t *)(((void *)(p)) - ((void *)(&(((t *)(0))->m)))))
@@ -49,10 +50,10 @@ list_is_linked(list_t *node) {
 }
 
 
-/** ¥ê¥¹¥ÈÃµºº
-    @param[in] itr    ¥¤¥Æ¥ì¡¼¥¿¤Ë»ÈÍÑ¤¹¤ëlist_t·¿¤Î¥Ý¥¤¥ó¥¿ÊÑ¿ôÌ¾
-    @param[in] refp   ¥ê¥¹¥È¥Ø¥Ã¥À¤ò´Þ¤à¹½Â¤ÂÎ¤Ø¤Î¥Ý¥¤¥ó¥¿ÊÑ¿ôÌ¾
-    @param[in] member refpÃæ¤Î¥ê¥¹¥È¥Ø¥Ã¥É¥á¥ó¥ÐÌ¾
+/** ãƒªã‚¹ãƒˆæŽ¢æŸ»
+    @param[in] itr    ã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿ã«ä½¿ç”¨ã™ã‚‹list_tåž‹ã®ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°å
+    @param[in] refp   ãƒªã‚¹ãƒˆãƒ˜ãƒƒãƒ€ã‚’å«ã‚€æ§‹é€ ä½“ã¸ã®ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°å
+    @param[in] member refpä¸­ã®ãƒªã‚¹ãƒˆãƒ˜ãƒƒãƒ‰ãƒ¡ãƒ³ãƒå
  */
 #define list_for_each(itr, refp, member)					\
   for((itr) = list_ref_top(&((refp)->member)); (itr) != (list_t *)&((refp)->member); (itr) = (itr)->next) 

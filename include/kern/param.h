@@ -3,16 +3,12 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Hardware Abstraction Layer common header                          */
+/*  Kernel parameters                                                 */
 /*                                                                    */
 /**********************************************************************/
-#if !defined(_HAL_HAL_H)
-#define _HAL_HAL_H
-#include "hal/linkage.h"
-#include "hal/hal_types.h"
-#include "hal/ctxsw.h"
-#include "hal/psw.h"
-#include "hal/addrinfo.h"
-#include "hal/boot64.h"
-
-#endif  /*  _HAL_HAL_H  */
+#if !defined(_KERN_PARAM_H)
+#define _KERN_PARAM_H
+#include "autoconf.h"
+#define HEAP_SIZE       ((CONFIG_HEAP_SIZE)*1024*1024)
+#define STACK_SIZE      ((CONFIG_KSTACK_PAGE_NR)*4*1024)
+#endif  /*   _KERN_PARAM_H  */

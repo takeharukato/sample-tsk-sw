@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  thread context handling routines                                  */
 /*                                                                    */
@@ -8,10 +9,10 @@
 
 #include "kern/kernel.h"
 
-/** ����åɥ����å��˥���åɳ��ϴؿ�����򥻥åȤ���
-    @param[in] thr  ����åɴ�������
-    @param[in] fn   ����åɤγ��ϴؿ�
-    @param[in] arg  ����åɤγ��ϴؿ��ΰ���
+/** スレッドスタックにスレッド開始関数情報をセットする
+    @param[in] thr  スレッド管理情報
+    @param[in] fn   スレッドの開始関数
+    @param[in] arg  スレッドの開始関数の引数
  */
 void
 hal_setup_thread_function(struct _thread *thr, void (*fn)(void *), void *arg) {
@@ -19,12 +20,12 @@ hal_setup_thread_function(struct _thread *thr, void (*fn)(void *), void *arg) {
 	thread_attr_t *attr = &thr->attr;
 
 	sp = (addr_t *)thr_refer_thread_info(thr);
-	--sp;  /* ����åɴ�������ΰ�ľ夫��������Ѥ߾夲��  */
+	--sp;  /* スレッド管理情報の一つ上から引数を積み上げる  */
 	*sp-- = (addr_t)arg;
 	*sp-- = (addr_t)fn;
-	*sp-- = (addr_t)thr_exit_thread;  /* thr_exit thread����륳��ƥ����Ȥ�ǰ�Τ����Ѥ�Ǥ���  */
-	*sp = (addr_t)__start_thread;     /* thread_start�ؿ��ƤӽФ��ѤΥ��롼 */
-	attr->stack = sp;                 /* �����å��ݥ��󥿤򹹿�����  */
+	*sp-- = (addr_t)thr_exit_thread;  /* thr_exit threadに戻るコンテキストを念のため積んでおく  */
+	*sp = (addr_t)__start_thread;     /* thread_start関数呼び出し用のグルー */
+	attr->stack = sp;                 /* スタックポインタを更新する  */
 }
 
 

@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  thread management routines                                        */
 /*                                                                    */
@@ -9,10 +10,10 @@
 #include "kern/kernel.h"
 
 static thread_manager_t all_threads;
-static id_bitmap_t thread_id_map = ID_BITMAP_INITIALIZER;  /*< ¥¹¥ì¥Ã¥ÉID¤Î¥×¡¼¥ë  */
+static id_bitmap_t thread_id_map = ID_BITMAP_INITIALIZER;  /*< ã‚¹ãƒ¬ãƒƒãƒ‰IDã®ãƒ—ãƒ¼ãƒ«  */
 
 
-/** ¥¹¥ì¥Ã¥É¥Ş¥Í¡¼¥¸¥ã¤ò½é´ü²½¤¹¤ë
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ã‚’åˆæœŸåŒ–ã™ã‚‹
  */
 static void
 thread_manager_init(thread_manager_t *tm) {
@@ -20,16 +21,16 @@ thread_manager_init(thread_manager_t *tm) {
 	init_list_head(&tm->head);
 }
 
-/** ¥¹¥ì¥Ã¥É¥Ş¥Í¡¼¥¸¥ã¤Î¥¢¥É¥ì¥¹¤ò¼èÆÀ¤¹¤ë
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—ã™ã‚‹
  */
 thread_manager_t *
 thrmgr_refer_thread_manager(void) {
 	return &all_threads; 
 }
 
-/** ¥¹¥ì¥Ã¥É¥Ş¥Í¡¼¥¸¥ã¤Ë¥¹¥ì¥Ã¥É¤òÄÉ²Ã¤¹¤ë
-    @param[in] tm ¥¹¥ì¥Ã¥É¥Ş¥Í¡¼¥¸¥ã¤Î¥¢¥É¥ì¥¹
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ã«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’è¿½åŠ ã™ã‚‹
+    @param[in] tm ã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void
 thrmgr_thread_manager_add(thread_manager_t *tm, thread_t *thr) {
@@ -39,9 +40,9 @@ thrmgr_thread_manager_add(thread_manager_t *tm, thread_t *thr) {
 	list_add(&tm->head, &thr->mgr_link);
 	psw_restore_interrupt(&psw);
 }
-/** ¥¹¥ì¥Ã¥É¥Ş¥Í¡¼¥¸¥ã¤«¤é¥¹¥ì¥Ã¥É¤ò¼è¤ê½ü¤¯
-    @param[in] tm ¥¹¥ì¥Ã¥É¥Ş¥Í¡¼¥¸¥ã¤Î¥¢¥É¥ì¥¹
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ã‹ã‚‰ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å–ã‚Šé™¤ã
+    @param[in] tm ã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void
 thrmgr_thread_manager_remove(thread_manager_t *tm, thread_t *thr) {
@@ -52,11 +53,11 @@ thrmgr_thread_manager_remove(thread_manager_t *tm, thread_t *thr) {
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥¹¥ì¥Ã¥ÉID¤«¤é¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤òÆÀ¤ë
-    @param[in] tid  ¸¡º÷ÂĞ¾İ¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥ÉID
-    @param[in] thrp ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤ò»²¾È¤¹¤ë¥İ¥¤¥ó¥¿ÊÑ¿ô¤Î¥¢¥É¥ì¥¹
-    @retval 0       Àµ¾ï½ªÎ»
-    @retval ESRCH   ¥¹¥ì¥Ã¥É¤¬¸«¤Ä¤«¤é¤Ê¤«¤Ã¤¿
+/** ã‚¹ãƒ¬ãƒƒãƒ‰IDã‹ã‚‰ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã‚’å¾—ã‚‹
+    @param[in] tid  æ¤œç´¢å¯¾è±¡ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ID
+    @param[in] thrp ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã‚’å‚ç…§ã™ã‚‹ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @retval 0       æ­£å¸¸çµ‚äº†
+    @retval ESRCH   ã‚¹ãƒ¬ãƒƒãƒ‰ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸ
  */
 int
 thrmgr_find_thread_by_tid(tid_t tid, thread_t **thrp) {
@@ -89,18 +90,18 @@ out:
 }
 
 
-/** ¥¹¥ì¥Ã¥ÉID¤ÎÍ½Ìó
-    @param[in] id Í½Ìó¤¹¤ëID
-    @retval EBUSY ´û¤Ë»ÈÍÑ¤µ¤ì¤Æ¤¤¤ë
+/** ã‚¹ãƒ¬ãƒƒãƒ‰IDã®äºˆç´„
+    @param[in] id äºˆç´„ã™ã‚‹ID
+    @retval EBUSY æ—¢ã«ä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹
  */
 int
 thrmgr_reserve_threadid(tid_t id) {
 	return reserve_id(&thread_id_map, id);
 }
 
-/** ¥¹¥ì¥Ã¥ÉID¤Î³ÍÆÀ
-    @param[in] tidp ¥¹¥ì¥Ã¥ÉIDÊÖµÑÎÎ°è
-    @retval ENOENT ID¤ò»È¤¤ÀÚ¤Ã¤¿
+/** ã‚¹ãƒ¬ãƒƒãƒ‰IDã®ç²å¾—
+    @param[in] tidp ã‚¹ãƒ¬ãƒƒãƒ‰IDè¿”å´é ˜åŸŸ
+    @retval ENOENT IDã‚’ä½¿ã„åˆ‡ã£ãŸ
  */
 int
 thrmgr_get_threadid(tid_t *tidp) {
@@ -111,8 +112,8 @@ thrmgr_get_threadid(tid_t *tidp) {
 	return rc;
 }
 
-/** ¥¹¥ì¥Ã¥ÉID¤Î³«Êü
-    @param[in] tid  ³«Êü¤¹¤ë¥¹¥ì¥Ã¥ÉID
+/** ã‚¹ãƒ¬ãƒƒãƒ‰IDã®é–‹æ”¾
+    @param[in] tid  é–‹æ”¾ã™ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ID
  */
 void
 thrmgr_put_threadid(tid_t tid) {
@@ -122,7 +123,7 @@ thrmgr_put_threadid(tid_t tid) {
 	return;
 }
 
-/** ¥¹¥ì¥Ã¥É´ÉÍı·Ï¤Î½é´ü²½
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†ç³»ã®åˆæœŸåŒ–
  */
 void
 thrmgr_init_thread_manager(void) {

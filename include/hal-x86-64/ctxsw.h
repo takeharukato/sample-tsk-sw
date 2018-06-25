@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  context switch                                                    */
 /*                                                                    */
@@ -10,13 +11,13 @@
 
 struct _thread;
 
-/** X86-64¤Î¥¹¥¿¥Ã¥¯ÀÚ¤êÂØ¤¨
-    @param[in] prev ÀÚ¤êÂØ¤¨¤é¤ì¤ë¥¹¥ì¥Ã¥É¤Î¥¹¥¿¥Ã¥¯¥¢¥É¥ì¥¹¤ò³ÊÇ¼¤·¤Æ¤¤¤ë¥İ¥¤¥ó¥¿ÊÑ¿ô¤Î¥¢¥É¥ì¥¹
-    @param[in] next ÀÚ¤êÂØ¤¨¤ë¥¹¥ì¥Ã¥É¤Î¥¹¥¿¥Ã¥¯¥¢¥É¥ì¥¹¤ò³ÊÇ¼¤·¤Æ¤¤¤ë¥İ¥¤¥ó¥¿ÊÑ¿ô¤Î¥¢¥É¥ì¥¹
-    @note PSW(Processor Status Word - X86-64¤Î¾ì¹ç, RFLAGS¤ÈRIP¤ÎÁÈ)¤È
-          AMD64 ABI Draft 0.99.5(http://www.x86-64.org/documentation/abi.pdf)¤Çµ¬Äê¤µ¤ì¤¿
-          callee saved¥ì¥¸¥¹¥¿¤Î¤¦¤Á x87 FPU À©¸æ¥ï¡¼¥É°Ê³°¤Î¥ì¥¸¥¹¥¿¤òÂàÈò/Éü¸µ¤¹¤ë
-	  x86-64¤Îcallee saved¥ì¥¸¥¹¥¿(AMD64 ABI Draft 0.99.5 Figure 3.4: Register Usage»²¾È)
+/** X86-64ã®ã‚¹ã‚¿ãƒƒã‚¯åˆ‡ã‚Šæ›¿ãˆ
+    @param[in] prev åˆ‡ã‚Šæ›¿ãˆã‚‰ã‚Œã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ã‚¿ãƒƒã‚¯ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æ ¼ç´ã—ã¦ã„ã‚‹ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] next åˆ‡ã‚Šæ›¿ãˆã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ã‚¿ãƒƒã‚¯ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æ ¼ç´ã—ã¦ã„ã‚‹ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @note PSW(Processor Status Word - X86-64ã®å ´åˆ, RFLAGSã¨RIPã®çµ„)ã¨
+          AMD64 ABI Draft 0.99.5(http://www.x86-64.org/documentation/abi.pdf)ã§è¦å®šã•ã‚ŒãŸ
+          callee savedãƒ¬ã‚¸ã‚¹ã‚¿ã®ã†ã¡ x87 FPU åˆ¶å¾¡ãƒ¯ãƒ¼ãƒ‰ä»¥å¤–ã®ãƒ¬ã‚¸ã‚¹ã‚¿ã‚’é€€é¿/å¾©å…ƒã™ã‚‹
+	  x86-64ã®callee savedãƒ¬ã‚¸ã‚¹ã‚¿(AMD64 ABI Draft 0.99.5 Figure 3.4: Register Usageå‚ç…§)
  */
 static inline void
 hal_do_context_switch(void **prev, void **next) {

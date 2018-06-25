@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  GDT/IDTΩËÕ˝                                                       */
+/*  GDT/IDT in Intel chips                                            */
 /*                                                                    */
 /**********************************************************************/
 
@@ -71,7 +72,7 @@ init_descriptor(void){
 
 	memset(&gdt[0], 0, sizeof(segment_desc_t) * GDT_NR);
 	/*
-	 *TODO: ¬Ë5∞˙øÙ(db)§Ú•ﬁ•Ø•Ì≤Ω§π§Î§≥§»
+	 *TODO: Á¨¨5ÂºïÊï∞(db)„Çí„Éû„ÇØ„É≠Âåñ„Åô„Çã„Åì„Å®
 	 */
 	set_mem_descriptor(&gdt[KERN_CS], 0xfffff, SD_T_MRE, PL_KERN, 0);
 	set_mem_descriptor(&gdt[KERN_DS], 0xfffff, SD_T_MRE, PL_KERN, 0);
@@ -79,11 +80,11 @@ init_descriptor(void){
 	set_mem_descriptor(&gdt[USER_DS], 0xfffff, SD_T_MRE, PL_USER, 1);
 	set_tss_descriptor(&gdt[GPROC0_SEL]);
 	/*
-	 *TODO:TSS§ÿ§Œª≤æ»§Ú¿ﬂƒÍ§π§Î
+	 *TODO:TSS„Å∏„ÅÆÂèÇÁÖß„ÇíË®≠ÂÆö„Åô„Çã
 	 */
 	
 	/*
-	 * GDT≈–œø
+	 * GDTÁôªÈå≤
 	 */
 	gdt_tbl.dt_limit = GDT_NR * sizeof(gdt[0]) - 1;
 	gdt_tbl.dt_base = (unsigned long)&gdt[0];

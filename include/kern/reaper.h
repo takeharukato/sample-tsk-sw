@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  reaper thread                                                     */
 /*                                                                    */
@@ -10,11 +11,11 @@
 #include "kern/thread.h"
 #include "kern/wqueue.h"
 
-#define REAPER_THREAD_TID  (1)  /*< ²ó¼ý¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥ÉID  */
-#define REAPER_THREAD_PRIO (7)  /*< ²ó¼ý¥¹¥ì¥Ã¥É¤ÎÍ¥ÀèÅÙ      */
+#define REAPER_THREAD_TID  (1)  /*< å›žåŽã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ID  */
+#define REAPER_THREAD_PRIO (7)  /*< å›žåŽã‚¹ãƒ¬ãƒƒãƒ‰ã®å„ªå…ˆåº¦      */
 typedef struct _reaper_thread_info{
-	thread_queue_t reaper_queue;  /*< ²ó¼ýÂÐ¾Ý¤Î¥¹¥ì¥Ã¥É  */
-	wait_queue_t             wq;  /*< ²ó¼ýÍ×µáÂÔ¤Á¥­¥å¡¼  */
+	thread_queue_t reaper_queue;  /*< å›žåŽå¯¾è±¡ã®ã‚¹ãƒ¬ãƒƒãƒ‰  */
+	wait_queue_t             wq;  /*< å›žåŽè¦æ±‚å¾…ã¡ã‚­ãƒ¥ãƒ¼  */
 }reaper_thread_info_t;
 
 void reaper_add_exit_thread(thread_t *);

@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  idle thread                                                       */
 /*                                                                    */
@@ -9,7 +10,7 @@
 #define  _KERN_IDLE_THREAD_H 
 #include "kern/thread.h"
 
-extern thread_t *current;  /*< ¥«¥ì¥ó¥È¥¹¥ì¥Ã¥É¤Ø¤Î¥Ý¥¤¥ó¥¿  */
+extern thread_t *current;  /*< ã‚«ãƒ¬ãƒ³ãƒˆã‚¹ãƒ¬ãƒƒãƒ‰ã¸ã®ãƒã‚¤ãƒ³ã‚¿  */
 
 void do_idle_loop(void);
 thread_t *idle_refer_idle_thread(void);

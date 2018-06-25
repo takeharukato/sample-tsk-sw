@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  ready queue definitions                                           */
 /*                                                                    */
@@ -9,20 +10,20 @@
 #define _KERN_READY_QUE_H
 #include "kern/list.h"
 
-#define RDQ_SYS_PRIORITY  (7)  /*< ¥·¥¹¥Æ¥à¥¹¥ì¥Ã¥É¤ÎÍ¥ÀèÅÙ  */
-#define RDQ_USER_PRIORITY (1)  /*< ¥æ¡¼¥¶¥¹¥ì¥Ã¥É¤ÎÍ¥ÀèÅÙ    */
+#define RDQ_SYS_PRIORITY  (7)  /*< ã‚·ã‚¹ãƒ†ãƒ ã‚¹ãƒ¬ãƒƒãƒ‰ã®å„ªå…ˆåº¦  */
+#define RDQ_USER_PRIORITY (1)  /*< ãƒ¦ãƒ¼ã‚¶ã‚¹ãƒ¬ãƒƒãƒ‰ã®å„ªå…ˆåº¦    */
 #define RDQ_PRIORITY_MAX (RDQ_USER_PRIORITY + RDQ_SYS_PRIORITY)
-#define RDQ_USER_QUE_IDX  (0)  /*< ¥æ¡¼¥¶¥¹¥ì¥Ã¥É¤Î¥¤¥ó¥Ç¥¯¥¹    */
-/** ¥ì¥Ç¥£¡¼¥­¥å¡¼
+#define RDQ_USER_QUE_IDX  (0)  /*< ãƒ¦ãƒ¼ã‚¶ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹    */
+/** ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼
  */
 typedef struct _thread_ready_queue{
-	int                         bitmap;    /*< ¥ì¥Ç¥£¡¼¥­¥å¡¼¤Î¥Ó¥Ã¥È¥Þ¥Ã¥×  */
-	list_head_t head[RDQ_PRIORITY_MAX];    /*< ¥¹¥ì¥Ã¥É¥­¥å¡¼¤Î¥Ø¥Ã¥É        */
+	int                         bitmap;    /*< ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã®ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—  */
+	list_head_t head[RDQ_PRIORITY_MAX];    /*< ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ã®ãƒ˜ãƒƒãƒ‰        */
 }thread_ready_queue_t;
 
-/** ¥Ó¥Ã¥È¥Þ¥Ã¥×¤Î¥¤¥ó¥Ç¥¯¥¹¤«¤éÍ¥ÀèÅÙ¤ò»»½Ð¤¹¤ë
-    @note ¥Ó¥Ã¥È¥Þ¥Ã¥×¤Î¥¤¥ó¥Ç¥¯¥¹¤Ï, Æ°ºî²ÄÇ½¥¹¥ì¥Ã¥É¤Ê¤·¤ò0¤ÇÉ½¤¹¤¿¤á¤Ë,
-    1¤«¤é¤Ä¤±¤é¤ì¤Æ¤¤¤ë¤Î¤Ç, -1¤·¤ÆÍ¥ÀèÅÙ¤ò»»½Ð¤¹¤ë
+/** ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—ã®ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã‹ã‚‰å„ªå…ˆåº¦ã‚’ç®—å‡ºã™ã‚‹
+    @note ãƒ“ãƒƒãƒˆãƒžãƒƒãƒ—ã®ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã¯, å‹•ä½œå¯èƒ½ã‚¹ãƒ¬ãƒƒãƒ‰ãªã—ã‚’0ã§è¡¨ã™ãŸã‚ã«,
+    1ã‹ã‚‰ã¤ã‘ã‚‰ã‚Œã¦ã„ã‚‹ã®ã§, -1ã—ã¦å„ªå…ˆåº¦ã‚’ç®—å‡ºã™ã‚‹
  */
 #define rdq_index2prio(idx) ((idx) - 1)
 

@@ -1,15 +1,16 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  thread relevant  routines                                         */
+/*  Thread manager                                                    */
 /*                                                                    */
 /**********************************************************************/
 
 #include "kern/kernel.h"
 
-/** ¥Ç¥£¥¹¥Ñ¥Ã¥Áµö²Ä¾õÂÖ¤ËÀßÄê¤¹¤ë
-    @param[in] tinfo ¥¹¥ì¥Ã¥É¾ğÊó¤Î¥¢¥É¥ì¥¹
+/** Enable dispatch
+    @param[in] tinfo 
  */
 static void
 enable_dispatch(thread_info_t *tinfo) {
@@ -17,8 +18,8 @@ enable_dispatch(thread_info_t *tinfo) {
 	tinfo->preempt &= ~THR_DISPATCH_DISABLE;
 }
 
-/** ¥Ç¥£¥¹¥Ñ¥Ã¥Á¶Ø»ß¾õÂÖ¤ËÀßÄê¤¹¤ë
-    @param[in] tinfo ¥¹¥ì¥Ã¥É¾ğÊó¤Î¥¢¥É¥ì¥¹
+/** ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒç¦æ­¢çŠ¶æ…‹ã«è¨­å®šã™ã‚‹
+    @param[in] tinfo ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 static void
 disable_dispatch(thread_info_t *tinfo) {
@@ -26,8 +27,8 @@ disable_dispatch(thread_info_t *tinfo) {
 	tinfo->preempt |= THR_DISPATCH_DISABLE;
 }
 
-/** ÃÙ±ä¥Ç¥£¥¹¥Ñ¥Ã¥ÁÍ½Ìó¤òÎ©¤Æ¤ë
-    @param[in] tinfo ¥¹¥ì¥Ã¥É¾ğÊó¤Î¥¢¥É¥ì¥¹
+/** é…å»¶ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒäºˆç´„ã‚’ç«‹ã¦ã‚‹
+    @param[in] tinfo ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 static void
 set_delay_dispatch(thread_info_t *tinfo) {
@@ -35,8 +36,8 @@ set_delay_dispatch(thread_info_t *tinfo) {
 	tinfo->preempt |= THR_DISPATCH_DELAYED;
 }
 
-/** ÃÙ±ä¥Ç¥£¥¹¥Ñ¥Ã¥ÁÍ½Ìó¤ò¥¯¥ê¥¢¤¹¤ë
-    @param[in] tinfo ¥¹¥ì¥Ã¥É¾ğÊó¤Î¥¢¥É¥ì¥¹
+/** é…å»¶ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒäºˆç´„ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
+    @param[in] tinfo ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 static void
 clr_delay_dispatch(thread_info_t *tinfo) {
@@ -44,8 +45,8 @@ clr_delay_dispatch(thread_info_t *tinfo) {
 	tinfo->preempt &= ~THR_DISPATCH_DELAYED;
 }
 
-/** ÃÙ±ä¥Ç¥£¥¹¥Ñ¥Ã¥ÁÍ½Ìó¤ò¥¯¥ê¥¢¤¹¤ë
-    @param[in] tinfo ¥¹¥ì¥Ã¥É¾ğÊó¤Î¥¢¥É¥ì¥¹
+/** é…å»¶ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒäºˆç´„ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
+    @param[in] tinfo ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
  */
 static void
 clr_thread_info(thread_info_t *tinfo) {
@@ -53,10 +54,10 @@ clr_thread_info(thread_info_t *tinfo) {
 	tinfo->preempt &= ~THR_DISPATCH_MASK;
 }
 
-/** ¥¹¥ì¥Ã¥É¤Î¥¹¥¿¥Ã¥¯¥¢¥É¥ì¥¹¤òÀßÄê¤¹¤ë
-    @param[in] thr       ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
-    @param[in] stack_top ¥¹¥¿¥Ã¥¯¤ÎÀèÆ¬¥¢¥É¥ì¥¹
-    @param[in] size      ¥¹¥¿¥Ã¥¯¤Î¥µ¥¤¥º
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ã‚¿ãƒƒã‚¯ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¨­å®šã™ã‚‹
+    @param[in] thr       ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
+    @param[in] stack_top ã‚¹ã‚¿ãƒƒã‚¯ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] size      ã‚¹ã‚¿ãƒƒã‚¯ã®ã‚µã‚¤ã‚º
  */
 static void
 set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
@@ -68,24 +69,24 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 	tinfo = thr_refer_thread_info(thr);
 	clr_thread_info(tinfo);
 	tinfo->magic = THR_THREAD_INFO_MAGIC;
-	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, MALIGN_SIZE);  /* ¥¹¥¿¥Ã¥¯°ÌÃÖÀßÄê  */
+	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, MALIGN_SIZE);  /* ã‚¹ã‚¿ãƒƒã‚¯ä½ç½®è¨­å®š  */
 }
 
-/** ¥¹¥ì¥Ã¥É¤ò³«»Ï¤¹¤ë
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’é–‹å§‹ã™ã‚‹
  */
 void
 thr_thread_start(void (*fn)(void *), void   *arg){
 
-	__psw_enable_interrupt();  /* ³ä¤ê¹ş¤ß¤òµö²Ä¤¹¤ë  */
-	fn(arg);                /* ¥¹¥ì¥Ã¥É³«»Ï´Ø¿ô¤ò¸Æ¤Ó½Ğ¤¹  */
-	thr_exit_thread(0);        /* ¥¹¥ì¥Ã¥É³«»Ï´Ø¿ô¤«¤éµ¢¤Ã¤¿¤é¼«¥¹¥ì¥Ã¥É¤ò½ªÎ»¤¹¤ë  */
-	/* ¤³¤³¤Ë¤ÏÍè¤Ê¤¤. */
+	__psw_enable_interrupt();  /* å‰²ã‚Šè¾¼ã¿ã‚’è¨±å¯ã™ã‚‹  */
+	fn(arg);                /* ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹é–¢æ•°ã‚’å‘¼ã³å‡ºã™  */
+	thr_exit_thread(0);        /* ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹é–¢æ•°ã‹ã‚‰å¸°ã£ãŸã‚‰è‡ªã‚¹ãƒ¬ãƒƒãƒ‰ã‚’çµ‚äº†ã™ã‚‹  */
+	/* ã“ã“ã«ã¯æ¥ãªã„. */
 
 	return ;
 }
 
-/** ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤Î¥ê¥ó¥¯¤ò¼è¤ê³°¤¹
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã®ãƒªãƒ³ã‚¯ã‚’å–ã‚Šå¤–ã™
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void
 thr_unlink_thread(thread_t *thr){
@@ -96,8 +97,8 @@ thr_unlink_thread(thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤Î¥¹¥¿¥Ã¥¯ÇÛÃÖÉôÊ¬¤ò»²¾È¤¹¤ë
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã®ã‚¹ã‚¿ãƒƒã‚¯é…ç½®éƒ¨åˆ†ã‚’å‚ç…§ã™ã‚‹
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 thread_info_t *
 thr_refer_thread_info(thread_t *thr) {
@@ -106,9 +107,9 @@ thr_refer_thread_info(thread_t *thr) {
 	return 	(thread_info_t *)(attr->stack_top + attr->stack_size - sizeof(thread_info_t));
 }
 
-/** ¥¹¥ì¥Ã¥É¤Î¥³¥ó¥Æ¥­¥¹¥È¥¹¥¤¥Ã¥Á¤ò¹Ô¤¦
-    @param[in] prev ¥¹¥¤¥Ã¥Á¤µ¤ì¤ë¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
-    @param[in] next ¥¹¥¤¥Ã¥Á¤¹¤ë¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¤ãƒƒãƒã‚’è¡Œã†
+    @param[in] prev ã‚¹ã‚¤ãƒƒãƒã•ã‚Œã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
+    @param[in] next ã‚¹ã‚¤ãƒƒãƒã™ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void 
 thr_thread_switch(thread_t *prev, thread_t *next) {
@@ -117,14 +118,14 @@ thr_thread_switch(thread_t *prev, thread_t *next) {
 	    &(((thread_attr_t *)(&next->attr))->stack));
 	return;
 }
-/** ¥¹¥ì¥Ã¥É¤òÀ¸À®¤¹¤ë
-    @param[in] thrp  ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤Î¥İ¥¤¥ó¥¿ÊÑ¿ô¤Î¥¢¥É¥ì¥¹
-    @param[in] attrp ¥¹¥ì¥Ã¥ÉÂ°À­¾ğÊó
-    @param[in] start ¥¹¥ì¥Ã¥É³«»Ï´Ø¿ô¤Î¥¢¥É¥ì¥¹
-    @param[in] arg   ¥¹¥ì¥Ã¥É³«»Ï´Ø¿ô¤Î°ú¿ô
-    @retval 0 Àµ¾ï½ªÎ»
-    @retval ENOENT ¥¹¥ì¥Ã¥ÉID¤ò¤¹¤Ù¤Æ»È¤¤ÀÚ¤Ã¤¿
-    @retval ENOMEM ¥¹¥ì¥Ã¥ÉÀ¸À®¤ËÉ¬Í×¤Ê¥á¥â¥ê¤¬ÉÔÂ­¤·¤Æ¤¤¤ë
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ç”Ÿæˆã™ã‚‹
+    @param[in] thrp  ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã®ãƒã‚¤ãƒ³ã‚¿å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] attrp ã‚¹ãƒ¬ãƒƒãƒ‰å±æ€§æƒ…å ±
+    @param[in] start ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹é–¢æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+    @param[in] arg   ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹é–¢æ•°ã®å¼•æ•°
+    @retval 0 æ­£å¸¸çµ‚äº†
+    @retval ENOENT ã‚¹ãƒ¬ãƒƒãƒ‰IDã‚’ã™ã¹ã¦ä½¿ã„åˆ‡ã£ãŸ
+    @retval ENOMEM ã‚¹ãƒ¬ãƒƒãƒ‰ç”Ÿæˆã«å¿…è¦ãªãƒ¡ãƒ¢ãƒªãŒä¸è¶³ã—ã¦ã„ã‚‹
  */
 int
 thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), void *arg){
@@ -134,7 +135,7 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 	size_t    stack_size;
 
 	/*
-	 * ¥¹¥¿¥Ã¥¯¤Î¥»¥Ã¥È¥¢¥Ã¥×
+	 * ã‚¹ã‚¿ãƒƒã‚¯ã®ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 	 */
 	if ( (attrp == NULL) || (attrp->stack_top == NULL) || (attrp->stack_size == 0) ) {
 
@@ -161,24 +162,24 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 
 	rc = thrmgr_get_threadid(&thr->tid);
 	if (rc != 0)
-		goto free_thread_out;  /* ID³ÍÆÀ¤Ë¼ºÇÔ¤·¤¿  */
+		goto free_thread_out;  /* IDç²å¾—ã«å¤±æ•—ã—ãŸ  */
 
 	/*
-	 * Â°À­¾ğÊó¤Î¥Á¥§¥Ã¥¯
+	 * å±æ€§æƒ…å ±ã®ãƒã‚§ãƒƒã‚¯
 	 */
 	if ( (attrp != NULL) &&
 	    ( (attrp->prio < RDQ_PRIORITY_MAX) && (attrp->prio > RDQ_USER_QUE_IDX) ) )
-		(&thr->attr)->prio = attrp->prio;  /*  Í¥ÀèÅÙ¤òÀßÄê¤¹¤ë  */
+		(&thr->attr)->prio = attrp->prio;  /*  å„ªå…ˆåº¦ã‚’è¨­å®šã™ã‚‹  */
 	else
 		(&thr->attr)->prio = 0;
 
-	hal_setup_thread_function(thr, start, arg);  /* ¥¹¥ì¥Ã¥É³«»Ï¥¢¥É¥ì¥¹¤òÀßÄê¤¹¤ë  */
+	hal_setup_thread_function(thr, start, arg);  /* ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¨­å®šã™ã‚‹  */
 	
 	init_list_node(&thr->link);
 	thr->exit_code = 0;
 
 	/*
-	 * ¥á¥Ã¥»¡¼¥¸Á÷¼õ¿®µ¡¹½¤Î½é´ü²½
+	 * ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸é€å—ä¿¡æ©Ÿæ§‹ã®åˆæœŸåŒ–
 	 */
 	wque_init_wait_queue(&thr->recv_wq);
 	wque_init_wait_queue(&thr->send_wq);
@@ -189,7 +190,7 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 
 	thrmgr_thread_manager_add(thrmgr_refer_thread_manager(), thr);
 
-	sched_set_ready(thr);  /* ¥ì¥Ç¥£¡¼¥­¥å¡¼¤ËÄÉ²Ã¤¹¤ë  */
+	sched_set_ready(thr);  /* ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ ã™ã‚‹  */
 
 	rc = 0;
 	*thrp = thr;
@@ -206,31 +207,31 @@ free_stack_out:
 	return rc;
 }
 
-/** ¼«¥¹¥ì¥Ã¥É¤Î½ªÎ»
-    @param[in] code ½ªÎ»¥³¡¼¥É
+/** è‡ªã‚¹ãƒ¬ãƒƒãƒ‰ã®çµ‚äº†
+    @param[in] code çµ‚äº†ã‚³ãƒ¼ãƒ‰
  */
 void
 thr_exit_thread(int code){
 	psw_t psw;
 
 	psw_disable_interrupt(&psw);
-	thr_unlink_thread(current);   /* ¥ì¥Ç¥£¡¼¥­¥å¡¼¤«¤é³°¤¹  */
-	current->exit_code = (exit_code_t)code; /* ½ªÎ»¥³¡¼¥É¤òÀßÄê  */
-	current->status = THR_TSTATE_EXIT;  /* ¥¹¥ì¥Ã¥É¤ò½ªÎ»¾õÂÖ¤Ë¤¹¤ë  */
-	thrmgr_thread_manager_remove(thrmgr_refer_thread_manager(), current);  /* ¥¹¥ì¥Ã¥É°ìÍ÷¤«¤é¼è¤ê½ü¤¯  */
+	thr_unlink_thread(current);   /* ãƒ¬ãƒ‡ã‚£ãƒ¼ã‚­ãƒ¥ãƒ¼ã‹ã‚‰å¤–ã™  */
+	current->exit_code = (exit_code_t)code; /* çµ‚äº†ã‚³ãƒ¼ãƒ‰ã‚’è¨­å®š  */
+	current->status = THR_TSTATE_EXIT;  /* ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’çµ‚äº†çŠ¶æ…‹ã«ã™ã‚‹  */
+	thrmgr_thread_manager_remove(thrmgr_refer_thread_manager(), current);  /* ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ã‹ã‚‰å–ã‚Šé™¤ã  */
 
-	reaper_add_exit_thread(current);  /*< ²ó¼ı¥¹¥ì¥Ã¥É¤Ë¥¹¥ì¥Ã¥É¤Î²ó¼ı¤ò°ÍÍê¤¹¤ë  */
+	reaper_add_exit_thread(current);  /*< å›åã‚¹ãƒ¬ãƒƒãƒ‰ã«ã‚¹ãƒ¬ãƒƒãƒ‰ã®å›åã‚’ä¾é ¼ã™ã‚‹  */
 out:	
 	psw_restore_interrupt(&psw);
 
-	sched_schedule();  /* ¼«¥¹¥ì¥Ã¥É½ªÎ»¤ËÈ¼¤¦¥¹¥±¥¸¥å¡¼¥ë  */
+	sched_schedule();  /* è‡ªã‚¹ãƒ¬ãƒƒãƒ‰çµ‚äº†ã«ä¼´ã†ã‚¹ã‚±ã‚¸ãƒ¥ãƒ¼ãƒ«  */
 
 	return;
 }
 
-/** ¥¹¥ì¥Ã¥É¤ÎÇË´ş
-   @param[in] thr ÇË´ş¤¹¤ë¥¹¥ì¥Ã¥É¤Î¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó 
-   @retval EBUSY ½ªÎ»¤·¤Æ¤¤¤Ê¤¤¥¹¥ì¥Ã¥É¤òÇË´ş¤·¤è¤¦¤È¤·¤¿
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã®ç ´æ£„
+   @param[in] thr ç ´æ£„ã™ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ± 
+   @retval EBUSY çµ‚äº†ã—ã¦ã„ãªã„ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ç ´æ£„ã—ã‚ˆã†ã¨ã—ãŸ
  */
 int
 thr_destroy_thread(thread_t *thr){
@@ -244,17 +245,17 @@ thr_destroy_thread(thread_t *thr){
 		goto out;
 	}
 
-	thrmgr_put_threadid(thr->tid); /* ID¤ÎÊÖµÑ          */
-	kfree(attr->stack_top);  /* ¥¹¥¿¥Ã¥¯¤Î³«Êü          */
-	kfree(thr);              /* ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤Î³«Êü  */
+	thrmgr_put_threadid(thr->tid); /* IDã®è¿”å´          */
+	kfree(attr->stack_top);  /* ã‚¹ã‚¿ãƒƒã‚¯ã®é–‹æ”¾          */
+	kfree(thr);              /* ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã®é–‹æ”¾  */
 out:	
 	psw_restore_interrupt(&psw);
 	return rc;
 }
 
-/** ¥¹¥ì¥Ã¥ÉID¤Î³ÍÆÀ
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
-    @retval    ¥¹¥ì¥Ã¥ÉID
+/** ã‚¹ãƒ¬ãƒƒãƒ‰IDã®ç²å¾—
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
+    @retval    ã‚¹ãƒ¬ãƒƒãƒ‰ID
  */
 tid_t
 thr_get_tid(thread_t *thr) {
@@ -262,9 +263,9 @@ thr_get_tid(thread_t *thr) {
 	return thr->tid;
 }
 
-/** ¼«¥¹¥ì¥Ã¥ÉID¤Î³ÍÆÀ
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
-    @retval    ¥¹¥ì¥Ã¥ÉID
+/** è‡ªã‚¹ãƒ¬ãƒƒãƒ‰IDã®ç²å¾—
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
+    @retval    ã‚¹ãƒ¬ãƒƒãƒ‰ID
  */
 tid_t
 thr_get_current_tid(void) {
@@ -272,8 +273,8 @@ thr_get_current_tid(void) {
 	return current->tid;
 }
 
-/** ¥¹¥ì¥Ã¥É¥­¥å¡¼¤Î½é´ü²½
-    @param[in] que ½é´ü²½ÂĞ¾İ¤Î¥¹¥ì¥Ã¥É¥­¥å¡¼
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ã®åˆæœŸåŒ–
+    @param[in] que åˆæœŸåŒ–å¯¾è±¡ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼
  */
 void
 thr_init_thread_queue(thread_queue_t *que) {
@@ -285,9 +286,9 @@ thr_init_thread_queue(thread_queue_t *que) {
 }
 
 
-/** ¥¹¥ì¥Ã¥É¥­¥å¡¼¤Ë¥¹¥ì¥Ã¥É¤òÄÉ²Ã¤¹¤ë
-    @param[in] que ÄÉ²ÃÀè¤Î¥¹¥ì¥Ã¥É¥­¥å¡¼
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ã«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’è¿½åŠ ã™ã‚‹
+    @param[in] que è¿½åŠ å…ˆã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void 
 thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
@@ -298,9 +299,9 @@ thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥¹¥ì¥Ã¥É¥­¥å¡¼¤«¤é¥¹¥ì¥Ã¥É¤ò¼è¤ê³°¤¹
-    @param[in] que ÄÉ²ÃÀè¤Î¥¹¥ì¥Ã¥É¥­¥å¡¼
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ã‹ã‚‰ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å–ã‚Šå¤–ã™
+    @param[in] que è¿½åŠ å…ˆã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
  */
 void 
 thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
@@ -311,10 +312,10 @@ thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥¹¥ì¥Ã¥É¥­¥å¡¼¤¬¶õ¤Ç¤¢¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë
-    @param[in] que ³ÎÇ§ÂĞ¾İ¤Î¥¹¥ì¥Ã¥É¥­¥å¡¼
-    @retval ¿¿ ¥¹¥ì¥Ã¥É¥­¥å¡¼¤¬¶õ¤Ç¤¢¤ë
-    @retval µ¶ ¥¹¥ì¥Ã¥É¥­¥å¡¼¤¬¶õ¤Ç¤Ê¤¤
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ãŒç©ºã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹
+    @param[in] que ç¢ºèªå¯¾è±¡ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼
+    @retval çœŸ ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ãŒç©ºã§ã‚ã‚‹
+    @retval å½ ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ãŒç©ºã§ãªã„
  */
 int 
 thr_thread_queue_empty(thread_queue_t *que) {
@@ -328,10 +329,10 @@ thr_thread_queue_empty(thread_queue_t *que) {
 	return rc;
 }
 
-/** ¥¹¥ì¥Ã¥É¥­¥å¡¼¤ÎÀèÆ¬Í×ÁÇ¤ò¼è¤ê½Ğ¤¹
-    @param[in] que ¼è¤ê½Ğ¤¹ÂĞ¾İ¤Î¥¹¥ì¥Ã¥É¥­¥å¡¼
-    @return    ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó¤Î¥¢¥É¥ì¥¹  ¥¹¥ì¥Ã¥É¥­¥å¡¼¤ÎÀèÆ¬Í×ÁÇ¤¬¤¢¤ë¾ì¹ç
-    @return    NULL                        ¥¹¥ì¥Ã¥É¥­¥å¡¼¤¬¶õ¤Î¾ì¹ç
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ã®å…ˆé ­è¦ç´ ã‚’å–ã‚Šå‡ºã™
+    @param[in] que å–ã‚Šå‡ºã™å¯¾è±¡ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼
+    @return    ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±ã®ã‚¢ãƒ‰ãƒ¬ã‚¹  ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ã®å…ˆé ­è¦ç´ ãŒã‚ã‚‹å ´åˆ
+    @return    NULL                        ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¥ãƒ¼ãŒç©ºã®å ´åˆ
  */
 thread_t *
 thr_thread_queue_get_top(thread_queue_t *que) {
@@ -350,10 +351,10 @@ thr_thread_queue_get_top(thread_queue_t *que) {
 	return thr;
 }
 
-/** ¥á¥Ã¥»¡¼¥¸¼õ¿®ÂÔ¤ÁÃæ¤Ç¤¢¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë
-    @param[in] thr ¥¹¥ì¥Ã¥É´ÉÍı¾ğÊó
-    @retval ¿¿ ¥á¥Ã¥»¡¼¥¸¼õ¿®ÂÔ¤ÁÃæ¤Ç¤¢¤ë
-    @retval µ¶ ¥á¥Ã¥»¡¼¥¸¼õ¿®ÂÔ¤ÁÃæ¤Ç¤Ê¤¤
+/** ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡å¾…ã¡ä¸­ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹
+    @param[in] thr ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æƒ…å ±
+    @retval çœŸ ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡å¾…ã¡ä¸­ã§ã‚ã‚‹
+    @retval å½ ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡å¾…ã¡ä¸­ã§ãªã„
  */
 int
 thr_can_receive_message(thread_t *thr) {

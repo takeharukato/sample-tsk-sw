@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  id bitmap operations                                              */
 /*                                                                    */
@@ -10,16 +11,16 @@
 #include <errno.h>
 #include "kern/kern_types.h"
 
-typedef uint64_t bitmap_ent_t;  /*< �ӥåȥޥå�1����ȥ�  */
-#define BITMAP_ARRAY_NR (CONFIG_ID_BITMAP_UNIT/(sizeof(bitmap_ent_t)*BIT_PER_BYTE)) /*< �ӥåȥޥå���������ǿ�  */
+typedef uint64_t bitmap_ent_t;  /*< ビットマップ1エントリ  */
+#define BITMAP_ARRAY_NR (CONFIG_ID_BITMAP_UNIT/(sizeof(bitmap_ent_t)*BIT_PER_BYTE)) /*< ビットマップ配列の要素数  */
 
-/** ID�ӥåȥޥå�
+/** IDビットマップ
  */
 typedef struct _bitmap{
-	bitmap_ent_t bitmap[BITMAP_ARRAY_NR];  /*< id�ӥåȥޥå�����  */
+	bitmap_ent_t bitmap[BITMAP_ARRAY_NR];  /*< idビットマップ本体  */
 }id_bitmap_t;
 
-/** ID�ӥåȥޥå׽������
+/** IDビットマップ初期化子
  */
 #define ID_BITMAP_INITIALIZER {			\
 	.bitmap = {0,}				\

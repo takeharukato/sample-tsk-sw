@@ -1,37 +1,38 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Processor Status WordÀ©¸æ                                         */
+/*  Processor Status Wordåˆ¶å¾¡                                         */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_PSW_H)
 #define  _HAL_PSW_H 
-#include "param.h"
+#include "kern/param.h"
 
-typedef uint64_t psw_t;  /*< ¥×¥í¥»¥µ¥¹¥Æ¡¼¥¿¥¹¥ï¡¼¥É  */
+typedef uint64_t psw_t;  /*< ãƒ—ãƒ­ã‚»ã‚µã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ¯ãƒ¼ãƒ‰  */
 
 #if defined(CONFIG_HAL)
 
-/** CPU¤Ø¤Î³ä¤ê¹þ¤ß¤òÌµ¾ò·ï¤Ëµö²Ä¤¹¤ë
+/** CPUã¸ã®å‰²ã‚Šè¾¼ã¿ã‚’ç„¡æ¡ä»¶ã«è¨±å¯ã™ã‚‹
  */
 #define __psw_enable_interrupt()     do{                     \
 		__asm__ __volatile__ ("sti\n\t");	     \
     }while(0)
-/** CPU¤Ø¤Î³ä¤ê¹þ¤ß¤òÌµ¾ò·ï¤Ë¶Ø»ß¤¹¤ë
+/** CPUã¸ã®å‰²ã‚Šè¾¼ã¿ã‚’ç„¡æ¡ä»¶ã«ç¦æ­¢ã™ã‚‹
  */
 #define __psw_disable_interrupt()     do{                     \
 		__asm__ __volatile__ ("cli\n\t");	      \
     }while(0)
 
-/** ¥¢¥¦¥È¥ª¥Ö¥ª¡¼¥À¼Â¹Ô¤·¤Æ¤¤¤ëÌ¿Îá¤òÂÔ¤Á¹ç¤ï¤»¤ë
+/** ã‚¢ã‚¦ãƒˆã‚ªãƒ–ã‚ªãƒ¼ãƒ€å®Ÿè¡Œã—ã¦ã„ã‚‹å‘½ä»¤ã‚’å¾…ã¡åˆã‚ã›ã‚‹
  */
 #define barrier() do{							\
 		__asm__ __volatile__ ("" :::"memory");			\
 	}while(0)
 
-/** PSW¤òÊÝÂ¸¤¹¤ë
-    @param[in] psw PSWÊÝÂ¸ÍÑ¤ÎÊÑ¿ô
+/** PSWã‚’ä¿å­˜ã™ã‚‹
+    @param[in] psw PSWä¿å­˜ç”¨ã®å¤‰æ•°
  */
 #define __save_psw(psw)  do{				\
        __asm__ __volatile__ ("pushfq\n\t"               \
@@ -41,8 +42,8 @@ typedef uint64_t psw_t;  /*< ¥×¥í¥»¥µ¥¹¥Æ¡¼¥¿¥¹¥ï¡¼¥É  */
        barrier();                                       \
     }while(0)
 
-/** PSW¤òÉü¸µ¤¹¤ë
-    @param[in] psw PSWÊÝÂ¸ÍÑ¤ÎÊÑ¿ô
+/** PSWã‚’å¾©å…ƒã™ã‚‹
+    @param[in] psw PSWä¿å­˜ç”¨ã®å¤‰æ•°
  */
 #define __restore_psw(psw) do{                          \
        barrier();                                       \

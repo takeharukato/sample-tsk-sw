@@ -1,12 +1,14 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  user routines                                                     */
+/*  User tasks                                                        */
 /*                                                                    */
 /**********************************************************************/
 
 #include "kern/kernel.h"
+
 wait_queue_t wque;
 
 void

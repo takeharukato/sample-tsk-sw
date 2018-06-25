@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  µºª˜•≥•Û•Ω°º•ÎΩËÕ˝                                                */
+/*  Pseudo console                                                    */
 /*                                                                    */
 /**********************************************************************/
 
@@ -18,7 +19,7 @@ pseudo_putchar (int c) {
 	
 	putchar(c);
 }
-/** µºª˜•≥•Û•Ω°º•Î§ŒΩÈ¥¸≤Ω
+/** Êì¨‰ºº„Ç≥„É≥„ÇΩ„Éº„É´„ÅÆÂàùÊúüÂåñ
  */
 void
 init_pseudo_console(void) {

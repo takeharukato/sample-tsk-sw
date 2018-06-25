@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥«¡¼¥Í¥ë¥³¥ó¥½¡¼¥ë½èÍı                                            */
+/*  kernel console                                                    */
 /*                                                                    */
 /**********************************************************************/
 
@@ -11,8 +12,8 @@
 static kconsole_list_t kcons = KCONSOLE_LIST_INITILIZER(kcons);
 volatile unsigned int * const UART0DR = (unsigned int *) 0x09000000;
  
-/** °ìÊ¸»ú½ĞÎÏ´Ø¿ô
-    @param[in] ch ½ĞÎÏ¤¹¤ëÊ¸»ú
+/** ä¸€æ–‡å­—å‡ºåŠ›é–¢æ•°
+    @param[in] ch å‡ºåŠ›ã™ã‚‹æ–‡å­—
  */
 void
 kputchar(int ch){
@@ -23,10 +24,10 @@ kputchar(int ch){
 	psw_restore_interrupt(&psw);
 }
 
-/** ¥«¡¼¥Í¥ë¥³¥ó¥½¡¼¥ëÅĞÏ¿
-    @param[in] conp ¥³¥ó¥½¡¼¥ë¾ğÊó
-    @retval     0  Àµ¾ï½ªÎ»
-    @retval EINVAL conp¤¬NULL¤Ş¤¿¤Ïputchar¥Ï¥ó¥É¥é¤¬ÅĞÏ¿¤µ¤ì¤Æ¤¤¤Ê¤¤
+/** ã‚«ãƒ¼ãƒãƒ«ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ç™»éŒ²
+    @param[in] conp ã‚³ãƒ³ã‚½ãƒ¼ãƒ«æƒ…å ±
+    @retval     0  æ­£å¸¸çµ‚äº†
+    @retval EINVAL conpãŒNULLã¾ãŸã¯putcharãƒãƒ³ãƒ‰ãƒ©ãŒç™»éŒ²ã•ã‚Œã¦ã„ãªã„
  */
 int 
 register_kconsole(kconsole_t *conp) {
@@ -46,8 +47,8 @@ out:
 	return rc;
 }
 
-/** ¥«¡¼¥Í¥ë¥³¥ó¥½¡¼¥ëÅĞÏ¿Ëõ¾Ã
-    @param[in] conp ¥³¥ó¥½¡¼¥ë¾ğÊó
+/** ã‚«ãƒ¼ãƒãƒ«ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ç™»éŒ²æŠ¹æ¶ˆ
+    @param[in] conp ã‚³ãƒ³ã‚½ãƒ¼ãƒ«æƒ…å ±
  */
 void
 unregister_kconsole(kconsole_t *conp) {

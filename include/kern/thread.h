@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  thread definitions                                                */
 /*                                                                    */
@@ -10,77 +11,62 @@
 
 #include "kern/kern_types.h"
 #include "kern/list.h"
+#include "kern/thread_info.h"
+
 #include "hal/hal_types.h"
 #include "hal/addrinfo.h"
 
-/** •π•Ï•√•…§Œæı¬÷
+/** „Çπ„É¨„ÉÉ„Éâ„ÅÆÁä∂ÊÖã
  */
-#define THR_TSTATE_RUN    (0)  /*< •È•Û•À•Û•∞√Ê */
-#define THR_TSTATE_WAIT   (1)  /*< ªÒ∏ª¬‘§¡√Ê   */
-#define THR_TSTATE_EXIT   (2)  /*< Ω™Œª√Ê   */
-#define THR_TSTATE_DEAD   (3)  /*< Ω™Œª¬‘§¡√Ê   */
+#define THR_TSTATE_RUN    (0)  /*< „É©„É≥„Éã„É≥„Ç∞‰∏≠ */
+#define THR_TSTATE_WAIT   (1)  /*< Ë≥áÊ∫êÂæÖ„Å°‰∏≠   */
+#define THR_TSTATE_EXIT   (2)  /*< ÁµÇ‰∫Ü‰∏≠   */
+#define THR_TSTATE_DEAD   (3)  /*< ÁµÇ‰∫ÜÂæÖ„Å°‰∏≠   */
 
-typedef uint64_t  preempt_state_t;  /*< •π•Ï•√•…•«•£•π•—•√•¡µˆ≤ƒæı¬÷  */
-
-/** •«•£•π•—•√•¡µˆ≤ƒæı¬÷
- */
-#define THR_DISPATCH_ENABLE   ((preempt_state_t)(0x0))  /*< •«•£•π•—•√•¡µˆ≤ƒ       */
-#define THR_DISPATCH_DISABLE  ((preempt_state_t)(0x1))  /*< •«•£•π•—•√•¡∂ÿªﬂ       */
-#define THR_DISPATCH_DELAYED  ((preempt_state_t)(0x2))  /*< √Ÿ±‰•«•£•π•—•√•¡ÕΩÃÛ√Ê */
-#define THR_DISPATCH_MASK  ((preempt_state_t)(THR_DISPATCH_DISABLE|THR_DISPATCH_DELAYED)) /*< æı¬÷•ﬁ•π•Ø */
-
-/** •π•Ï•√•…¬∞¿≠æ Û
+/** „Çπ„É¨„ÉÉ„ÉâÂ±ûÊÄßÊÉÖÂ†±
  */
 typedef struct _thread_attr{
-	void         *stack_top;  /*< •π•ø•√•Ø§Œ¿Ë∆¨•¢•…•Ï•π                  */
-	void             *stack;  /*< •◊•Ì•ª•π•π•§•√•¡ª˛§Œ•π•ø•√•Ø•›•§•Û•ø    */
-	size_t       stack_size;  /*< •π•ø•√•Ø•µ•§•∫                          */
-	int                prio;  /*< Õ•¿Ë≈Ÿ                                  */
+	void         *stack_top;  /*< „Çπ„Çø„ÉÉ„ÇØ„ÅÆÂÖàÈ†≠„Ç¢„Éâ„É¨„Çπ                  */
+	void             *stack;  /*< „Éó„É≠„Çª„Çπ„Çπ„Ç§„ÉÉ„ÉÅÊôÇ„ÅÆ„Çπ„Çø„ÉÉ„ÇØ„Éù„Ç§„É≥„Çø    */
+	size_t       stack_size;  /*< „Çπ„Çø„ÉÉ„ÇØ„Çµ„Ç§„Ç∫                          */
+	int                prio;  /*< ÂÑ™ÂÖàÂ∫¶                                  */
 }thread_attr_t;
 
-/** •π•Ï•√•…¬∞¿≠æ ÛΩÈ¥¸≤Ωª“
-    @param[in] stk      •π•ø•√•Ø§Œ¿Ë∆¨•¢•…•Ï•π
-    @param[in] stk_size •π•ø•√•Ø§Œ•µ•§•∫
+/** „Çπ„É¨„ÉÉ„ÉâÂ±ûÊÄßÊÉÖÂ†±ÂàùÊúüÂåñÂ≠ê
+    @param[in] stk      „Çπ„Çø„ÉÉ„ÇØ„ÅÆÂÖàÈ†≠„Ç¢„Éâ„É¨„Çπ
+    @param[in] stk_size „Çπ„Çø„ÉÉ„ÇØ„ÅÆ„Çµ„Ç§„Ç∫
  */
 #define THR_ATTR_INITIALIZER(stk, stk_size) {			\
-	.stack = TRUNCATE_ALIGN(stk + stk_size - sizeof(thread_info_t) - 1, stk_size), \
+	.stack = TRUNCATE_ALIGN(stk + stk_size - sizeof(thread_info_t), stk_size), \
 	.stack_size = stk_size,			\
 	}
 
-
 struct _thread_ready_queue;
 
-/** •π•Ï•√•…¥…Õ˝æ Û
+/** „Çπ„É¨„ÉÉ„ÉâÁÆ°ÁêÜÊÉÖÂ†±
  */
 typedef struct _thread{
-	thr_state_t        status;  /*< •π•Ï•√•…æı¬÷                */
-	tid_t                 tid;  /*< •π•Ï•√•…ID                  */
-	list_t               link;  /*< •≠•Â°º§ÿ§Œ•Í•Û•Ø            */
-	list_t           mgr_link;  /*< •π•Ï•√•…¥…Õ˝Õ—•Í•Û•Ø        */
-	struct _thread_ready_queue *rdq;  /*< •Ï•«•£°º•≠•Â°º              */
-	exit_code_t     exit_code;  /*< Ω™Œª•≥°º•…                  */
-	thread_attr_t        attr;  /*< ¬∞¿≠æ Û                    */
-	message_buffer_t  msg_buf;  /*< •·•√•ª°º•∏¡˜øÆæ Û          */
-	wait_queue_t      recv_wq;  /*< •·•√•ª°º•∏ºıøÆ¬‘§¡•≠•Â°º    */
-	wait_queue_t      send_wq;  /*< •·•√•ª°º•∏¡˜øÆº‘¬‘§¡•≠•Â°º  */
-	list_head_t      recv_que;  /*< •·•√•ª°º•∏•≠•Â°º            */
+	thr_state_t        status;  /*< „Çπ„É¨„ÉÉ„ÉâÁä∂ÊÖã                */
+	tid_t                 tid;  /*< „Çπ„É¨„ÉÉ„ÉâID                  */
+	list_t               link;  /*< „Ç≠„É•„Éº„Å∏„ÅÆ„É™„É≥„ÇØ            */
+	list_t           mgr_link;  /*< „Çπ„É¨„ÉÉ„ÉâÁÆ°ÁêÜÁî®„É™„É≥„ÇØ        */
+	struct _thread_ready_queue *rdq;  /*< „É¨„Éá„Ç£„Éº„Ç≠„É•„Éº              */
+	exit_code_t     exit_code;  /*< ÁµÇ‰∫Ü„Ç≥„Éº„Éâ                  */
+	thread_attr_t        attr;  /*< Â±ûÊÄßÊÉÖÂ†±                    */
+	message_buffer_t  msg_buf;  /*< „É°„ÉÉ„Çª„Éº„Ç∏ÈÄÅ‰ø°ÊÉÖÂ†±          */
+	wait_queue_t      recv_wq;  /*< „É°„ÉÉ„Çª„Éº„Ç∏Âèó‰ø°ÂæÖ„Å°„Ç≠„É•„Éº    */
+	wait_queue_t      send_wq;  /*< „É°„ÉÉ„Çª„Éº„Ç∏ÈÄÅ‰ø°ËÄÖÂæÖ„Å°„Ç≠„É•„Éº  */
+	list_head_t      recv_que;  /*< „É°„ÉÉ„Çª„Éº„Ç∏„Ç≠„É•„Éº            */
 }thread_t;
 
-#define THR_THREAD_INFO_MAGIC                  (0xdeadbeef)  /*< •π•ø•√•Ø§ŒƒÏ§Úº®§π•ﬁ•∏•√•Ø»÷πÊ  */
-/** •π•Ï•√•…§¨•Ï•«•£•≠•Â°º§À§ƒ§ §¨§√§∆§§§Î§´≥Œ«ß§π§Î
+/** „Çπ„É¨„ÉÉ„Éâ„Åå„É¨„Éá„Ç£„Ç≠„É•„Éº„Å´„Å§„Å™„Åå„Å£„Å¶„ÅÑ„Çã„ÅãÁ¢∫Ë™ç„Åô„Çã
  */
 #define THR_THREAD_ON_RDQ(thr) (thr->rdq != NULL)
-/** •π•Ï•√•…¥…Õ˝æ Û(•π•ø•√•Ø…Ù ¨)
- */
-typedef struct _thread_info{
-	preempt_state_t	preempt;   /*< •«•£•π•—•√•¡∂ÿªﬂæı¬÷¥…Õ˝æ Û   */
-	addr_t          magic;     /*< •π•ø•√•Ø§ŒƒÏ§Ú…Ω§π•ﬁ•∏•√•Ø»÷πÊ */
-}thread_info_t;
 
-/** •π•Ï•√•…•≠•Â°º
+/** „Çπ„É¨„ÉÉ„Éâ„Ç≠„É•„Éº
  */
 typedef struct _thread_queue{
-	list_head_t head;    /*< •π•Ï•√•…•≠•Â°º§Œ•ÿ•√•…  */
+	list_head_t head;    /*< „Çπ„É¨„ÉÉ„Éâ„Ç≠„É•„Éº„ÅÆ„Éò„ÉÉ„Éâ  */
 }thread_queue_t;
 
 thread_info_t *thr_refer_thread_info(thread_t *);

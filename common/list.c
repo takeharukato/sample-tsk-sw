@@ -1,13 +1,14 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥ê¥¹¥ÈÁàºî                                                        */
+/*  List operations                                                   */
 /*                                                                    */
 /**********************************************************************/
 #include "kern/kernel.h"
 
-/** ¥ê¥¹¥Èºï½ü
+/** ãƒªã‚¹ãƒˆå‰Šé™¤
  */
 void
 list_del(list_t *node) {
@@ -17,7 +18,7 @@ list_del(list_t *node) {
 	node->next = node->prev = node;
 }
 
-/** ¥ê¥¹¥È¤òËöÈø¤ËÄÉ²Ã
+/** ãƒªã‚¹ãƒˆã‚’æœ«å°¾ã«è¿½åŠ 
  */
 void
 list_add(struct _list_head *head, list_t *node) {
@@ -28,7 +29,7 @@ list_add(struct _list_head *head, list_t *node) {
 	head->prev = node;
 }
 
-/** ¥ê¥¹¥È¤òÀèÆ¬¤ËÄÉ²Ã
+/** ãƒªã‚¹ãƒˆã‚’å…ˆé ­ã«è¿½åŠ 
  */
 void
 list_add_top(struct _list_head *head, list_t *node) {
@@ -39,7 +40,7 @@ list_add_top(struct _list_head *head, list_t *node) {
 	head->next = node;
 }
 
-/** ÀèÆ¬¥Î¡¼¥É»²¾È
+/** å…ˆé ­ãƒãƒ¼ãƒ‰å‚ç…§
  */
 list_t *
 list_ref_top(struct _list_head *head) {
@@ -47,7 +48,7 @@ list_ref_top(struct _list_head *head) {
 	return head->next;
 }
 
-/** ÀèÆ¬¥Î¡¼¥É³ÍÆÀ
+/** å…ˆé ­ãƒãƒ¼ãƒ‰ç²å¾—
  */
 list_t *
 list_get_top(struct _list_head *head) {

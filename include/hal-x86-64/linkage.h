@@ -1,8 +1,9 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  アセンブラ関連マクロ                                              */
+/*  Asm macros                                                        */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_LINKAGE_H)

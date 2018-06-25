@@ -1,9 +1,10 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  ¥«¡¼¥Í¥ëÆâprintf½èÍı                                              */
-/*  FreeBSD sys/kern/subr_prf.c ¤òÎ®ÍÑ                                */
+/*  printf function in the OS kernel                                  */
+/*  These are drived from FreeBSD sys/kern/subr_prf.c                 */
 /**********************************************************************/
 
 /*-
@@ -50,17 +51,17 @@
 
 #include "kern/kernel.h"
 
-#define NULLFMT   "(fmt null)"  /*< ½ñ¼°»ØÄêÊ¸»úÎó¤ËNULL¤ò»ØÄê¤µ¤ì¤¿  */
-#define MIN_RADIX          (2)  /*< Äì¤ÎºÇ¾®ÃÍ                        */
-#define MAX_RADIX         (36)  /*< Äì¤ÎºÇÂçÃÍ                        */
-#define DEFAULT_RADIX     (10)  /*< Äì¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ                  */
+#define NULLFMT   "(fmt null)"  /*< æ›¸å¼æŒ‡å®šæ–‡å­—åˆ—ã«NULLã‚’æŒ‡å®šã•ã‚ŒãŸ  */
+#define MIN_RADIX          (2)  /*< åº•ã®æœ€å°å€¤                        */
+#define MAX_RADIX         (36)  /*< åº•ã®æœ€å¤§å€¤                        */
+#define DEFAULT_RADIX     (10)  /*< åº•ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤                  */
 
-char const hex2ascii_data[] = "0123456789abcdefghijklmnopqrstuvwxyz";  /*< 16¿Ê¿ô¤òÊ¸»ú¤ËÊÑ´¹¤¹¤ë¥Æ¡¼¥Ö¥ë  */
+char const hex2ascii_data[] = "0123456789abcdefghijklmnopqrstuvwxyz";  /*< 16é€²æ•°ã‚’æ–‡å­—ã«å¤‰æ›ã™ã‚‹ãƒ†ãƒ¼ãƒ–ãƒ«  */
 
-/** ¥Ğ¥Ã¥Õ¥¡¤ËÊ¸»ú¤òµ­Ï¿¤¹¤ë
-    @param[in]      c µ­Ï¿¤¹¤ëÊ¸»ú
-    @param[in] outbuf µ­Ï¿Àè¥Ğ¥Ã¥Õ¥¡¤Ø¤Î¥İ¥¤¥ó¥¿
-    @param[in] retval ÊÖ¤êÃÍ¤ò³ÊÇ¼¤·¤¿ÊÑ¿ô
+/** ãƒãƒƒãƒ•ã‚¡ã«æ–‡å­—ã‚’è¨˜éŒ²ã™ã‚‹
+    @param[in]      c è¨˜éŒ²ã™ã‚‹æ–‡å­—
+    @param[in] outbuf è¨˜éŒ²å…ˆãƒãƒƒãƒ•ã‚¡ã¸ã®ãƒã‚¤ãƒ³ã‚¿
+    @param[in] retval è¿”ã‚Šå€¤ã‚’æ ¼ç´ã—ãŸå¤‰æ•°
  */
 #define PUTCHAR(c, outbuf, retval) do{		\
 		*(outbuf) = (c);			\
@@ -85,14 +86,14 @@ typedef struct _fmt_cmd{
 	unsigned zflag:1;
 }fmt_cmd_t;
 
-/** 16¿Ê¿ô¤òÊ¸»úÎó¤Ë¤¹¤ë
+/** 16é€²æ•°ã‚’æ–‡å­—åˆ—ã«ã™ã‚‹
  */
 #define hex2ascii(hex)  (hex2ascii_data[hex])
 #define ktoupper(c)      ((c) - 0x20 * (((c) >= 'a') && ((c) <= 'z')))
 
 
-/** ½ñ¼°»Ø¼¨¤ò¥ê¥»¥Ã¥È¤¹¤ë
-    @param[in] cmdp ½ñ¼°»ØÄê»Ø¼¨¹½Â¤ÂÎ¤Ø¤Î¥İ¥¤¥ó¥¿
+/** æ›¸å¼æŒ‡ç¤ºã‚’ãƒªã‚»ãƒƒãƒˆã™ã‚‹
+    @param[in] cmdp æ›¸å¼æŒ‡å®šæŒ‡ç¤ºæ§‹é€ ä½“ã¸ã®ãƒã‚¤ãƒ³ã‚¿
  */
 #define RESET_FMT(cmdp) do{				\
 		(cmdp)->dot = 0;			\
@@ -110,7 +111,7 @@ typedef struct _fmt_cmd{
 		(cmdp)->zflag = 0;			\
 	} while (0)
 
-/** ½ñ¼°»ØÄê¥³¥Ş¥ó¥É½é´ü²½»Ò
+/** æ›¸å¼æŒ‡å®šã‚³ãƒãƒ³ãƒ‰åˆæœŸåŒ–å­
  */
 #define FMTCMD_INITILIZER    {			\
 		.dot = 0,			\
@@ -152,13 +153,13 @@ ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
 	return (p);
 }
 
-/** ½ñ¼°»ØÄê¤Ë½¾¤Ã¤ÆÊ¸»úÎó¤òÀ¸À®¤¹¤ë
-    @param[in] len   Ê¸»úÎó½ĞÎÏÀè¥Ğ¥Ã¥Õ¥¡¤ÎÄ¹¤µ
-    @param[in] buf   Ê¸»úÎó½ĞÎÏÀè¥Ğ¥Ã¥Õ¥¡
-    @param[in] fmt   ½ñ¼°»ØÄêÊ¸»úÎó
-    @param[in] radix ¿ôÃÍ½ĞÎÏ¤ÎÄì
-    @param[in] ap    ²ÄÊÑ°ú¿ô¥ê¥¹¥È
-    @retval ½ĞÎÏÊ¸»úÎóÄ¹
+/** æ›¸å¼æŒ‡å®šã«å¾“ã£ã¦æ–‡å­—åˆ—ã‚’ç”Ÿæˆã™ã‚‹
+    @param[in] len   æ–‡å­—åˆ—å‡ºåŠ›å…ˆãƒãƒƒãƒ•ã‚¡ã®é•·ã•
+    @param[in] buf   æ–‡å­—åˆ—å‡ºåŠ›å…ˆãƒãƒƒãƒ•ã‚¡
+    @param[in] fmt   æ›¸å¼æŒ‡å®šæ–‡å­—åˆ—
+    @param[in] radix æ•°å€¤å‡ºåŠ›ã®åº•
+    @param[in] ap    å¯å¤‰å¼•æ•°ãƒªã‚¹ãƒˆ
+    @retval å‡ºåŠ›æ–‡å­—åˆ—é•·
  */
 static int
 kvprintf(size_t len, void *buf, char const *fmt, int radix, va_list ap) {
@@ -192,7 +193,7 @@ kvprintf(size_t len, void *buf, char const *fmt, int radix, va_list ap) {
 		padchar = ' ';
 		
 		/*
-		 * ½ñ¼°»ØÄêÊ¸»ú('%')¤Ë½Ğ²ñ¤¦¤Ş¤Ç¥Ğ¥Ã¥Õ¥¡¤ËÊ¸»ú¤ò½ĞÎÏ¤¹¤ë
+		 * æ›¸å¼æŒ‡å®šæ–‡å­—('%')ã«å‡ºä¼šã†ã¾ã§ãƒãƒƒãƒ•ã‚¡ã«æ–‡å­—ã‚’å‡ºåŠ›ã™ã‚‹
 		 */
 		while ((ch = (unsigned char)*fmt++) != '%' || discard_format) {
 			if ( (ch == '\0') || ( rc >= (len - 1) ) )
@@ -414,8 +415,8 @@ number:
 	}
 }
 
-/** Ê¸»úÎóÉ½¼¨
-    @param[in] str É½¼¨¤¹¤ëÊ¸»úÎó
+/** æ–‡å­—åˆ—è¡¨ç¤º
+    @param[in] str è¡¨ç¤ºã™ã‚‹æ–‡å­—åˆ—
  */
 static void
 kprint_string(const char *str) {
@@ -424,11 +425,11 @@ kprint_string(const char *str) {
 		kputchar((int)*str++);
 }
 
-/** ½ñ¼°ÉÕ¤­¥«¡¼¥Í¥ëÆâ½ĞÎÏ´Ø¿ô
-    @param[in] fmt ½ñ¼°»ØÄêÊ¸»úÎó
-    @param[in] ... ²ÄÊÑ¸Ä°ú¿ô
-    @retval ½ĞÎÏ¤·¤¿Ê¸»úÎóÄ¹
-    @note Ê¸»úÎóÄ¹¤Ï, PRFBUFLEN(127)Ê¸»ú¤Ş¤Ç¤ËÀ©¸Â¤µ¤ì¤ë
+/** æ›¸å¼ä»˜ãã‚«ãƒ¼ãƒãƒ«å†…å‡ºåŠ›é–¢æ•°
+    @param[in] fmt æ›¸å¼æŒ‡å®šæ–‡å­—åˆ—
+    @param[in] ... å¯å¤‰å€‹å¼•æ•°
+    @retval å‡ºåŠ›ã—ãŸæ–‡å­—åˆ—é•·
+    @note æ–‡å­—åˆ—é•·ã¯, PRFBUFLEN(127)æ–‡å­—ã¾ã§ã«åˆ¶é™ã•ã‚Œã‚‹
  */
 int
 kprintf(const char *fmt, ...) {

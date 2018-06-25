@@ -1,6 +1,7 @@
+/* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
-/*  Copyright 2001 Takeharu KATO                                      */
+/*  OS kernel sample                                                  */
+/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  thread manager definitions                                        */
 /*                                                                    */
@@ -12,10 +13,10 @@
 #include "hal/hal_types.h"
 #include "hal/addrinfo.h"
 
-/** ¥¹¥ì¥Ã¥É´ÉÍı¹½Â¤
+/** ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æ§‹é€ 
  */
 typedef struct _thread_manager{
-	list_head_t    head;    /*< ¥¹¥ì¥Ã¥É´ÉÍı¹½Â¤¥ê¥¹¥È¤Î¥Ø¥Ã¥É  */
+	list_head_t    head;    /*< ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç†æ§‹é€ ãƒªã‚¹ãƒˆã®ãƒ˜ãƒƒãƒ‰  */
 }thread_manager_t;
 
 int thrmgr_get_threadid(tid_t *);
