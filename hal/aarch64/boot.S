@@ -9,6 +9,7 @@
 #define ASM_FILE   1
 
 #include <kern/param.h>
+#include <kern/thread_info.h>
 
 #include <hal/asm-offset.h>	
 #include <hal/aarch64.h>
@@ -68,6 +69,11 @@ start_el1:
 	add	x30, x30, STACK_SIZE
 	sub	x30, x30, #TI_SIZE //Allocate ti size
 	mov 	sp, x30
+	mov	x0, #(THR_DISPATCH_ENABLE)     /* Enable dispatch  */
+	str	x0, [sp, #TI_PREEMPT_OFFSET]  
+	movz	x0, #0xbeef           /*  Stack magic */
+	movk	x0, #0xdead,lsl#16    
+	str	x0, [sp, #TI_MAGIC_OFFSET]  
 	bl 	boot_main
 	b .
 

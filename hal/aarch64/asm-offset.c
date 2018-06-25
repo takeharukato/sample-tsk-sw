@@ -14,6 +14,6 @@ int
 main(int  __attribute__ ((unused)) argc, char  __attribute__ ((unused)) *argv[]) {
 
 	DEFINE_SIZE(TI_SIZE, sizeof(struct _thread_info));
-	OFFSET(TI_FLAGS_OFFSET, _thread_info, preempt);
-	OFFSET(TI_FLAGS_MAGIC, _thread_info, magic);
+	OFFSET(TI_PREEMPT_OFFSET, _thread_info, preempt);
+	OFFSET(TI_MAGIC_OFFSET, _thread_info, magic);
 }

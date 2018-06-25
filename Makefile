@@ -1,6 +1,6 @@
 top=.
 include Makefile.inc
-targets=kernel
+targets=kernel.elf kernel.asm
 
 subdirs=common kern hal user
 cleandirs=include ${subdirs} tools configs
@@ -27,17 +27,11 @@ include/autoconf.h: .config
 	${RM} -f $@
 	tools/kconfig/conf-header.sh .config > $@
 
-kernel: kernel.elf kernel.asm
-	${CP} $@.elf $@.tmp
-	${STRIP} $@.tmp
-	${OBJCOPY} -O binary $@.tmp $@
-	${RM} $@.tmp
-
 kernel.asm: kernel.elf
 	${RM} $@
 	${OBJDUMP} -S $< > $@
 
-kernel.elf:include/autoconf.h subsystem
+kernel.elf: include/autoconf.h subsystem
 ifeq ($(CONFIG_HAL),y)
 	${LD} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\
@@ -56,10 +50,10 @@ subsystem: hal
 	${MAKE} -C $${dir} ;\
 	done
 
-run: hal kernel
+run: hal kernel.elf
 	${MAKE} -C hal/hal $@ ;\
 
-run-debug: hal kernel
+run-debug: hal kernel.elf
 	${MAKE} -C hal/hal $@ ;\
 
 docs:
