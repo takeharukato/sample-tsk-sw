@@ -39,6 +39,7 @@ threadB(void *arg) {
 }
 void
 threadC(void *arg) {
+
 	kprintf("threadC\n");
 }
 
