@@ -65,7 +65,6 @@ hal/hal
 include/hal
 rfs/
 *.iso
-vector.S
 kernel.asm
 kernel.sym
 apboot.asm
