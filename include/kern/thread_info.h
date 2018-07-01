@@ -52,7 +52,7 @@ typedef struct _thread_info{
 static inline int
 ti_is_dispatch_disabled(thread_info_t *tinfo) {
 
-	return ( tinfo->preempt & THR_DISPATCH_DISABLE );
+	return ( ( tinfo->preempt & THR_DISPATCH_DISABLE ) != 0 );
 } 
 
 /** ディスパッチ禁止中に設定する
@@ -97,7 +97,7 @@ ti_clr_delay_dispatch(thread_info_t *tinfo) {
 static inline int
 ti_check_need_dispatch(thread_info_t *tinfo) {
 
-	return (tinfo->preempt & THR_PRMPT_CTRL_RESCHED_DELAYED);
+	return ( ( tinfo->preempt & THR_PRMPT_CTRL_RESCHED_DELAYED ) != 0 );
 }
 
 /** スケジュール実行中フラグを立てる
