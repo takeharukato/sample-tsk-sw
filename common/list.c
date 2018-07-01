@@ -6,7 +6,8 @@
 /*  List operations                                                   */
 /*                                                                    */
 /**********************************************************************/
-#include "kern/kernel.h"
+
+#include <kern/kernel.h>
 
 /** リスト削除
  */

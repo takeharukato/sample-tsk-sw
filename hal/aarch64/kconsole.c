@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 static kconsole_list_t kcons = KCONSOLE_LIST_INITILIZER(kcons);
 volatile unsigned int * const UART0DR = (unsigned int *) 0x09000000;

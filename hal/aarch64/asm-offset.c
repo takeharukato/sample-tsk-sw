@@ -5,11 +5,12 @@
 /*                                                                      */
 /*  Some of size and offset information for assembler routines          */
 /************************************************************************/
+#define __IN_ASM_OFFSET 1
+
 #include <kern/asm-offset-helper.h>
 #include <kern/thread_info.h>
-#include <hal/exception.h>
 
-#define __IN_ASM_OFFSET 1
+#include <hal/exception.h>
 
 int
 main(int  __attribute__ ((unused)) argc, char  __attribute__ ((unused)) *argv[]) {

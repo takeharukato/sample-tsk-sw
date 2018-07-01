@@ -23,15 +23,15 @@ SECTIONS
 	}
 	 _edata = .;			/* End of data section */
 	/* payload */
-	. = ALIGN(4096);
+	. = ALIGN(__PAGE_SIZE__);
 	_payload_start = .;
 	.payload : { *(.payload) }
 	_payload_end = .;
-	. = ALIGN(4096);
+	. = ALIGN(__PAGE_SIZE__);
 	_end = . ;
   	_kend = .;
 	_kheap_start = .;
-	. += (2*1024*1024);
+	. += (__KHEAP_SIZE__);
 	_kheap_end = .;
 
   /* Sections to be discarded */

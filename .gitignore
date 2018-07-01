@@ -66,14 +66,8 @@ include/hal
 rfs/
 *.iso
 kernel.asm
-kernel.sym
-apboot.asm
-apentry
-boot.log
-gen-cpuid-db
-#
-hal/x86-64/cpuid-intel-table.c
-hal/x86-64/apentry-asm.S
+kernel.map
+kernel.lds
 asm-offset.s
 asm-offset.h
 build.log
@@ -93,4 +87,8 @@ configs/hal
 *.lot
 *.pdf
 *.toc
-
+#
+#latexmk
+#
+*.fdb_latexmk
+*.fls

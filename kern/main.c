@@ -7,19 +7,22 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 /** カーネルの初期化
  */
 void
 kern_init(void) {
 	
-	init_heap();
 	idle_init_idle();
 	thrmgr_init_thread_manager();
 	sched_init();
 
 	reaper_init_thread();
+
+	irq_initialize_manager();
+
+	hal_kernel_init();
 	
 	user_init();
 

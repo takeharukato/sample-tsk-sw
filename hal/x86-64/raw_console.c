@@ -7,9 +7,10 @@
 /*                                                                    */
 /*                                                                    */
 /**********************************************************************/
-#include <stddef.h>
-#include <stdint.h>
-#include "kern/kernel.h"
+
+#include <kern/kernel.h>
+
+#include <hal/raw_console.h>
 
 #define COLUMNS			(80)  /* columns.  */
 #define LINES			(25)  /* lines.  */

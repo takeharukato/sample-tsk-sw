@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 static thread_t *reaper_thread;
 static reaper_thread_info_t reaper_info;

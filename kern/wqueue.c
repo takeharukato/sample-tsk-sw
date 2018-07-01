@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 /** Add a thread into a wait queue
     @param[in] wq  wait queue

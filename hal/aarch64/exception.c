@@ -7,11 +7,8 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include <stddef.h>
-#include <stdint.h>
+#include <kern/kernel.h>
 
-#include "kern/kernel.h"
-#include "kern/printf.h"
 #include <hal/exception.h>
 
 void
@@ -37,16 +34,45 @@ hal_handle_exception(exception_frame *exc) {
 
 void
 hal_common_trap_handler(exception_frame *exc){
-	
-	if ( ( exc->exc_type & 0xf ) == 0x1 ) {
+	thread_info_t *ti;
 
+	ti = thr_refer_thread_info(current);
+
+	if ( ( exc->exc_type & 0xf ) == 0x1 ) {
+		
+		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, 1);
 		__psw_enable_interrupt();
 		hal_handle_exception(exc);
 		__psw_disable_interrupt();
-	}
-#if 0
-	if ( ( exc->exc_type & 0xf ) == 0x2 )
-		hal_handle_interrupt(exc);
-#endif
+		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, -1);
 
+	}
+
+	if ( ( exc->exc_type & 0xf ) == 0x2 ) {
+
+		ti_update_preempt_count(ti, THR_IRQCNT_SHIFT, 1);
+		irq_handle_irq(exc);
+		ti_update_preempt_count(ti, THR_IRQCNT_SHIFT, -1);
+	}
+
+	/*
+	 * Delay dispatching
+	 */
+	if  ( ( ti_refer_preempt_count(ti) > 0 ) ||
+	    ( ti_refer_irq_count(ti) > 0 ) ||
+	    ( ti_is_dispatch_disabled(ti) ) )
+		goto out; /* Dispatching is disabled */
+		
+	if ( ti_check_need_dispatch(ti) ) {
+		
+		/* Clear a delay scheduling request */
+		ti_clr_delay_dispatch(ti);
+		sched_schedule(); 
+	}
+out:
+	return;
+}
+
+void
+hal_do_delay_dispatch(exception_frame *exc){
 }

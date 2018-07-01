@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 static thread_manager_t all_threads;
 static id_bitmap_t thread_id_map = ID_BITMAP_INITIALIZER;  /*< スレッドIDのプール  */

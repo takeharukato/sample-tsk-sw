@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 static thread_ready_queue_t rd_queue;
 
@@ -61,8 +61,21 @@ void
 sched_schedule(void) {
 	psw_t psw;
 	thread_t *prev, *next;
+	thread_info_t *ti;
 
 	psw_disable_interrupt(&psw);
+
+	ti = thr_refer_thread_info(current);
+	ti_set_preempt_active(ti);  /* Set preempt-active flag. */
+
+	if ( ( ti_refer_preempt_count(ti) > 0 ) ||
+	    ( ti_refer_irq_count(ti) > 0 ) ||
+	    ( ti_is_dispatch_disabled(ti) ) ) {
+
+                /*  Need to delay dispatch */
+		ti_set_delay_dispatch(ti);
+		goto out;
+	}
 
 	prev = current;
 	next = select_next_thread(); 
@@ -74,6 +87,8 @@ sched_schedule(void) {
 
 	current->status = THR_TSTATE_RUN ;
 out:
+	ti_clr_preempt_active(ti);  /* Clear preempt-active flag. */
+
 	psw_restore_interrupt(&psw);	
 }
 

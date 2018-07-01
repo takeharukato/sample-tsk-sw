@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 /** Enable dispatch
     @param[in] tinfo 
@@ -27,25 +27,7 @@ disable_dispatch(thread_info_t *tinfo) {
 	tinfo->preempt |= THR_DISPATCH_DISABLE;
 }
 
-/** 遅延ディスパッチ予約を立てる
-    @param[in] tinfo スレッド情報のアドレス
- */
-static void
-set_delay_dispatch(thread_info_t *tinfo) {
-
-	tinfo->preempt |= THR_DISPATCH_DELAYED;
-}
-
-/** 遅延ディスパッチ予約をクリアする
-    @param[in] tinfo スレッド情報のアドレス
- */
-static void
-clr_delay_dispatch(thread_info_t *tinfo) {
-
-	tinfo->preempt &= ~THR_DISPATCH_DELAYED;
-}
-
-/** 遅延ディスパッチ予約をクリアする
+/** スレッド情報をクリアする
     @param[in] tinfo スレッド情報のアドレス
  */
 static void
@@ -140,8 +122,8 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 	if ( (attrp == NULL) || (attrp->stack_top == NULL) || (attrp->stack_size == 0) ) {
 
 		stack_size = STACK_SIZE;
-		thread_stack = kmalloc(stack_size);
-		if (thread_stack == NULL) {
+		rc = kposix_memalign(&thread_stack, stack_size, stack_size);
+		if ( rc != 0 ) {
 			rc = ENOMEM;
 			goto out;
 		}

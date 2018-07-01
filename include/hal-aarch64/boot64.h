@@ -10,5 +10,5 @@
 #define  _HAL_BOOT64_H 
 
 void boot_main(void);
-
+void hal_kernel_init(void);
 #endif  /*  _HAL_BOOT64_H   */

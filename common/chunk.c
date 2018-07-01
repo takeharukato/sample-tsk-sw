@@ -6,9 +6,8 @@
 /*  Buddy memory allocator                                            */
 /*                                                                    */
 /**********************************************************************/
-#include <errno.h>
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 /** 空きチャンクのサイズがリストに接続可能か確認する
  */

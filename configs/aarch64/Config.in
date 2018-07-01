@@ -15,4 +15,7 @@ config CONFIG_HAL_OPT_FLAGS
        default ""
        depends on CONFIG_HAL
 
+config CONFIG_HAL_PAGE_SIZE
+       int
+       default 4096
 

@@ -1,6 +1,6 @@
 top=.
 include Makefile.inc
-targets=kernel.elf kernel.asm
+targets=kernel.elf kernel.asm kernel.map
 
 subdirs=common kern hal user
 cleandirs=include ${subdirs} tools configs
@@ -19,11 +19,11 @@ ${mconf}:
 	${MAKE} -C tools
 
 menuconfig:hal configs/Config.in ${mconf}
-	${RM} include/autoconf.h
+	${RM} include/kern/autoconf.h
 	${mconf} configs/Config.in || :
 
 
-include/autoconf.h: .config
+include/kern/autoconf.h: .config
 	${RM} -f $@
 	tools/kconfig/conf-header.sh .config > $@
 
@@ -31,7 +31,11 @@ kernel.asm: kernel.elf
 	${RM} $@
 	${OBJDUMP} -S $< > $@
 
-kernel.elf: include/autoconf.h subsystem
+kernel.map: kernel.elf
+	${RM} $@
+	${NM} $< |${SORT} > $@
+
+kernel.elf: include/kern/autoconf.h subsystem
 ifeq ($(CONFIG_HAL),y)
 	${LD} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\
@@ -63,13 +67,13 @@ clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\
 	done
-	${RM} *.o ${targets} *.tmp *.elf *.asm
+	${RM} *.o ${targets} *.tmp *.elf *.asm *.map
 
 distclean:clean
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} distclean ;\
 	done
-	${RM}  *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
+	${RM}  \#* *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
 
 gtags:
 	${GTAGS} -v

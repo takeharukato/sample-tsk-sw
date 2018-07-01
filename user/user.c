@@ -7,9 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
-
-wait_queue_t wque;
+#include <kern/kernel.h>
 
 void
 threadA(void *arg) {
@@ -47,7 +45,6 @@ void
 user_init(void) {
 	thread_t *thrA, *thrB, *thrC;
 
-	wque_init_wait_queue(&wque);
 	thr_create_thread(&thrA, NULL, threadA, NULL);
 	thr_create_thread(&thrB, NULL, threadB, NULL);
 	thr_create_thread(&thrC, NULL, threadC, (void *)0x5a5a5a5a5a);

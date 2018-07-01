@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 extern void thr_thread_start(void (*_fn)(void *), void   *_arg);
 

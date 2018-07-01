@@ -6,8 +6,16 @@
 /*  64bit boot code                                                   */
 /*                                                                    */
 /**********************************************************************/
+
+#include <float.h>
+#include <iso646.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include "hal/hal.h"
+
+#include <hal/hal.h>
 
 #define CHECK_FLAG(flags,bit)   \
 	((flags) & (1 << (bit))) /* Check if the bit BIT in FLAGS is set. */

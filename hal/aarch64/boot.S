@@ -14,6 +14,8 @@
 #include <hal/asm-offset.h>	
 #include <hal/aarch64.h>
 
+.extern bsp_stack
+
 .global _start
 start:	
 _start:	
@@ -69,16 +71,10 @@ start_el1:
 	add	x30, x30, STACK_SIZE
 	sub	x30, x30, #TI_SIZE //Allocate ti size
 	mov 	sp, x30
-	mov	x0, #(THR_DISPATCH_ENABLE)     /* Enable dispatch  */
-	str	x0, [sp, #TI_PREEMPT_OFFSET]  
+	str	xzr, [sp, #TI_PREEMPT_OFFSET]  /* Clear preempt info  */ 
 	movz	x0, #0xbeef           /*  Stack magic */
 	movk	x0, #0xdead,lsl#16    
 	str	x0, [sp, #TI_MAGIC_OFFSET]  
 	bl 	boot_main
 	b .
 
-.data
-.align 8
-bsp_stack:
-	.skip STACK_SIZE
-bsp_stack_end:

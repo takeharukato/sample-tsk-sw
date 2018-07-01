@@ -144,5 +144,6 @@ aarch64_get_generic_timer_freq(void) {
 	return val;
 }
 
+void aarch64_setup_vector(void);
 #endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_AARCH64_H   */

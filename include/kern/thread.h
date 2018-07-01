@@ -86,4 +86,56 @@ int thr_thread_queue_empty(thread_queue_t *);
 thread_t *thr_thread_queue_get_top(thread_queue_t *);
 
 int thr_can_receive_message(thread_t *);
+
+static inline void
+ti_update_preempt_count(thread_info_t *ti, uint64_t shift, int64_t diff) {
+	psw_t psw;
+	preempt_state_t	cnt;
+
+	psw_disable_interrupt(&psw);
+
+	cnt = ti->preempt;
+	cnt = ( cnt >> shift ) & THR_CNTR_MASK;
+	cnt = (preempt_state_t)( ( (int64_t)cnt ) + diff );
+	cnt = ( cnt << shift ) & ( THR_CNTR_MASK << shift );
+
+	ti->preempt &= ~( THR_CNTR_MASK << shift );
+	ti->preempt |= cnt;
+	
+	psw_restore_interrupt(&psw);
+}
+
+static inline precnt_t
+ti_refer_pre_count(thread_info_t *ti, int shift) {
+	psw_t    psw;
+	precnt_t cnt;
+
+	psw_disable_interrupt(&psw);
+
+	cnt = (precnt_t)( ( ti->preempt >> shift ) & THR_CNTR_MASK );
+
+	psw_restore_interrupt(&psw);
+	
+	return cnt;
+}
+
+static inline precnt_t
+ti_refer_preempt_count(thread_info_t *ti) {
+
+	return ti_refer_pre_count(ti, THR_PRECNT_SHIFT);
+}
+
+static inline precnt_t
+ti_refer_irq_count(thread_info_t *ti) {
+
+	return ti_refer_pre_count(ti, THR_IRQCNT_SHIFT);
+}
+
+static inline precnt_t
+ti_refer_exc_count(thread_info_t *ti) {
+
+	return ti_refer_pre_count(ti, THR_EXCCNT_SHIFT);
+}
+
+
 #endif  /*  _KERN_THREAD_H */

@@ -49,7 +49,7 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 #define NULLFMT   "(fmt null)"  /*< 書式指定文字列にNULLを指定された  */
 #define MIN_RADIX          (2)  /*< 底の最小値                        */

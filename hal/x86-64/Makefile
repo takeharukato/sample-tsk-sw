@@ -8,11 +8,26 @@ endif
 
 lib=libhal.a
 
-all:${lib}
+all: kernel.lds ${lib}
 
 ${lib}:${objects}
 	${AR} ${ARFLAGS} $@ $^
 	${RANLIB} $@
+
+asm-offset.s: asm-offset.c
+	${CC} ${ASM_OFFSET_CFLAGS} -S -o $@ $<
+
+gen-asm-offset: asm-offset.s
+	${top}/tools/asmoffset/gen-asm-offset.py \
+	-i ${top}/hal/hal/asm-offset.s \
+	-o ${top}/include/hal/asm-offset.h
+
+kernel.lds: kernel.lds.in ${top}/.config
+	${RM} $@
+	${SED} -e 's|__KHEAP_SIZE__|${CONFIG_HEAP_SIZE}*1024*1024|g' 	\
+	       -e 's|__PAGE_SIZE__|${CONFIG_HAL_PAGE_SIZE}|g' 		\
+	$< > $@
+
 clean:
 	${RM} *.o ${lib}
 

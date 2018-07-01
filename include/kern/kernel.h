@@ -6,26 +6,40 @@
 /*  kernel common header                                              */
 /*                                                                    */
 /**********************************************************************/
+
 #if !defined(_KERN_KERNEL_H)
 #define _KERN_KERNEL_H
-#include "kern/kern_types.h"
-#include "kern/string.h"
-#include "kern/bitops.h"
-#include "kern/list.h"
-#include "kern/kconsole.h"
-#include "kern/printf.h"
-#include "kern/malloc.h"
-#include "kern/id_bitmap.h"
-#include "kern/wqueue.h"
-#include "kern/message.h"
-#include "kern/thread.h"
-#include "kern/thread_manager.h"
-#include "kern/ready_que.h"
-#include "kern/reaper.h"
-#include "kern/idle_thread.h"
-#include "kern/sched.h"
-#include "kern/main.h"
 
-#include "hal/hal.h"
+#include <float.h>
+#include <iso646.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <kern/param.h>
+#include <kern/kern_types.h>
+#include <kern/errno.h>
+#include <kern/string.h>
+#include <kern/bitops.h>
+#include <kern/list.h>
+#include <kern/kconsole.h>
+#include <kern/printf.h>
+#include <kern/malloc.h>
+#include <kern/id_bitmap.h>
+#include <kern/wqueue.h>
+#include <kern/message.h>
+#include <kern/thread.h>
+#include <kern/thread_manager.h>
+#include <kern/ready_que.h>
+#include <kern/reaper.h>
+#include <kern/idle_thread.h>
+#include <kern/sched.h>
+#include <kern/irq.h>
+#include <kern/main.h>
+#include <kern/irq.h>
+#include <kern/heap.h>
+#include <hal/hal.h>
 
 #endif  /*  _KERN_KERNEL_H  */

@@ -7,7 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
+#include <kern/kernel.h>
 
 static thread_t idle_thread;        /* アイドルスレッドのスレッド管理情報            */
 thread_t *current = &idle_thread;   /* カレントの初期値をアイドルスレッドに設定する  */
@@ -21,6 +21,7 @@ do_idle_loop(void) {
 	psw_t psw;
 
 	for(;;) {
+		
 		sched_schedule();
 	}
 }

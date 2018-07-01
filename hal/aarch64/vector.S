@@ -15,7 +15,8 @@
 .section ".text.boot"
 
 .extern hal_common_trap_handler
-
+.extern hal_do_delay_dispatch
+	
 .macro build_trapframe exc_type
 	/*
 	 * store generic registers from (x29,x30) pair to (x1,x2) pair.
@@ -57,7 +58,21 @@
 	mrs	x21, sp_el0
 	str	x21, [sp, #EXC_EXC_SP_OFFSET]
 .endm
-
+.macro	refer_current_thread_info ret_reg, tmp
+	movn	\tmp, ( #STACK_SIZE - 1 )
+	mov	\ret_reg, sp	
+	and	\ret_reg, \ret_reg, \tmp
+	add	\ret_reg, \ret_reg, #STACK_SIZE
+	sub	\ret_reg, \ret_reg, #TI_SIZE
+.endm
+.macro	process_delay_dispatch
+	refer_current_thread_info x21, x22
+	ldr	x22, [x21, #TI_PREEMPT_OFFSET]
+	cbnz	x22, 1f
+	mov	x0, sp
+	bl	hal_do_delay_dispatch
+1:
+.endm
 .macro call_common_trap_handler
 	mov	x0, sp
 	bl hal_common_trap_handler
@@ -295,8 +310,8 @@ _el0_error32:	/* Error EL0 from AArch32 */
 	restore_trapframe
 
 	text_align
- 	.globl	hal_setup_vector
-hal_setup_vector:	
+ 	.globl	aarch64_setup_vector
+aarch64_setup_vector:	
 	ldr x0, =vectors
 	msr vbar_el1, x0
 	ret

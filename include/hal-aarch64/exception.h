@@ -77,6 +77,7 @@ typedef struct _exception_frame{
 }exception_frame;
 
 void hal_common_trap_handler(exception_frame *_exc);
-void hal_setup_vector(void);
-#endif  /*  ASM_FILE  */
+void hal_do_delay_dispatch(exception_frame *exc);
+void hal_update_preempt_count(uint64_t _shift, int64_t _diff);
+#endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_EXCEPTION_H   */

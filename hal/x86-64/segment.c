@@ -7,8 +7,9 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "kern/kernel.h"
-#include "hal/segments.h"
+#include <kern/kernel.h>
+
+#include <hal/segments.h>
 
 static segment_desc_t gdt[GDT_NR];
 static gate_descriptor_t idt[IDT_NR];

@@ -21,7 +21,7 @@ config CONFIG_ID_BITMAP_UNIT
 config CONFIG_HEAP_SIZE
 	int "heap memory size(UNIT:MB)"
 	default 2
-	range 1 4
+	range 1 64
 	help
 	  This sets the value of kernel heap memory size
 
@@ -31,5 +31,18 @@ config CONFIG_KSTACK_PAGE_NR
 	range 1 4
 	help
 	  This sets the value of kernel stack size
+
+config CONFIG_KSTACK_PAGE_NR
+	int "kernel stack pages(UNIT:pages-nr)"
+	default 1
+	range 1 4
+	help
+	  This sets the value of kernel stack size
+
+config CONFIG_TIMER_INTERVAL
+       int
+       default 10
+       help
+	  This sets the value of timer interval in ms
 
 source "configs/hal/Config.in"

@@ -12,3 +12,6 @@ config CONFIG_HAL_OPT_FLAGS
        string 
        default "-mtune=generic"
 
+config CONFIG_HAL_PAGE_SIZE
+       int
+       default 4096
