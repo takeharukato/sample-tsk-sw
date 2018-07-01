@@ -9,7 +9,8 @@
 #if !defined(_HAL_SEGMENTS_H)
 #define  _HAL_SEGMENTS_H 
 #if !defined(ASM)
-#include <stdint.h>
+
+#include <kern/freestanding.h>
 
 /*
  *  セグメント ディスクリプタ

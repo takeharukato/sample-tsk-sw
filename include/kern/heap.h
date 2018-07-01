@@ -21,4 +21,5 @@ extern void *_kheap_start;
 extern void *_kheap_end;
 
 void *kheap_sbrk(intptr_t _inc);
+void kheap_init(void);
 #endif  /*  _KERN_HEAP_H   */

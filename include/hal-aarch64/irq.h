@@ -9,6 +9,8 @@
 #if !defined(_HAL_IRQ_H)
 #define  _HAL_IRQ_H 
 
+#include <kern/freestanding.h>
+
 #include <kern/kern_types.h>
 
 void aarch64_init_interrupt(void);

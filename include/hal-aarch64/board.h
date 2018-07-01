@@ -8,6 +8,7 @@
 /**********************************************************************/
 #if !defined(_HAL_BOARD_H)
 #define  _HAL_BOARD_H 
+
 /*
  * GIC on QEMU Virt 
  */

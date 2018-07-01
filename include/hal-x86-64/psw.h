@@ -8,7 +8,10 @@
 /**********************************************************************/
 #if !defined(_HAL_PSW_H)
 #define  _HAL_PSW_H 
-#include "kern/param.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/param.h>
 
 typedef uint64_t psw_t;  /*< プロセサステータスワード  */
 

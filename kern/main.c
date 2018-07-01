@@ -22,8 +22,10 @@ kern_init(void) {
 
 	irq_initialize_manager();
 
+#if defined(CONFIG_HAL)
 	hal_kernel_init();
-	
+#endif /*  CONFIG_HAL  */
+
 	user_init();
 
 	do_idle_loop();
@@ -34,6 +36,7 @@ int
 main(int argc, char *argv[]) {
 
 	init_pseudo_console();
+	kheap_init();
 	kern_init();
 }
-#endif  /*  CONFIG_HAL  */
+#endif  /*  !CONFIG_HAL  */

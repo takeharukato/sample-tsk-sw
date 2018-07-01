@@ -3,11 +3,13 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*   relevant routines                                 */
+/*  Aliignments and an address space definitions                      */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_ADDR_INFO_H)
 #define  _HAL_ADDR_INFO_H 
+
+#include <kern/freestanding.h>
 
 #define MALIGN_SIZE       (sizeof(void *))       /*<  メモリ割り当て単位  */
 
