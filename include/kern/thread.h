@@ -9,12 +9,14 @@
 #if !defined(_KERN_THREAD_H)
 #define _KERN_THREAD_H
 
-#include "kern/kern_types.h"
-#include "kern/list.h"
-#include "kern/thread_info.h"
+#include <kern/freestanding.h>
 
-#include "hal/hal_types.h"
-#include "hal/addrinfo.h"
+#include <kern/kern_types.h>
+#include <kern/list.h>
+#include <kern/thread_info.h>
+
+#include <hal/hal_types.h>
+#include <hal/addrinfo.h>
 
 /** スレッドの状態
  */
@@ -53,10 +55,6 @@ typedef struct _thread{
 	struct _thread_ready_queue *rdq;  /*< レディーキュー              */
 	exit_code_t     exit_code;  /*< 終了コード                  */
 	thread_attr_t        attr;  /*< 属性情報                    */
-	message_buffer_t  msg_buf;  /*< メッセージ送信情報          */
-	wait_queue_t      recv_wq;  /*< メッセージ受信待ちキュー    */
-	wait_queue_t      send_wq;  /*< メッセージ送信者待ちキュー  */
-	list_head_t      recv_que;  /*< メッセージキュー            */
 }thread_t;
 
 /** スレッドがレディキューにつながっているか確認する
@@ -69,7 +67,6 @@ typedef struct _thread_queue{
 	list_head_t head;    /*< スレッドキューのヘッド  */
 }thread_queue_t;
 
-thread_info_t *thr_refer_thread_info(thread_t *);
 void thr_thread_switch(thread_t *, thread_t *);
 void thr_unlink_thread(thread_t *);
 int thr_create_thread(thread_t **, thread_attr_t *, void (*start)(void *), void *);
@@ -85,7 +82,7 @@ void thr_remove_thread_queue(thread_queue_t *, thread_t *);
 int thr_thread_queue_empty(thread_queue_t *);
 thread_t *thr_thread_queue_get_top(thread_queue_t *);
 
-int thr_can_receive_message(thread_t *);
+thread_info_t *thr_refer_thread_info(thread_t *);
 
 static inline void
 ti_update_preempt_count(thread_info_t *ti, uint64_t shift, int64_t diff) {
@@ -136,6 +133,5 @@ ti_refer_exc_count(thread_info_t *ti) {
 
 	return ti_refer_pre_count(ti, THR_EXCCNT_SHIFT);
 }
-
 
 #endif  /*  _KERN_THREAD_H */

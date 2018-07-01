@@ -1,7 +1,7 @@
 top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
-objects=thread.o threadmgr.o ready_queue.o sched.o idle.o wqueue.o message.o reaper.o \
+objects=thread.o threadmgr.o ready_queue.o sched.o idle.o wqueue.o reaper.o \
 	pconsole.o irq.o
 
 

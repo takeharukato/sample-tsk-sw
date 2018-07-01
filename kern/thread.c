@@ -160,14 +160,6 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 	init_list_node(&thr->link);
 	thr->exit_code = 0;
 
-	/*
-	 * メッセージ送受信機構の初期化
-	 */
-	wque_init_wait_queue(&thr->recv_wq);
-	wque_init_wait_queue(&thr->send_wq);
-	init_list_head(&thr->recv_que);
-	msg_init_message_buffer(&thr->msg_buf);
-
 	thr->status = THR_TSTATE_RUN;
 
 	thrmgr_thread_manager_add(thrmgr_refer_thread_manager(), thr);
@@ -332,22 +324,3 @@ thr_thread_queue_get_top(thread_queue_t *que) {
 
 	return thr;
 }
-
-/** メッセージ受信待ち中であることを確認する
-    @param[in] thr スレッド管理情報
-    @retval 真 メッセージ受信待ち中である
-    @retval 偽 メッセージ受信待ち中でない
- */
-int
-thr_can_receive_message(thread_t *thr) {
-	int rc;
-	psw_t psw;
-	
-	psw_disable_interrupt(&psw);
-
-	rc = is_wque_empty(&thr->recv_wq);
-
-	psw_restore_interrupt(&psw);
-	return rc;
-}
-

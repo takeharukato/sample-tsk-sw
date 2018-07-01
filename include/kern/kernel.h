@@ -10,13 +10,7 @@
 #if !defined(_KERN_KERNEL_H)
 #define _KERN_KERNEL_H
 
-#include <float.h>
-#include <iso646.h>
-#include <limits.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <kern/freestanding.h>
 
 #include <kern/param.h>
 #include <kern/kern_types.h>
@@ -29,7 +23,6 @@
 #include <kern/malloc.h>
 #include <kern/id_bitmap.h>
 #include <kern/wqueue.h>
-#include <kern/message.h>
 #include <kern/thread.h>
 #include <kern/thread_manager.h>
 #include <kern/ready_que.h>
