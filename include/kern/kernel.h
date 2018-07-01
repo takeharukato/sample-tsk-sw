@@ -6,7 +6,6 @@
 /*  kernel common header                                              */
 /*                                                                    */
 /**********************************************************************/
-
 #if !defined(_KERN_KERNEL_H)
 #define _KERN_KERNEL_H
 

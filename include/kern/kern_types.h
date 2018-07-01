@@ -8,8 +8,8 @@
 /**********************************************************************/
 #if !defined(_KERN_KERN_TYPES_H)
 #define _KERN_KERN_TYPES_H
-#include <stdint.h>
-#include <stddef.h>
+
+#include <kern/freestanding.h>
 
 #define BIT_PER_BYTE       (8)  /*<  バイトマシンを想定              */
 

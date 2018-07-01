@@ -8,8 +8,11 @@
 /**********************************************************************/
 #if !defined(_KERN_ID_BITMAP_H)
 #define _KERN_ID_BITMAP_H
-#include <errno.h>
-#include "kern/kern_types.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/errno.h>
+#include <kern/kern_types.h>
 
 typedef uint64_t bitmap_ent_t;  /*< ビットマップ1エントリ  */
 #define BITMAP_ARRAY_NR (CONFIG_ID_BITMAP_UNIT/(sizeof(bitmap_ent_t)*BIT_PER_BYTE)) /*< ビットマップ配列の要素数  */

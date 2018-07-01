@@ -9,9 +9,12 @@
 #if !defined(_KERN_CHUNK_H)
 #define  _KERN_CHUNK_H 
 
-#include "kern/list.h"
-#include "kern/heap.h"
-#include "hal/addrinfo.h"
+#include <kern/freestanding.h>
+
+#include <kern/list.h>
+#include <kern/heap.h>
+
+#include <hal/addrinfo.h>
 
 /** メモリ獲得単位/メモリ管理単位
  */

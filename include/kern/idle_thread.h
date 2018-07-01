@@ -8,7 +8,10 @@
 /**********************************************************************/
 #if !defined(_KERN_IDLE_THREAD_H)
 #define  _KERN_IDLE_THREAD_H 
-#include "kern/thread.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/thread.h>
 
 extern thread_t *current;  /*< カレントスレッドへのポインタ  */
 

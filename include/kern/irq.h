@@ -9,8 +9,7 @@
 #if !defined(_KERN_IRQ_H)
 #define  _KERN_IRQ_H 
 
-#include <stddef.h>
-#include <stdint.h>
+#include <kern/freestanding.h>
 
 #include <kern/kern_types.h>
 #include <kern/list.h>

@@ -6,10 +6,10 @@
 /*  Definitions for calculation of offset addresses in structured data */
 /*                                                                     */
 /***********************************************************************/
-#if !defined(KERN_ASM_OFFSET_HELPER_H)
-#define KERN_ASM_OFFSET_HELPER_H
-#include <stdint.h>
-#include <stddef.h>
+#if !defined(_KERN_ASM_OFFSET_HELPER_H)
+#define _KERN_ASM_OFFSET_HELPER_H
+
+#include <kern/freestanding.h>
 
 #define __asm_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
@@ -27,4 +27,4 @@
  */
 #define OFFSET(sym, str, mem) \
 	DEFINE_SIZE(sym, __asm_offsetof(struct str, mem))
-#endif  /*  KERN_ASM_OFFSET_HELPER_H  */
+#endif  /*  _KERN_ASM_OFFSET_HELPER_H  */

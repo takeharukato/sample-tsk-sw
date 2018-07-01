@@ -3,12 +3,15 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  wait queue definitions                                            */
+/*  Wait queue definitions                                            */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_KERN_WQUEUE_H)
 #define  _KERN_WQUEUE_H 
-#include "kern/list.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/list.h>
 
 struct _thread;
 

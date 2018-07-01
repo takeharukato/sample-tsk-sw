@@ -9,10 +9,7 @@
 #if !defined(_KERN_HEAP_H)
 #define  _KERN_HEAP_H 
 
-#include <stddef.h>
-#include <stdint.h>
-
-#include <kern/param.h>
+#include <kern/freestanding.h>
 
 typedef struct _kernel_heap{
 	void *start;  /*< Start address of kernel heap */

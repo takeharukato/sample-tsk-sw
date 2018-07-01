@@ -8,8 +8,11 @@
 /**********************************************************************/
 #if !defined(_KERN_REAPER_H)
 #define  _KERN_REAPER_H 
-#include "kern/thread.h"
-#include "kern/wqueue.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/thread.h>
+#include <kern/wqueue.h>
 
 #define REAPER_THREAD_TID  (1)  /*< 回収スレッドのスレッドID  */
 #define REAPER_THREAD_PRIO (7)  /*< 回収スレッドの優先度      */

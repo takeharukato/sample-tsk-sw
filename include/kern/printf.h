@@ -8,7 +8,8 @@
 /**********************************************************************/
 #if !defined(_KERN_PRINTF_H)
 #define  _KERN_PRINTF_H
-#include <stdarg.h>
+
+#include <kern/freestanding.h>
 
 #define PRFBUFLEN        (128)  /*< 内部バッファ長                    */
 int kprintf(const char *, ...);

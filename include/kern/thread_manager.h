@@ -8,10 +8,14 @@
 /**********************************************************************/
 #if !defined(_KERN_THREAD_MANAGER_H)
 #define _KERN_THREAD_MANAGER_H
-#include "kern/kern_types.h"
-#include "kern/list.h"
-#include "hal/hal_types.h"
-#include "hal/addrinfo.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/kern_types.h>
+#include <kern/list.h>
+
+#include <hal/hal_types.h>
+#include <hal/addrinfo.h>
 
 /** スレッド管理構造
  */

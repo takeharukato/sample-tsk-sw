@@ -8,8 +8,11 @@
 /**********************************************************************/
 #if !defined(_KERN_STRING_H)
 #define _KERN_STRING_H
-#include <errno.h>
-#include "kern/kern_types.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/errno.h>
+#include <kern/kern_types.h>
 
 void *memset(void *, int , size_t );
 void *memcpy(void *, const void *, size_t );

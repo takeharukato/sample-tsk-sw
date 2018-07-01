@@ -21,7 +21,8 @@
 #define THR_EXCCNT_SHIFT      (0)    /*< Shift value for Exeception count */
 
 #if !defined(ASM_FILE)
-#include <stdint.h>
+
+#include <kern/freestanding.h>
 
 #include <hal/psw.h>
 

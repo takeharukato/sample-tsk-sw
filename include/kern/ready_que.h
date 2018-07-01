@@ -8,7 +8,10 @@
 /**********************************************************************/
 #if !defined(_KERN_READY_QUE_H)
 #define _KERN_READY_QUE_H
-#include "kern/list.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/list.h>
 
 #define RDQ_SYS_PRIORITY  (7)  /*< システムスレッドの優先度  */
 #define RDQ_USER_PRIORITY (1)  /*< ユーザスレッドの優先度    */

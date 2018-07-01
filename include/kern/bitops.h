@@ -9,7 +9,9 @@
 #if !defined(_KERN_BITOPS_H)
 #define _KERN_BITOPS_H
 
-#include "kern/kern_types.h"
+#include <kern/freestanding.h>
+
+#include <kern/kern_types.h>
 
 int  find_msr_bit_in_size(size_t );
 int  find_lsr_bit_in_size(size_t );

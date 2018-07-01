@@ -9,7 +9,9 @@
 #if !defined(_KERN_LIST_H)
 #define _KERN_LIST_H
 
-#include "kern/kern_types.h"
+#include <kern/freestanding.h>
+
+#include <kern/kern_types.h>
 
 /** リストエントリ
  */

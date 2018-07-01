@@ -8,7 +8,10 @@
 /**********************************************************************/
 #if !defined(_HAL_KCONSOLE_H)
 #define  _HAL_KCONSOLE_H 
-#include "kern/list.h"
+
+#include <kern/freestanding.h>
+
+#include <kern/list.h>
 
 typedef struct _kconsole{
 	list_t           link;      /*< コンソールリスト       */
