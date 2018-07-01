@@ -10,6 +10,7 @@
 #include <kern/kernel.h>
 
 #include <hal/hal.h>
+#include <hal/timer.h>
 
 static kconsole_t uart_console = KCONSOLE_INITILIZER(uart_console);
 
@@ -41,6 +42,7 @@ hal_kernel_init(void) {
 	attrp->stack_size = STACK_SIZE;
 
 	aarch64_init_interrupt();
+	hal_init_timer(CONFIG_TIMER_INTERVAL_MS);
 }
 
 /** 64bit モードでのブートアップ

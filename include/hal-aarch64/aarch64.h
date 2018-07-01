@@ -118,15 +118,6 @@ aarch64_current_el(void) {
  */
 
 static inline uint64_t
-aarch64_get_vctcnt(void) {
-	uint64_t val;
-
-	__asm__ __volatile__("mrs %0, cntvct_el0\n\t" : "=r"(val));
-
-	return val;
-}
-
-static inline uint64_t
 aarch64_get_physical_counter(void) {
 	uint64_t val;
 

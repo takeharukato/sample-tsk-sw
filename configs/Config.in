@@ -39,7 +39,7 @@ config CONFIG_KSTACK_PAGE_NR
 	help
 	  This sets the value of kernel stack size
 
-config CONFIG_TIMER_INTERVAL
+config CONFIG_TIMER_INTERVAL_MS
        int
        default 10
        help

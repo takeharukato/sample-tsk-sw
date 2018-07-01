@@ -29,4 +29,5 @@
 #define GIC_PRI_SHIFT               (4)
 #define GIC_PRI_MASK                (0x0f)
 
+#define AARCH64_TIMER_IRQ           (27)  /** Timer IRQ  */
 #endif  /*  _HAL_BOARD_H   */

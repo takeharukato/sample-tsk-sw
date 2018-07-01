@@ -84,10 +84,11 @@ irq_unregister_ctrlr(irq_no irq){
     @param[in] irq     IRQ number
     @param[in] attr    IRQ attribution
     @param[in] prio    IRQ priority
+    @param[in] private Hanlder private data
     @param[in] handler IRQ handler
  */
 int 
-irq_register_handler(irq_no irq, irq_attr attr, irq_prio prio, int (*handler)(irq_no _irq, struct _exception_frame *_exc)){
+irq_register_handler(irq_no irq, irq_attr attr, irq_prio prio, void *private, int (*handler)(irq_no _irq, struct _exception_frame *_exc, void *_private)){
 	int                       rc;
 	irq_attr        handler_attr;
 	irq_line              *linep;
@@ -133,6 +134,7 @@ irq_register_handler(irq_no irq, irq_attr attr, irq_prio prio, int (*handler)(ir
 
 	init_list_node(&handler_ent->link);
 	handler_ent->handler = handler;
+	handler_ent->private = private;
 	linep->attr = attr;
 	linep->prio = prio;
 	
@@ -162,7 +164,7 @@ restore_irq_out:
     @param[in] handler IRQ handler
  */
 int 
-irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception_frame *_exc)){
+irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception_frame *_exc, void *_private)){
 	int                       rc;
 	irq_line              *linep;
 	list_t                   *lp;
@@ -279,7 +281,7 @@ irq_handle_irq(struct _exception_frame *exc) {
 			if ( !( linep->attr & IRQ_ATTR_NON_NESTABLE) ) 
 				__psw_enable_interrupt();
 
-			is_handled = entp->handler(irq, exc);
+			is_handled = entp->handler(irq, exc, entp->private);
 			__psw_disable_interrupt();
 
 			if ( is_handled == IRQ_HANDLED ) {

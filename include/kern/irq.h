@@ -38,7 +38,8 @@
 
 typedef struct _irq_handler_ent{
 	list_t link;
-	int (*handler)(irq_no _irq, struct _exception_frame *_exc);  
+	int (*handler)(irq_no _irq, struct _exception_frame *_exc, void *private);
+	void *private;
 }irq_handler_ent;
 
 typedef struct _irq_ctrlr{
@@ -67,8 +68,8 @@ typedef struct _irq_manage{
 int irq_initialize_manager(void);
 int irq_register_ctrlr(irq_no _irq, irq_ctrlr *_ctrlrp);
 int irq_unregister_ctrlr(irq_no _irq);
-int irq_register_handler(irq_no _irq, irq_attr _attr, irq_prio _prio, int (*_handler)(irq_no _irq, struct _exception_frame *_exc));
-int irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception_frame *_exc));
+int irq_register_handler(irq_no _irq, irq_attr _attr, irq_prio _prio, void *_private, int (*_handler)(irq_no _irq, struct _exception_frame *_exc, void *_private));
+int irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception_frame *_exc, void *_private));
 void irq_register_pending_irq_finder(int (*_find_pending)(struct _exception_frame *_exc, irq_no *_irqp));
 void irq_unregister_pending_irq_finder(void);
 int irq_handle_irq(struct _exception_frame *_exc);

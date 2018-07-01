@@ -355,7 +355,7 @@ found:
 
 
 int 
-test_handler(irq_no irq, struct _exception_frame *exc){
+test_handler(irq_no irq, struct _exception_frame *exc, void *private __attribute__((unused))){
 
 	kprintf("Handler\n");
 	return IRQ_HANDLED;
@@ -376,7 +376,7 @@ aarch64_init_interrupt(void){
 
 	gic_pl390_initialize(&arm_gic_ctrlr);
 	irq_register_handler(35, IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_NESTABLE | IRQ_ATTR_EDGE, 
-	    1, test_handler);
+	    1, NULL, test_handler);
 
 }
 

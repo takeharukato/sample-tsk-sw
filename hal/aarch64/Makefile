@@ -10,7 +10,7 @@ CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
 objects = kconsole.o psw.o thr_context.o ctxsw.o
 ifeq ($(CONFIG_HAL),y)
-objects += boot.o boot64.o data.o exception.o vector.o gic-pl390.o
+objects += boot.o boot64.o data.o exception.o vector.o gic-pl390.o timer.o
 endif
 
 lib=libhal.a
