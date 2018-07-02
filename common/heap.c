@@ -51,3 +51,55 @@ kheap_sbrk(intptr_t inc){
 	return prev;
 }
 
+mutex malloc_global_mutex=__MUTEX_INITIALIZER(malloc_global_mutex);
+
+void 
+kmalloc_initialize_lock(mutex *mtx){
+	psw_t psw;	
+
+	psw_disable_and_save_interrupt(&psw);
+	mutex_init(mtx);
+	psw_restore_interrupt(&psw);
+}
+
+void 
+kmalloc_destroy_lock(mutex *mtx){
+	psw_t psw;	
+
+	psw_disable_and_save_interrupt(&psw);
+	mutex_destroy(mtx);
+	psw_restore_interrupt(&psw);
+}
+
+int 
+kmalloc_try_lock(mutex *mtx){
+	int rc;
+	psw_t psw;	
+
+	psw_disable_and_save_interrupt(&psw);
+	rc = ( !mutex_try_hold(mtx) );
+	psw_restore_interrupt(&psw);
+
+	return rc;
+}
+
+int
+kmalloc_acquire_lock(mutex *mtx){
+	int    rc;
+	psw_t psw;	
+	
+	psw_disable_and_save_interrupt(&psw);
+	rc = mutex_hold(mtx);
+	psw_restore_interrupt(&psw);
+
+	return rc;
+}
+
+void
+kmalloc_release_lock(mutex *mtx){
+	psw_t psw;	
+
+	psw_disable_and_save_interrupt(&psw);
+	mutex_release(mtx);
+	psw_restore_interrupt(&psw);
+}

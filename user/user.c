@@ -18,7 +18,6 @@ threadA(void *arg) {
 		kprintf("threadA\n");
 
 		sched_rotate_queue();
-		sched_set_ready(current) ;
 		sched_schedule();
 	}
 }
@@ -31,7 +30,6 @@ threadB(void *arg) {
 		kprintf("threadB\n");
 
 		sched_rotate_queue();
-		sched_set_ready(current) ;
 		sched_schedule();
 	}
 }

@@ -59,7 +59,7 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 void
 thr_thread_start(void (*fn)(void *), void   *arg){
 
-	__psw_enable_interrupt();  /* 割り込みを許可する  */
+	psw_enable_interrupt();  /* 割り込みを許可する  */
 	fn(arg);                /* スレッド開始関数を呼び出す  */
 	thr_exit_thread(0);        /* スレッド開始関数から帰ったら自スレッドを終了する  */
 	/* ここには来ない. */
@@ -74,7 +74,7 @@ void
 thr_unlink_thread(thread_t *thr){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_del(&thr->link);
 	psw_restore_interrupt(&psw);
 }
@@ -188,7 +188,7 @@ void
 thr_exit_thread(int code){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	thr_unlink_thread(current);   /* レディーキューから外す  */
 	current->exit_code = (exit_code_t)code; /* 終了コードを設定  */
 	current->status = THR_TSTATE_EXIT;  /* スレッドを終了状態にする  */
@@ -213,7 +213,7 @@ thr_destroy_thread(thread_t *thr){
 	psw_t psw;
 	thread_attr_t *attr = &thr->attr;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	if ( thr->status != THR_TSTATE_DEAD ) {
 		rc = EBUSY;
 		goto out;
@@ -254,7 +254,7 @@ void
 thr_init_thread_queue(thread_queue_t *que) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	init_list_head(&que->head);
 	psw_restore_interrupt(&psw);
 }
@@ -268,7 +268,7 @@ void
 thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_add(&que->head, &thr->link);
 	psw_restore_interrupt(&psw);
 }
@@ -281,7 +281,7 @@ void
 thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_del(&thr->link);
 	psw_restore_interrupt(&psw);
 }
@@ -296,7 +296,7 @@ thr_thread_queue_empty(thread_queue_t *que) {
 	int rc;
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	rc = list_is_empty(&que->head);
 	psw_restore_interrupt(&psw);
 
@@ -313,7 +313,7 @@ thr_thread_queue_get_top(thread_queue_t *que) {
 	thread_t *thr;
 	psw_t psw;
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	if (list_is_empty(&que->head)) 
 		thr =  NULL;

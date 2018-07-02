@@ -37,12 +37,12 @@ kernel.map: kernel.elf
 
 kernel.elf: include/kern/autoconf.h subsystem
 ifeq ($(CONFIG_HAL),y)
-	${LD} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
+	${CC} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\
 		-o $@ ${start_obj} 				\
-		--start-group ${kernlibs} ${hallibs} --end-group
+		-Wl,--start-group ${kernlibs} ${hallibs} -Wl,--end-group
 else
-	${CC} ${CFLAGS} -o $@ ${start_obj} ${kernlibs}
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${start_obj} -Wl,--start-group ${kernlibs} -Wl,--end-group
 endif
 hal:
 	${MAKE} -C include hal

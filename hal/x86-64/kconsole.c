@@ -21,7 +21,7 @@ kputchar(int ch){
 	kconsole_t *con;
 	list_t *cp;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_for_each(cp, kcp, head) {
 		con = CONTAINER_OF(cp, kconsole_t, link);
 		if (con->putchar != NULL) {
@@ -40,7 +40,7 @@ kcls(void){
 	kconsole_t *con;
 	list_t *cp;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_for_each(cp, kcp, head) {
 		con = CONTAINER_OF(cp, kconsole_t, link);
 		if (con->cls != NULL) {
@@ -61,7 +61,7 @@ klocate(int x, int y){
 	kconsole_t *con;
 	list_t *cp;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_for_each(cp, kcp, head) {
 		con = CONTAINER_OF(cp, kconsole_t, link);
 		if (con->locate != NULL) {
@@ -82,7 +82,7 @@ register_kconsole(kconsole_t *conp) {
 	psw_t psw;	
 	kconsole_list_t *kcp = &kcons;
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	if ( (conp == NULL) || (conp->putchar == NULL) ) {
 		rc = EINVAL;
 		goto out;
@@ -103,7 +103,7 @@ unregister_kconsole(kconsole_t *conp) {
 	psw_t psw;	
 	kconsole_list_t *kcp = &kcons;
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_del(&conp->link);
 	psw_restore_interrupt(&psw);
 

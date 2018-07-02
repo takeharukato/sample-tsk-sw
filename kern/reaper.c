@@ -22,7 +22,7 @@ reaper(void *nouse) {
 
 	
 	for(;;) {
-		psw_disable_interrupt(&psw);
+		psw_disable_and_save_interrupt(&psw);
 		/*
 		 * 終了したスレッドを破棄する
 		 */
@@ -42,13 +42,13 @@ void
 reaper_add_exit_thread(thread_t *thr) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	if (thr->status != THR_TSTATE_EXIT)
 		goto out;
 	thr->status = THR_TSTATE_DEAD;  /* スレッド情報を破棄可能な状態に遷移する    */
 
 	thr_add_thread_queue(&(reaper_info.reaper_queue), thr);  /*< キューに追加    */
-	wque_wakeup(&(reaper_info.wq));                          /*< スレッドを起床  */
+	wque_wakeup(&(reaper_info.wq), WQUE_REASON_WAKEUP);      /*< スレッドを起床  */
 out:
 	psw_restore_interrupt(&psw);
 }

@@ -41,9 +41,9 @@ hal_common_trap_handler(exception_frame *exc){
 	if ( ( exc->exc_type & 0xf ) == 0x1 ) {
 		
 		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, 1);
-		__psw_enable_interrupt();
+		psw_enable_interrupt();
 		hal_handle_exception(exc);
-		__psw_disable_interrupt();
+		psw_disable_interrupt();
 		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, -1);
 
 	}

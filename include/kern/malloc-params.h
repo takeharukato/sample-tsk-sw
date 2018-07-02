@@ -13,7 +13,7 @@
 
 #define MSPACES         (0) 
 #define ONLY_MSPACES    (0)
-#define USE_LOCKS       (0)
+#define USE_LOCKS       (2)
 #define USE_SPIN_LOCKS  (0)
 #define USE_DL_PREFIX   (1)
 #define ABORT          do{}while(1)
@@ -55,5 +55,13 @@
 #define dlindependent_comalloc kindependent_comalloc
 #define dlbulk_free            kbulk_free
 #endif /* USE_KMALLOC_PREFIX */
+#if USE_LOCKS > 1
+#define MLOCK_T           mutex
+#define INITIAL_LOCK(lk)  kmalloc_initialize_lock(lk)
+#define DESTROY_LOCK(lk)  kmalloc_destroy_lock(lk)
+#define ACQUIRE_LOCK(lk)  kmalloc_acquire_lock(lk)
+#define RELEASE_LOCK(lk)  kmalloc_release_lock(lk)
+#define TRY_LOCK(lk)      kmalloc_try_lock(lk)
 
+#endif
 #endif  /*  _KERN_KMALLOC_PARAMS_H   */

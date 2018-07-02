@@ -9,8 +9,8 @@
 #define ASM_FILE   1
 
 #include <kern/param.h>
-#include <kern/thread_info.h>
 
+#include <hal/thread_info.h>
 #include <hal/asm-offset.h>	
 #include <hal/aarch64.h>
 

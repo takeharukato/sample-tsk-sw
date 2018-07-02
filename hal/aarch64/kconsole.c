@@ -19,7 +19,7 @@ void
 kputchar(int ch){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	*UART0DR = (unsigned int)(ch); /* Transmit char */
 	psw_restore_interrupt(&psw);
 }
@@ -35,7 +35,7 @@ register_kconsole(kconsole_t *conp) {
 	psw_t psw;	
 	kconsole_list_t *kcp = &kcons;
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	if ( (conp == NULL) || (conp->putchar == NULL) ) {
 		rc = EINVAL;
 		goto out;
@@ -56,7 +56,7 @@ unregister_kconsole(kconsole_t *conp) {
 	psw_t psw;	
 	kconsole_list_t *kcp = &kcons;
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_del(&conp->link);
 	psw_restore_interrupt(&psw);
 

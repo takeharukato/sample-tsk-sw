@@ -6,8 +6,8 @@
 /*  Thread Information                                                */
 /*                                                                    */
 /**********************************************************************/
-#if !defined(_KERN_THREAD_INFO_H)
-#define  _KERN_THREAD_INFO_H 
+#if !defined(_HAL_THREAD_INFO_H)
+#define  _HAL_THREAD_INFO_H 
 
 /** Magic nunber which indicate the end of stack  */
 #define THR_THREAD_INFO_MAGIC                  (0xdeadbeef)  
@@ -119,4 +119,4 @@ ti_clr_preempt_active(thread_info_t *tinfo) {
 }
 
 #endif  /*  ASM_FILE  */
-#endif  /*  _KERN_THREAD_INFO_H   */
+#endif  /*  _HAL_THREAD_INFO_H   */

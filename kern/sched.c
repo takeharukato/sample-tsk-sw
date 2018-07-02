@@ -20,7 +20,7 @@ select_next_thread(void) {
 	psw_t psw;
 	thread_t *next;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	next = rdq_find_runnable_thread(&rd_queue);
 
 	/* 実行可能なスレッドがなければ, アイドルスレッドを選択  */	
@@ -39,7 +39,7 @@ void
 sched_set_ready(thread_t *thr) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	rdq_add_thread(&rd_queue, thr);  /* レディーキューに追加する  */
 	psw_restore_interrupt(&psw);
 }
@@ -50,7 +50,7 @@ void
 sched_rotate_queue(void) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	rdq_rotate_queue(&rd_queue);
 	psw_restore_interrupt(&psw);	
 }
@@ -65,7 +65,7 @@ sched_schedule(void) {
 	thread_info_t *ti;
 #endif  /* CONFIG_HAL */
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 #if defined(CONFIG_HAL)
 	ti = thr_refer_thread_info(current);

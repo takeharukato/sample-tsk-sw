@@ -13,8 +13,8 @@
 
 #include <kern/kern_types.h>
 #include <kern/list.h>
-#include <kern/thread_info.h>
 
+#include <hal/thread_info.h>
 #include <hal/hal_types.h>
 #include <hal/addrinfo.h>
 
@@ -89,7 +89,7 @@ ti_update_preempt_count(thread_info_t *ti, uint64_t shift, int64_t diff) {
 	psw_t psw;
 	preempt_state_t	cnt;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	cnt = ti->preempt;
 	cnt = ( cnt >> shift ) & THR_CNTR_MASK;
@@ -107,7 +107,7 @@ ti_refer_pre_count(thread_info_t *ti, int shift) {
 	psw_t    psw;
 	precnt_t cnt;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	cnt = (precnt_t)( ( ti->preempt >> shift ) & THR_CNTR_MASK );
 

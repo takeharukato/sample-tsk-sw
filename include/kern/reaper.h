@@ -18,7 +18,7 @@
 #define REAPER_THREAD_PRIO (7)  /*< 回収スレッドの優先度      */
 typedef struct _reaper_thread_info{
 	thread_queue_t reaper_queue;  /*< 回収対象のスレッド  */
-	wait_queue_t             wq;  /*< 回収要求待ちキュー  */
+	wait_queue               wq;  /*< 回収要求待ちキュー  */
 }reaper_thread_info_t;
 
 void reaper_add_exit_thread(thread_t *);

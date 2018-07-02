@@ -31,7 +31,9 @@
 #include <kern/irq.h>
 #include <kern/main.h>
 #include <kern/irq.h>
+#include <kern/mutex.h>
 #include <kern/heap.h>
+
 #include <hal/hal.h>
 
 #endif  /*  _KERN_KERNEL_H  */

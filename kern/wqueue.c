@@ -15,10 +15,10 @@
     @param[in] thr thread which to be wait state
  */
 void 
-wque_add_thread(wait_queue_t *wq, wait_queue_entry_t *ep, struct _thread  *thr){
+wque_add_thread(wait_queue *wq, wait_queue_entry *ep, struct _thread  *thr){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	list_del(&thr->link);
 	init_list_node(&ep->link);
@@ -34,10 +34,10 @@ wque_add_thread(wait_queue_t *wq, wait_queue_entry_t *ep, struct _thread  *thr){
     @param[in] ep  wait queue entry
  */
 void 
-wque_remove_entry(wait_queue_t *wq, wait_queue_entry_t *ep){
+wque_remove_entry(wait_queue *wq, wait_queue_entry *ep){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	list_del(&ep->link);
 	init_list_node(&ep->link);
@@ -50,25 +50,27 @@ wque_remove_entry(wait_queue_t *wq, wait_queue_entry_t *ep){
     @param[in] wq  wait queue
  */
 void 
-wque_init_wait_queue(wait_queue_t *wq) {
+wque_init_wait_queue(wait_queue *wq) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	init_list_head(&wq->head);
+	wq->reason = WQUE_REASON_WAKEUP;
 	psw_restore_interrupt(&psw);
 }
 
 /** Wait an event associated to a wait queue
     @param[in] wq  wait queue
  */
-void 
-wque_wait_on_queue(wait_queue_t *wq) {
+wq_reason
+wque_wait_on_queue(wait_queue *wq) {
 	psw_t psw;
-	wait_queue_entry_t ent, *ep = &ent;
+	wait_queue_entry ent, *ep = &ent;
+	wq_reason reason;
 
 	init_list_node(&ep->link);
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	if (THR_THREAD_ON_RDQ(current))
 		rdq_remove_thread(current->rdq, current);
 	wque_add_thread(wq, ep, current);
@@ -78,21 +80,24 @@ wque_wait_on_queue(wait_queue_t *wq) {
 	sched_schedule() ;
 
 	wque_remove_entry(wq, ep);
-
+	reason = wq->reason;
 	psw_restore_interrupt(&psw);
+
+	return reason;
 }
 
 /** Wake up all the threads in a wait queue
     @param[in] wq  wait queue
+    @param[in] reason wakeup reason
  */
 void 
-wque_wakeup(wait_queue_t *wq) {
-	psw_t                psw;
-	wait_queue_entry_t   *ep;
+wque_wakeup(wait_queue *wq, wq_reason reason) {
+	psw_t              psw;
+	wait_queue_entry   *ep;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	while(!list_is_empty(&wq->head)) {
-		ep = CONTAINER_OF(list_get_top(&wq->head), wait_queue_entry_t, link);
+		ep = CONTAINER_OF(list_get_top(&wq->head), wait_queue_entry, link);
 
 		list_del(&ep->link);
 		init_list_node(&ep->link);
@@ -100,7 +105,7 @@ wque_wakeup(wait_queue_t *wq) {
 		sched_set_ready(ep->thr); 
 		ep->thr = NULL;
 	}
-	
+	wq->reason = reason;
 	psw_restore_interrupt(&psw);
 }
 
@@ -110,11 +115,11 @@ wque_wakeup(wait_queue_t *wq) {
     @retval False The wait queue contains some threads.
  */
 int  
-is_wque_empty(wait_queue_t *wq) {
+is_wque_empty(wait_queue *wq) {
 	int    rc;
 	psw_t psw;
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	rc = list_is_empty(&wq->head);
 	psw_restore_interrupt(&psw);
 	

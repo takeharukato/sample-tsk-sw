@@ -18,7 +18,7 @@ rdq_add_thread(thread_ready_queue_t *rdq, thread_t *thr){
 	psw_t psw;
 	thread_attr_t *attr = &thr->attr;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_add(&rdq->head[attr->prio], &thr->link);
 	rdq->bitmap |= (1 << attr->prio);
 	thr->rdq = rdq;
@@ -35,7 +35,7 @@ rdq_remove_thread(thread_ready_queue_t *rdq, thread_t *thr){
 	psw_t psw;
 	thread_attr_t *attr = &thr->attr;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	thr_unlink_thread(thr);
 	if (list_is_empty(&rdq->head[attr->prio]))
 		rdq->bitmap &= ~(1 << attr->prio);
@@ -50,7 +50,7 @@ void
 rdq_rotate_queue(thread_ready_queue_t *rdq) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_rotate(&rdq->head[RDQ_USER_QUE_IDX]);
 	psw_restore_interrupt(&psw);
 }
@@ -66,7 +66,7 @@ rdq_find_runnable_thread(thread_ready_queue_t *rdq){
 	thread_t *thr;
 	int idx;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	idx = find_msr_bit(rdq->bitmap);
 	if (idx == 0) {

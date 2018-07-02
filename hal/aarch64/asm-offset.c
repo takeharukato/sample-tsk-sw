@@ -8,8 +8,8 @@
 #define __IN_ASM_OFFSET 1
 
 #include <kern/asm-offset-helper.h>
-#include <kern/thread_info.h>
 
+#include <hal/thread_info.h>
 #include <hal/exception.h>
 
 int

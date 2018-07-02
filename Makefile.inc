@@ -17,6 +17,7 @@ LN=ln
 ARFLAGS=rvc
 OPT_FLAGS=-O0 -g
 CFLAGS=${OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
+LDFLAGS=
 
 .PHONY: clean distclean hal tools menuconfig gtags
 

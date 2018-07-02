@@ -13,10 +13,11 @@
     @param[in] pswp 割り込み禁止前のプロセサステータスワード返却域
  */
 void
-psw_disable_interrupt(psw_t *pswp) {
+psw_disable_and_save_interrupt(psw_t *pswp) {
 	psw_t psw;
 
 	__save_psw(psw);
+	psw_disable_interrupt();
 	*pswp = psw;
 }
 

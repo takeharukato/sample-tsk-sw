@@ -36,7 +36,7 @@ void
 thrmgr_thread_manager_add(thread_manager_t *tm, thread_t *thr) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_add(&tm->head, &thr->mgr_link);
 	psw_restore_interrupt(&psw);
 }
@@ -48,7 +48,7 @@ void
 thrmgr_thread_manager_remove(thread_manager_t *tm, thread_t *thr) {
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	list_del(&thr->mgr_link);
 	psw_restore_interrupt(&psw);
 }
@@ -69,7 +69,7 @@ thrmgr_find_thread_by_tid(tid_t tid, thread_t **thrp) {
 
 	tm = thrmgr_refer_thread_manager();
 	
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	rc = ESRCH;
 	if (list_is_empty(&tm->head)) 

@@ -20,7 +20,7 @@ get_new_id(id_bitmap_t *idmap, obj_id_t *idp) {
 	int i,j;
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	for(i = 0; i < BITMAP_ARRAY_NR; ++i) {
 		for(j = 0; j < sizeof(bitmap_ent_t); ++j) {
 			if (!(idmap->bitmap[i] & ( 1UL << j ) )) {
@@ -44,7 +44,7 @@ put_id(id_bitmap_t *idmap, obj_id_t id) {
 	int idx, offset;
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	idx = id / BITMAP_ARRAY_NR;
 	offset = id % sizeof(bitmap_ent_t);
 	idmap->bitmap[idx] &= ~((bitmap_ent_t)( 1UL << offset ));
@@ -65,7 +65,7 @@ reserve_id(id_bitmap_t *idmap, obj_id_t id) {
 	int idx, offset;
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	idx = id / BITMAP_ARRAY_NR;
 	offset = id % sizeof(bitmap_ent_t);
 	if (idmap->bitmap[idx] & ((bitmap_ent_t)( 1UL << offset ))) {
@@ -87,7 +87,7 @@ void
 init_idmap(id_bitmap_t *idmap){
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	memset(idmap, 0, sizeof(id_bitmap_t));
 	psw_restore_interrupt(&psw);
 

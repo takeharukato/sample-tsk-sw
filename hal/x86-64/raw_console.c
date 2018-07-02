@@ -31,7 +31,7 @@ raw_locate(int x,int y) {
 	unsigned short vram_pos = (y * COLUMNS) + x;
 	psw_t psw;
 
-	psw_disable_interrupt(&psw);	
+	psw_disable_and_save_interrupt(&psw);	
 
 	xpos = x; /*  本当は, 引数チェックをしないとまずい  */
 	ypos = y;
@@ -54,7 +54,7 @@ raw_do_scroll(void) {
 
 	video = (unsigned char *) VRAM_ADDR;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	for(cx = 0; cx < COLUMNS; ++cx) {
 		for(cy = 0; cy < LINES-1; ++cy) {
 			/*  最期の1行を除いて表示  */
@@ -87,7 +87,7 @@ raw_cls (void) {
 
 	video = (unsigned char *) VRAM_ADDR;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	for (i = 0; i < COLUMNS * LINES * 2; i++)
 		*(video + i) = 0; 	/*  ブランクを書き込む  */
 
@@ -105,7 +105,7 @@ raw_putchar (int c) {
 
 	video = (unsigned char *) VRAM_ADDR;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	if (c == '\n' || c == '\r'){
 	newline:

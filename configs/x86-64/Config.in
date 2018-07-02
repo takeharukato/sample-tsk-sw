@@ -5,7 +5,7 @@ config CONFIG_HAL_CFLAGS
 
 config CONFIG_HAL_LDFLAGS
        string
-       default "-z max-page-size=0x1000 --build-id=none"
+       default "-Wl,-z,max-page-size=0x1000 -Wl,--build-id=none"
 
 config CONFIG_HAL_OPT_FLAGS
        prompt "Additional optimize flags for HAL"

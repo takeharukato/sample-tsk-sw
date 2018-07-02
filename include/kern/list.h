@@ -35,6 +35,9 @@ typedef struct _list_head{
 #define CONTAINER_OF(p, t, m)			\
 	((t *)(((void *)(p)) - ((void *)(&(((t *)(0))->m)))))
 
+#define __LIST_HEAD_INITIALIZER(lh)  \
+	{(struct _list *)&lh, (struct _list *)&lh}
+
 void list_rotate(struct _list_head *);
 int list_is_empty(struct _list_head *);
 list_t *list_ref_top(struct _list_head *);

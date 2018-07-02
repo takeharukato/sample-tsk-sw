@@ -20,7 +20,7 @@ irq_initialize_manager(void) {
 	irq_line             *linep;
 	psw_t                   psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	mgr->find_pending = NULL;
 	for(i = 0; NR_IRQS > i; ++i) {
@@ -50,7 +50,7 @@ irq_register_ctrlr(irq_no irq, irq_ctrlr *ctrlrp){
 	if ( ( irq < 0 ) || ( irq >= NR_IRQS ) )
 		return EINVAL;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	(&mgr->irqs[irq])->ctrlrp = ctrlrp;
 	
@@ -71,7 +71,7 @@ irq_unregister_ctrlr(irq_no irq){
 	if ( ( irq < 0 ) || ( irq >= NR_IRQS ) )
 		return EINVAL;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	(&mgr->irqs[irq])->ctrlrp = NULL;
 	
@@ -101,7 +101,7 @@ irq_register_handler(irq_no irq, irq_attr attr, irq_prio prio, void *private, in
 
 	handler_attr &= IRQ_ATTR_HANDLER_MASK;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	linep = &mgr->irqs[irq];
 
@@ -175,7 +175,7 @@ irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception
 	if ( ( irq < 0 ) || ( irq >= NR_IRQS ) )
 		return EINVAL;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 
 	linep = &mgr->irqs[irq];
 	
@@ -207,7 +207,7 @@ irq_register_pending_irq_finder(int (*find_pending)(struct _exception_frame *_ex
 	psw_t                    psw;
 	irq_manage  *mgr = (&irqMgr);
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	mgr->find_pending = find_pending;
 	psw_restore_interrupt(&psw);
 	
@@ -221,7 +221,7 @@ irq_unregister_pending_irq_finder(void){
 	psw_t                    psw;
 	irq_manage  *mgr = (&irqMgr);
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	mgr->find_pending = NULL;
 	psw_restore_interrupt(&psw);
 	
@@ -242,7 +242,7 @@ irq_handle_irq(struct _exception_frame *exc) {
 	irq_handler_ent        *entp;
 	psw_t                    psw;
 
-	psw_disable_interrupt(&psw);
+	psw_disable_and_save_interrupt(&psw);
 	
 	if ( mgr->find_pending == NULL ) {
 
@@ -279,10 +279,10 @@ irq_handle_irq(struct _exception_frame *exc) {
 		if ( entp->handler != NULL ) {
 
 			if ( !( linep->attr & IRQ_ATTR_NON_NESTABLE) ) 
-				__psw_enable_interrupt();
+				psw_enable_interrupt();
 
 			is_handled = entp->handler(irq, exc, entp->private);
-			__psw_disable_interrupt();
+			psw_disable_interrupt();
 
 			if ( is_handled == IRQ_HANDLED ) {
 
