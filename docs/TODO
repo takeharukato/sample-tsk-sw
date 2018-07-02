@@ -2,8 +2,7 @@
    既存delay処理のマクロ化
    
 2. EL1(OS)への移行処理の追加[済み]
-   https://qiita.com/kaizen_nagoya/items/9a0bd8a725de62682602
-   https://groups.google.com/a/chromium.org/forum/#!topic/chromium-os-reviews/6tnea0ZUi6w
+
 3. 既存delay処理の置き換え
 
 4. HALの初期化の整理
@@ -35,5 +34,3 @@
 
 8. 多重割込み用の優先度の設定[済み]
    
-割込みマージ
-git diff -r 04d9fb37ea6c328f3747bec67d56efe195739c25
