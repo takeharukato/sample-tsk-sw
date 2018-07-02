@@ -17,10 +17,10 @@
 #include <hal/hal_types.h>
 #include <hal/addrinfo.h>
 
-/** スレッド管理構造
+/** Thread manager 
  */
 typedef struct _thread_manager{
-	list_head_t    head;    /*< スレッド管理構造リストのヘッド  */
+	list_head_t    head;    /*< The list for threads  */
 }thread_manager_t;
 
 int thrmgr_get_threadid(tid_t *);

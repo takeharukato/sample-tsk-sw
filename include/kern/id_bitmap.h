@@ -14,23 +14,23 @@
 #include <kern/errno.h>
 #include <kern/kern_types.h>
 
-typedef uint64_t bitmap_ent_t;  /*< ビットマップ1エントリ  */
-#define BITMAP_ARRAY_NR (CONFIG_ID_BITMAP_UNIT/(sizeof(bitmap_ent_t)*BIT_PER_BYTE)) /*< ビットマップ配列の要素数  */
+typedef uint64_t bitmap_ent_t;  /*<  Bitmap entry  */
+#define BITMAP_ARRAY_NR (CONFIG_ID_BITMAP_UNIT/(sizeof(bitmap_ent_t)*BIT_PER_BYTE)) /*< The number of entries in a bitmap  */
 
-/** IDビットマップ
+/** ID Bitmap
  */
 typedef struct _bitmap{
-	bitmap_ent_t bitmap[BITMAP_ARRAY_NR];  /*< idビットマップ本体  */
+	bitmap_ent_t bitmap[BITMAP_ARRAY_NR];  /*< ID bitmap  */
 }id_bitmap_t;
 
-/** IDビットマップ初期化子
+/** A macro to initialize an ID bitmap 
  */
 #define ID_BITMAP_INITIALIZER {			\
 	.bitmap = {0,}				\
 	 }
 
-void init_idmap(id_bitmap_t *);
-int get_new_id(id_bitmap_t *, obj_id_t *);
-void put_id(id_bitmap_t *, obj_id_t );
-int reserve_id(id_bitmap_t *, obj_id_t );
+void init_idmap(id_bitmap_t *_bmap);
+int get_new_id(id_bitmap_t *_bmap, obj_id_t *_id);
+void put_id(id_bitmap_t *_bmap, obj_id_t _id);
+int reserve_id(id_bitmap_t *_bmap, obj_id_t _id);
 #endif  /*  _KERN_ID_BITMAP_H  */

@@ -15,21 +15,21 @@
 
 struct _thread;
 
-typedef uint32_t wq_reason;
+typedef uint32_t wq_reason;  /*< Type for the reason why threads were awaken.  */
 
-#define WQUE_REASON_WAKEUP  (0x0)
-#define WQUE_REASON_DESTROY (0x1)
+#define WQUE_REASON_WAKEUP  (0x0)  /*< wque_wakeup is called */
+#define WQUE_REASON_DESTROY (0x1)  /*< The object is destroyed */
 
-/** ウエイトキュー
+/** Wait queue
  */
 typedef struct _wait_queue{
-	list_head_t head;   /*< 待ちキューのヘッド  */
-	wq_reason   reason; /*< 起床要因  */
+	list_head_t head;   /*< Wait queue head  */
+	wq_reason   reason; /*< Wakeup reason    */
 }wait_queue;
 
 typedef struct _wait_queue_entry{
-	list_t          link;   /*< 待ちキューヘッドへのリンク   */
-	struct _thread  *thr;   /*< スレッド管理情報へのポインタ */
+	list_t          link;   /*< a link for wait queue head  */
+	struct _thread  *thr;   /*< a pointer to a slept thread */
 }wait_queue_entry;
 
 #define __WAIT_QUEUE_INITIALIZER(wq)  \

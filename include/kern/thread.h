@@ -18,25 +18,25 @@
 #include <hal/hal_types.h>
 #include <hal/addrinfo.h>
 
-/** スレッドの状態
+/** Thread  status
  */
-#define THR_TSTATE_RUN    (0)  /*< ランニング中 */
-#define THR_TSTATE_WAIT   (1)  /*< 資源待ち中   */
-#define THR_TSTATE_EXIT   (2)  /*< 終了中   */
-#define THR_TSTATE_DEAD   (3)  /*< 終了待ち中   */
+#define THR_TSTATE_RUN    (0)  /*< Running */
+#define THR_TSTATE_WAIT   (1)  /*< Waiting for some resources   */
+#define THR_TSTATE_EXIT   (2)  /*< Exiting   */
+#define THR_TSTATE_DEAD   (3)  /*< Wait for termination   */
 
-/** スレッド属性情報
+/** Thread attributes
  */
 typedef struct _thread_attr{
-	void         *stack_top;  /*< スタックの先頭アドレス                  */
-	void             *stack;  /*< プロセススイッチ時のスタックポインタ    */
-	size_t       stack_size;  /*< スタックサイズ                          */
-	int                prio;  /*< 優先度                                  */
+	void         *stack_top;  /*< Start address of the stack                   */
+	void             *stack;  /*< Stack pointer when the thread were switched  */
+	size_t       stack_size;  /*< Stack size                                   */
+	int                prio;  /*< Thread priority                              */
 }thread_attr_t;
 
-/** スレッド属性情報初期化子
-    @param[in] stk      スタックの先頭アドレス
-    @param[in] stk_size スタックのサイズ
+/** A macro to initialize a thread attribute
+    @param[in] stk      Start address of the stack
+    @param[in] stk_size Stack size
  */
 #define THR_ATTR_INITIALIZER(stk, stk_size) {			\
 	.stack = TRUNCATE_ALIGN(stk + stk_size - sizeof(thread_info_t), stk_size), \
@@ -45,27 +45,27 @@ typedef struct _thread_attr{
 
 struct _thread_ready_queue;
 
-/** スレッド管理情報
+/** Thread definiion
  */
 typedef struct _thread{
-	thr_state_t        status;  /*< スレッド状態                */
-	tid_t                 tid;  /*< スレッドID                  */
-	list_t               link;  /*< キューへのリンク            */
-	list_t           mgr_link;  /*< スレッド管理用リンク        */
-	struct _thread_ready_queue *rdq;  /*< レディーキュー              */
-	exit_code_t     exit_code;  /*< 終了コード                  */
-	thread_attr_t        attr;  /*< 属性情報                    */
-	uptime_cnt          slice;  /*< 残りのタイムスライス        */
+	thr_state_t        status;  /*< Status of the thread       */
+	tid_t                 tid;  /*< Thread ID                  */
+	list_t               link;  /*< link for thread queue      */
+	list_t           mgr_link;  /*< link for thread manager    */
+	struct _thread_ready_queue *rdq;  /*< Ready queue which the thread belongs to */
+	exit_code_t     exit_code;  /*< Exit code                  */
+	thread_attr_t        attr;  /*< Thread attribute           */
+	uptime_cnt          slice;  /*< Remaining time slices      */
 }thread_t;
 
-/** スレッドがレディキューにつながっているか確認する
+/** Confirm the thread is linked to the ready queue
  */
 #define THR_THREAD_ON_RDQ(thr) (thr->rdq != NULL)
 
-/** スレッドキュー
+/** Thread queue
  */
 typedef struct _thread_queue{
-	list_head_t head;    /*< スレッドキューのヘッド  */
+	list_head_t head;    /*< Thread queue head  */
 }thread_queue_t;
 
 void thr_thread_switch(thread_t *, thread_t *);

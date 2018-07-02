@@ -55,6 +55,7 @@
 #define dlindependent_comalloc kindependent_comalloc
 #define dlbulk_free            kbulk_free
 #endif /* USE_KMALLOC_PREFIX */
+
 #if USE_LOCKS > 1
 #define MLOCK_T           mutex
 #define INITIAL_LOCK(lk)  kmalloc_initialize_lock(lk)
@@ -62,6 +63,5 @@
 #define ACQUIRE_LOCK(lk)  kmalloc_acquire_lock(lk)
 #define RELEASE_LOCK(lk)  kmalloc_release_lock(lk)
 #define TRY_LOCK(lk)      kmalloc_try_lock(lk)
-
-#endif
+#endif  /*  USE_LOCKS > 1  */
 #endif  /*  _KERN_KMALLOC_PARAMS_H   */

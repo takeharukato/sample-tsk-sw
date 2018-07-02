@@ -3,7 +3,7 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  list data structure                                               */
+/*  List Data Structure                                               */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_KERN_LIST_H)
@@ -13,24 +13,24 @@
 
 #include <kern/kern_types.h>
 
-/** リストエントリ
+/** List entry
  */
 typedef struct _list{
-	struct _list *prev;       /*<  前の領域へのポインタ  */
-	struct _list *next;       /*<  次の領域へのポインタ  */
+	struct _list *prev;       /*<  Previous pointer  */
+	struct _list *next;       /*<  Next pointer      */
 }list_t;
 
-/** リストヘッド
+/** List head
  */
 typedef struct _list_head{
-	struct _list *prev;       /*<  前の領域へのポインタ  */
-	struct _list *next;       /*<  次の領域へのポインタ  */
+	struct _list *prev;       /*<  Previous pointer  */
+	struct _list *next;       /*<  Next pointer      */
 }list_head_t;
 
-/** リストから構造体へのポインタを得る
-    @param[in] p リストメンバのアドレス
-    @param[in] t 構造体の型
-    @param[in] m tの構造体中のリストメンバのメンバ名
+/** Obtain an address of the structure from list member
+    @param[in] p An address of the list member
+    @param[in] t A type of the structure
+    @param[in] m The member name of the list entry in the structure 't'
  */
 #define CONTAINER_OF(p, t, m)			\
 	((t *)(((void *)(p)) - ((void *)(&(((t *)(0))->m)))))

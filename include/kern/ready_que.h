@@ -13,20 +13,21 @@
 
 #include <kern/list.h>
 
-#define RDQ_SYS_PRIORITY  (7)  /*< システムスレッドの優先度  */
-#define RDQ_USER_PRIORITY (1)  /*< ユーザスレッドの優先度    */
+#define RDQ_SYS_PRIORITY  (7)  /*< Priority of system threads  */
+#define RDQ_USER_PRIORITY (1)  /*< Priority of user threads  */
 #define RDQ_PRIORITY_MAX (RDQ_USER_PRIORITY + RDQ_SYS_PRIORITY)
-#define RDQ_USER_QUE_IDX  (0)  /*< ユーザスレッドのインデクス    */
-/** レディーキュー
+#define RDQ_USER_QUE_IDX  (0)  /*< Index for user threads    */
+
+/** Ready queue
  */
 typedef struct _thread_ready_queue{
-	int                         bitmap;    /*< レディーキューのビットマップ  */
-	list_head_t head[RDQ_PRIORITY_MAX];    /*< スレッドキューのヘッド        */
+	int                         bitmap;    /*< Bitmap for ready queue */
+	list_head_t head[RDQ_PRIORITY_MAX];    /*< Thread queue head      */
 }thread_ready_queue_t;
 
-/** ビットマップのインデクスから優先度を算出する
-    @note ビットマップのインデクスは, 動作可能スレッドなしを0で表すために,
-    1からつけられているので, -1して優先度を算出する
+/** Calculate the priority from bitmap index
+    @note IDX minus one means thread's priority since index zero means that
+    no runnable thread exists.
  */
 #define rdq_index2prio(idx) ((idx) - 1)
 

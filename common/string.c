@@ -18,7 +18,7 @@
 void *
 memset(void *b, int c, size_t len) {
 	size_t i;
-	caddr_t m = b;
+	char * m = b;
 
 	for(i = 0; i < len; ++i) {
 		*m++ = (char )c;
@@ -36,8 +36,9 @@ memset(void *b, int c, size_t len) {
  */
 void *
 memcpy(void *dst, const void *src, size_t len){
-	caddr_t end  = (caddr_t)(src + len);
-	caddr_t dstp = (caddr_t)dst, srcp = (caddr_t)src;
+	char *end  = (char *)(src + len);
+	char *dstp = (char *)dst;
+	char *srcp = (char *)src;
 
 	do {
 		*dstp++ = *srcp++;
@@ -54,20 +55,21 @@ memcpy(void *dst, const void *src, size_t len){
  */
 void *
 memmove(void *dst, const void *src, size_t len){
-	caddr_t end;
-	caddr_t dstp = (caddr_t)dst, srcp = (caddr_t)src;
+	char *end;
+	char *dstp = (char *)dst;
+	char *srcp = (char *)src;
 
 	if (dst < src) {
-		end = (caddr_t)( src + len );
+		end = (char *)( src + len );
 
 		do {
 			*dstp++ = *srcp++;
 		}while (srcp != end);
 
 	} else {
-		srcp = (caddr_t)(src + len);
-		dstp = (caddr_t)(dst + len);
-		end = (caddr_t)src;
+		srcp = (char *)(src + len);
+		dstp = (char *)(dst + len);
+		end = (char *)src;
 
 		do{
 			*--dstp = *--srcp;

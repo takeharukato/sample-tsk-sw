@@ -3,7 +3,7 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  reaper thread                                                     */
+/*  Reaper Thread                                                     */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_KERN_REAPER_H)
@@ -14,11 +14,11 @@
 #include <kern/thread.h>
 #include <kern/wqueue.h>
 
-#define REAPER_THREAD_TID  (1)  /*< 回収スレッドのスレッドID  */
-#define REAPER_THREAD_PRIO (7)  /*< 回収スレッドの優先度      */
+#define REAPER_THREAD_TID  (1)  /*< Thread ID of the reaper thread  */
+#define REAPER_THREAD_PRIO (7)  /*< Priority of the reaper thread  */
 typedef struct _reaper_thread_info{
-	thread_queue_t reaper_queue;  /*< 回収対象のスレッド  */
-	wait_queue               wq;  /*< 回収要求待ちキュー  */
+	thread_queue_t reaper_queue;  /*< Threads to be ended  */
+	wait_queue               wq;  /*< Wait queue to recieve terminate requests  */
 }reaper_thread_info_t;
 
 void reaper_add_exit_thread(thread_t *);

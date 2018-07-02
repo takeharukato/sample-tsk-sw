@@ -11,6 +11,6 @@
 
 #include <kern/freestanding.h>
 
-#define PRFBUFLEN        (128)  /*< 内部バッファ長                    */
+#define PRFBUFLEN        (128)  /*< Buffer length                */
 int kprintf(const char *, ...);
 #endif  /*  _KERN_PRINTF_H   */

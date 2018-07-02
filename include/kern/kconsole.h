@@ -14,12 +14,12 @@
 #include <kern/list.h>
 
 typedef struct _kconsole{
-	list_t           link;      /*< コンソールリスト       */
-	int                 x;      /*< 出力カーソルX座標位置  */
-	int                 y;      /*< 出力カーソルY座標位置  */
-	void (*putchar)(int );      /*< 一文字出力             */
-	void (*cls)(void);          /*< 画面クリア             */
-	void (*locate)(int , int);  /*< カーソル移動           */
+	list_t           link;      /*< Console list           */
+	int                 x;      /*< Cursor's X position    */
+	int                 y;      /*< Cursor's Y position    */
+	void (*putchar)(int );      /*< Put one char           */
+	void (*cls)(void);          /*< Clear the screen       */
+	void (*locate)(int , int);  /*< Move cursor            */
 }kconsole_t;
 
 typedef struct _kconsole_list{
