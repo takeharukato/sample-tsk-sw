@@ -10,8 +10,3 @@
 #include <kern/param.h>
 
 .data
-.align 8
-.global bsp_stack
-bsp_stack:
-	.skip STACK_SIZE
-bsp_stack_end:

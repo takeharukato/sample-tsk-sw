@@ -23,8 +23,11 @@
 #if !defined(ASM_FILE)
 
 #include <kern/freestanding.h>
+#include <kern/param.h>
 
+#include <hal/addrinfo.h>
 #include <hal/psw.h>
+#include <hal/aarch64.h>
 
 #define THR_CNTR_MASK         (0xffULL) /*< Mask value for counters */
 
@@ -36,11 +39,15 @@
 #define THR_PRMPT_CTRL_MASK     \
 	(THR_PRMPT_CTRL_PREEMPT_ACTIVE|THR_PRMPT_CTRL_RESCHED_DELAYED) 
 typedef uint64_t  preempt_state_t;  /*< dispatch state  */
+
+struct _thread;
 /** Thread info in kernel stack
  */
 typedef struct _thread_info{
 	preempt_state_t	preempt;   /*< Dispatch state  */
-	uintptr_t         magic;     /*< Magic number */
+	struct _thread     *thr;   /*< Thread info     */
+	uint64_t            pad;   /*< padding         */
+	uint64_t          magic;   /*< Magic number    */
 }thread_info_t;
 
 /** 遅延ディスパッチ予約を立てる
@@ -88,5 +95,15 @@ ti_clr_preempt_active(thread_info_t *tinfo) {
 	tinfo->preempt &= ~THR_PRMPT_CTRL_PREEMPT_ACTIVE;
 }
 
+/** 現在のスレッドのスレッド情報を得る
+ */
+static inline thread_info_t *
+hal_get_current_thread_info(void) {
+	uint64_t sp;
+
+	sp = (uint64_t)hal_get_sp();
+	return (thread_info_t *)(TRUNCATE_ALIGN(sp, STACK_SIZE) + 
+	    STACK_SIZE - sizeof(thread_info_t));
+}
 #endif  /*  ASM_FILE  */
 #endif  /*  _HAL_THREAD_INFO_H   */

@@ -41,7 +41,9 @@ typedef uint64_t  preempt_state_t;  /*< dispatch state  */
  */
 typedef struct _thread_info{
 	preempt_state_t	preempt;   /*< Dispatch state  */
-	uintptr_t         magic;     /*< Magic number */
+	struct _thread     *thr;   /*< Thread info     */
+	uint64_t            pad;   /*< padding         */
+	uintptr_t         magic;   /*< Magic number    */
 }thread_info_t;
 
 /** 遅延ディスパッチ予約を立てる
@@ -87,6 +89,33 @@ static inline void
 ti_clr_preempt_active(thread_info_t *tinfo) {
 
 	tinfo->preempt &= ~THR_PRMPT_CTRL_PREEMPT_ACTIVE;
+}
+static inline void *
+hal_get_sp(void) {
+	uint64_t sp;
+
+	__asm__ __volatile__("mov %0, sp\n\t" : "=r"(sp));
+
+	return (void *)sp;
+}
+static inline void *
+hal_get_sp(void) {
+	uint64_t sp;
+
+	__asm__ __volatile__("mov %%rsp, %0" : "=r" (sp));  
+
+	return (void *)sp;
+}
+
+/** 現在のスレッドのスレッド情報を得る
+ */
+static inline thread_info_t *
+hal_get_current_thread_info(void) {
+	uint64_t sp;
+
+	sp = (uint64_t)hal_get_sp();
+	return (thread_info_t *)(TRUNCATE_ALIGN(sp, STACK_SIZE) + 
+	    STACK_SIZE - sizeof(thread_info_t));
 }
 
 #endif  /*  ASM_FILE  */

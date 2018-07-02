@@ -68,7 +68,7 @@ sched_schedule(void) {
 	psw_disable_and_save_interrupt(&psw);
 
 #if defined(CONFIG_HAL)
-	ti = thr_refer_thread_info(current);
+	ti = hal_get_current_thread_info();
 	ti_set_preempt_active(ti);  /* Set preempt-active flag. */
 
 	if ( ( ti_refer_preempt_count(ti) > 0 ) ||

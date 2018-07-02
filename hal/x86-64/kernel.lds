@@ -16,12 +16,15 @@ SECTIONS
 	.rodata : { *(.rodata .rodata.*) }
 
 	/* writable data  */
-	.data : { *(.data .gnu.linkonce.d.* .got*) }
-	  __bss_start = .;		/* BSS */
-	    .bss : {
-	    	*(.bss)
+	.data : { *(.data .gnu.linkonce.d.* .got*) 
+	. = ALIGN(4096 * 1);
+	bsp_stack = .;
+	. += (4096 * 1);
+	bsp_stack_end = .;
 	}
-	 _edata = .;			/* End of data section */
+	 __bss_start = .;		/* BSS */
+	.bss : { *(.bss) }
+	_edata = .;			/* End of data section */
 	/* payload */
 	. = ALIGN(4096);
 	_payload_start = .;

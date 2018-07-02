@@ -36,8 +36,7 @@ void
 hal_common_trap_handler(exception_frame *exc){
 	thread_info_t *ti;
 
-	ti = thr_refer_thread_info(current);
-
+	ti = hal_get_current_thread_info();
 	if ( ( exc->exc_type & 0xf ) == 0x1 ) {
 		
 		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, 1);

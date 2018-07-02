@@ -136,6 +136,15 @@ aarch64_get_generic_timer_freq(void) {
 	return val;
 }
 
+static inline void *
+hal_get_sp(void) {
+	uint64_t sp;
+
+	__asm__ __volatile__("mov %0, sp\n\t" : "=r"(sp));
+
+	return (void *)sp;
+}
+
 void aarch64_setup_vector(void);
 #endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_AARCH64_H   */

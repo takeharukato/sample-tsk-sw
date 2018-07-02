@@ -141,7 +141,7 @@ multiboot_entry:
 
 .code64
 long_64_mode:
-	mov		$stack_end, %rsp
+	mov		$bsp_stack_end, %rsp
 
 	movq	__boot_structure, %rsi
 	movq	__boot_magic, %rdi
@@ -164,11 +164,6 @@ stack32:
 	.skip 0x4000
 stack32_end:
 	
-.align 8
-stack:
-	.skip 0x4000
-stack_end:
-
 .align 8
 __boot_structure:
 	.skip 0x8

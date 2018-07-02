@@ -3,7 +3,12 @@ SECTIONS
 {
 	. = 0x40000000;
 	.text : { *(.text) }
-	.data : { *(.data) }
+	.data : { *(.data) 
+	. = ALIGN(4096 * 1);
+	bsp_stack = .;
+	. += (4096 * 1);
+	bsp_stack_end = .;
+	}
 	.bss : { *(.bss COMMON) }
 	. = ALIGN(16);
 	_edata = .;			/* End of data section */
