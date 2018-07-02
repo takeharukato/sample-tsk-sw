@@ -55,6 +55,7 @@ typedef struct _thread{
 	struct _thread_ready_queue *rdq;  /*< レディーキュー              */
 	exit_code_t     exit_code;  /*< 終了コード                  */
 	thread_attr_t        attr;  /*< 属性情報                    */
+	uptime_cnt          slice;  /*< 残りのタイムスライス        */
 }thread_t;
 
 /** スレッドがレディキューにつながっているか確認する

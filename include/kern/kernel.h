@@ -33,6 +33,7 @@
 #include <kern/irq.h>
 #include <kern/mutex.h>
 #include <kern/heap.h>
+#include <kern/timer.h>
 
 #include <hal/hal.h>
 

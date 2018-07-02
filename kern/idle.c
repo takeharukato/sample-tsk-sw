@@ -42,4 +42,5 @@ idle_init_idle(void){
 
 	thrmgr_reserve_threadid(0);
 	idle_thread.tid = 0;
+	idle_thread.slice = 0;
 }

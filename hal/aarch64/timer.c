@@ -113,6 +113,9 @@ aarch64_timer_handler(irq_no irq, struct _exception_frame *exc, void *private){
 	stop_timer();
 	reload_timer(cfg->interval_us);
 	start_timer();
+
+	timer_update_uptime();
+	timer_update_thread_time();
 }
 
 void

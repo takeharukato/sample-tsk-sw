@@ -160,6 +160,8 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 	init_list_node(&thr->link);
 	thr->exit_code = 0;
 
+	thr->slice = CONFIG_TIMER_TIME_SLICE;
+
 	thr->status = THR_TSTATE_RUN;
 
 	thrmgr_thread_manager_add(thrmgr_refer_thread_manager(), thr);

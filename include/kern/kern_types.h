@@ -23,4 +23,5 @@ typedef int32_t            irq_no;  /*< 割込み番号                   */
 typedef int32_t          irq_prio;  /*< 割込み優先度                 */
 typedef uint32_t         irq_attr;  /*< 割込み属性                   */
 typedef uint8_t          precnt_t;  /*< プリエンプション/IRQ/例外カウンタ   */
+typedef uint64_t       uptime_cnt;  /*< 起動後の経過時間(タイマ割込発生回数)   */
 #endif  /*  _KERN_KERN_TYPES_H  */

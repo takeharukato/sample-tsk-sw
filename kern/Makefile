@@ -2,7 +2,7 @@ top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
 objects=psw.o thread.o threadmgr.o ready_queue.o sched.o idle.o wqueue.o reaper.o \
-	mutex.o pconsole.o irq.o 
+	mutex.o pconsole.o irq.o timer.o
 
 
 lib=libkern.a

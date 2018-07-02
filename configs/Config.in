@@ -43,6 +43,12 @@ config CONFIG_TIMER_INTERVAL_MS
        int
        default 10
        help
-	  This sets the value of timer interval in ms
+	  This sets the value of timer interval(timer tick interval) in ms
+
+config CONFIG_TIMER_TIME_SLICE
+       int "Timer slice of threads (UNIT: ticks)"
+       default 10
+       help
+	  This sets the value of timer slice for each thread in tick counts.
 
 source "configs/hal/Config.in"
