@@ -27,10 +27,7 @@
 #include <hal/psw.h>
 
 #define THR_CNTR_MASK         (0xffULL) /*< Mask value for counters */
-#define THR_DISPATCH_ENABLE   ((0x00ULL) << THR_DISPATCH_SHIFT)  /*< Dispatch is enabled       */
-#define THR_DISPATCH_DISABLE  ((0x01ULL) << THR_DISPATCH_SHIFT)  /*< Dispatch is NOT enabled   */
-#define THR_DISPATCH_MASK     (THR_DISPATCH_DISABLE)          /*< mask for dispatch state */
-
+#define THR_PRMPT_CTRL_BITS   (0xffULL) /*< Reserved mask value for counters */
 /** Dispatch requests are delayed */
 #define THR_PRMPT_CTRL_PREEMPT_ACTIVE    ((0x80ULL) << THR_PRMPT_CTRL_SHIFT)  
 /** Dispatch requests are delayed */
@@ -38,6 +35,7 @@
 /** mask for dispatch state */
 #define THR_PRMPT_CTRL_MASK     \
 	(THR_PRMPT_CTRL_PREEMPT_ACTIVE|THR_PRMPT_CTRL_RESCHED_DELAYED) 
+
 typedef uint64_t  preempt_state_t;  /*< dispatch state  */
 /** Thread info in kernel stack
  */
@@ -45,33 +43,6 @@ typedef struct _thread_info{
 	preempt_state_t	preempt;   /*< Dispatch state  */
 	uintptr_t         magic;     /*< Magic number */
 }thread_info_t;
-
-/** ディスパッチ禁止中であることを確認する
-    @param[in] tinfo スレッド情報のアドレス
- */
-static inline int
-ti_is_dispatch_disabled(thread_info_t *tinfo) {
-
-	return ( ( tinfo->preempt & THR_DISPATCH_DISABLE ) != 0 );
-} 
-
-/** ディスパッチ禁止中に設定する
-    @param[in] tinfo スレッド情報のアドレス
- */
-static inline void
-ti_set_dispatch_disabled(thread_info_t *tinfo) {
-
-	 tinfo->preempt |= THR_DISPATCH_DISABLE;
-} 
-
-/** ディスパッチ禁止を解除する
-    @param[in] tinfo スレッド情報のアドレス
- */
-static inline void
-ti_clr_dispatch_disabled(thread_info_t *tinfo) {
-
-	 tinfo->preempt &= ~THR_DISPATCH_DISABLE;
-} 
 
 /** 遅延ディスパッチ予約を立てる
     @param[in] tinfo スレッド情報のアドレス

@@ -9,31 +9,13 @@
 
 #include <kern/kernel.h>
 
-/** Enable dispatch
-    @param[in] tinfo 
- */
-static void
-enable_dispatch(thread_info_t *tinfo) {
-
-	tinfo->preempt &= ~THR_DISPATCH_DISABLE;
-}
-
-/** ディスパッチ禁止状態に設定する
-    @param[in] tinfo スレッド情報のアドレス
- */
-static void
-disable_dispatch(thread_info_t *tinfo) {
-
-	tinfo->preempt |= THR_DISPATCH_DISABLE;
-}
-
 /** スレッド情報をクリアする
     @param[in] tinfo スレッド情報のアドレス
  */
 static void
 clr_thread_info(thread_info_t *tinfo) {
 
-	tinfo->preempt &= ~THR_DISPATCH_MASK;
+	tinfo->preempt = 0;
 }
 
 /** スレッドのスタックアドレスを設定する

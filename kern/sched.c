@@ -72,8 +72,7 @@ sched_schedule(void) {
 	ti_set_preempt_active(ti);  /* Set preempt-active flag. */
 
 	if ( ( ti_refer_preempt_count(ti) > 0 ) ||
-	    ( ti_refer_irq_count(ti) > 0 ) ||
-	    ( ti_is_dispatch_disabled(ti) ) ) {
+	    ( ti_refer_irq_count(ti) > 0 ) ) {
 
                 /*  Need to delay dispatch */
 		ti_set_delay_dispatch(ti);

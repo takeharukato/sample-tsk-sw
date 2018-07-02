@@ -59,8 +59,7 @@ hal_common_trap_handler(exception_frame *exc){
 	 * Delay dispatching
 	 */
 	if  ( ( ti_refer_preempt_count(ti) > 0 ) ||
-	    ( ti_refer_irq_count(ti) > 0 ) ||
-	    ( ti_is_dispatch_disabled(ti) ) )
+	    ( ti_refer_irq_count(ti) > 0 ) )
 		goto out; /* Dispatching is disabled */
 		
 	if ( ti_check_need_dispatch(ti) ) {
