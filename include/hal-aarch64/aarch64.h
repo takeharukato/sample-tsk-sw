@@ -12,8 +12,8 @@
 /*
  * Interrupt flags
  */
-#define AARCH64_DAIF_FIQ    (1)
-#define AARCH64_DAIF_IRQ    (2)
+#define AARCH64_DAIF_FIQ    (1)     /*< FIQ */
+#define AARCH64_DAIF_IRQ    (2)     /*< IRQ */
 /*
  * Exception Level
  */
@@ -97,8 +97,6 @@
 #define AARCH64_SPSR_SP_SEL_N     (0x1 << 0)
 #define AARCH64_SPSR_SP_SEL_0     (0x0 << 0)
 
-
-
 #if !defined(ASM_FILE)
 #include <stdint.h>
 
@@ -116,7 +114,8 @@ aarch64_current_el(void) {
  * See D10.6 Generic Timer registers in
  * ARM Architecture Reference Manual ARMv8, for ARMv8-A architecture profile
  */
-
+/** Read physical counter
+ */
 static inline uint64_t
 aarch64_get_physical_counter(void) {
 	uint64_t val;
@@ -126,6 +125,8 @@ aarch64_get_physical_counter(void) {
 	return val;
 }
 
+/** Get the frequency of generic timers(UNIT:Hz)
+ */
 static inline uint64_t
 aarch64_get_generic_timer_freq(void) {
 	uint64_t val;

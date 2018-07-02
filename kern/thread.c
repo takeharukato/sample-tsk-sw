@@ -51,7 +51,7 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 	tinfo = thr_refer_thread_info(thr);
 	clr_thread_info(tinfo);
 	tinfo->magic = THR_THREAD_INFO_MAGIC;
-	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, MALIGN_SIZE);  /* スタック位置設定  */
+	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, STACK_ALIGN);  /* スタック位置設定  */
 }
 
 /** スレッドを開始する

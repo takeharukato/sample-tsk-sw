@@ -9,7 +9,7 @@
 #if !defined(_HAL_ADDR_INFO_H)
 #define  _HAL_ADDR_INFO_H 
 
-#define MALIGN_SIZE       (sizeof(void *))       /*<  メモリ割り当て単位  */
+#define STACK_ALIGN       (16)       /*<  スタックアラインメント  */
 
 /** 指定されたアラインメントにそっていないことを確認するためのマスク値を算出する
     @param[in] size アラインメントサイズ
@@ -17,15 +17,6 @@
  */
 #define CALC_ALIGN_MASK(size)					\
 	((size_t)((size) - 1))
-
-/** 指定されたアラインメントにそっていないことを確認する
-    @param[in] addr メモリアドレス
-    @param[in] size アラインメントサイズ
-    @retval 真 指定されたアドレスが所定のアラインメントにそっていない
-    @retval 偽 指定されたアドレスが所定のアラインメントにそっている
- */
-#define ADDR_NOT_ALIGNED(addr, size)				\
-	( ( (size_t)(addr) ) & CALC_ALIGN_MASK((size)) )
 
 /** 指定されたアラインメントで切り詰める
     @param[in] addr メモリアドレス

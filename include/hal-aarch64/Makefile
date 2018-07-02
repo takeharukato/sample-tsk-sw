@@ -1,7 +1,7 @@
 top=../..
 include ${top}/Makefile.inc
-headers= hal.h ctxsw.h boot64.h multiboot.h port.h low_printk.h
-
+headers= aarch64.h addrinfo.h board.h boot64.h ctxsw.h exception.h gic-pl390.h hal.h \
+	hal_types.h irq.h psw.h thread_info.h timer.h
 all:
 clean:
 

@@ -11,5 +11,4 @@
 
 #include <kern/freestanding.h>
 
-typedef uint64_t addr_t;  /*  アドレスを整数型で表す値  */
 #endif  /*  _KERN_TYPES_H   */

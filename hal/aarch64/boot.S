@@ -72,8 +72,8 @@ start_el1:
 	sub	x30, x30, #TI_SIZE //Allocate ti size
 	mov 	sp, x30
 	str	xzr, [sp, #TI_PREEMPT_OFFSET]  /* Clear preempt info  */ 
-	movz	x0, #0xbeef           /*  Stack magic */
-	movk	x0, #0xdead,lsl#16    
+	movz	x0, #(THR_THREAD_INFO_MAGIC & 0xffff)    /*  Stack magic */
+	movk	x0, #(THR_THREAD_INFO_MAGIC >> 16), lsl #16    
 	str	x0, [sp, #TI_MAGIC_OFFSET]  
 	bl 	boot_main
 	b .
