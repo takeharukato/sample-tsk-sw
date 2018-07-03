@@ -141,7 +141,15 @@ multiboot_entry:
 
 .code64
 long_64_mode:
-	mov		$bsp_stack_end, %rsp
+clear_bss:
+	xorq	%rax, %rax
+	movq	$__bss_start , %rdi
+	movq	$__bss_end , %rcx
+	subq	%rdi, %rcx	/* %rcx = __bss_end(%rcx) - __bss_start(%rdi) */
+	shrq	$3, %rcx	/* %rcx = %rcx / 8  */
+	rep	stosq
+setup_bsp_stack:
+	mov	$bsp_stack_end, %rsp
 
 	movq	__boot_structure, %rsi
 	movq	__boot_magic, %rdi
@@ -155,8 +163,8 @@ gdt64:
 	.long gdt64
 	.word 0
 	// entry 64bit code segment
-    .long 0x00000000  // base & limit are ignored
-    .long 0x00af9a00  // type: 64 bit, code, <present>, priviledge 0
+	.long 0x00000000  // base & limit are ignored
+	.long 0x00af9a00  // type: 64 bit, code, <present>, priviledge 0
 	
 .data
 .align 4

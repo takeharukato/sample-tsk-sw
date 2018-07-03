@@ -3,14 +3,17 @@ SECTIONS
 {
 	. = 0x40000000;
 	.text : { *(.text) }
-	.data : { *(.data) 
-	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
+	.data : { *(.data) }
+	. = ALIGN(__PAGE_SIZE__);
+        __bss_start = .;
+	.bss : {
+ 	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
 	bsp_stack = .;
 	. += (__PAGE_SIZE__ * __KSTACK_PAGES__);
 	bsp_stack_end = .;
-	}
-	.bss : { *(.bss COMMON) }
-	. = ALIGN(16);
+	*(.bss COMMON) }
+	. = ALIGN(__PAGE_SIZE__);
+        __bss_end = .;
 	_edata = .;			/* End of data section */
 	. = ALIGN(__PAGE_SIZE__);
 	_payload_start = .;
@@ -23,3 +26,4 @@ SECTIONS
 	. += (__KHEAP_SIZE__);
 	_kheap_end = .;
 }
+

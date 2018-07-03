@@ -61,6 +61,26 @@ list_get_top(struct _list_head *head) {
 	return top;
 }
 
+/** 最終ノード参照
+ */
+list_t *
+list_ref_tail(struct _list_head *head) {
+	
+	return head->prev;
+}
+
+/** 最終ノード獲得
+ */
+list_t *
+list_get_tail(struct _list_head *head) {
+	list_t *tail;
+
+	tail = list_ref_tail(head);
+	list_del(tail);
+
+	return tail;
+}
+
 int
 list_is_empty(struct _list_head *head) {
 	

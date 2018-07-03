@@ -58,12 +58,23 @@ start_el1:
 	 */
 	mrs     x1, mpidr_el1  /* Read cpuid */
 	and     x1, x1, #3     /*  Check whether CPUID is zero or not  */
-	cbz     x1, 2f         /*  If CPUID is zero, continue to initialize */
-1:
+	cbz     x1, clear_bss         /*  If CPUID is zero, continue to initialize */
+ap_wait_loop:
 	wfe                    /*  Enter WFE(Wait For Event) loop if CPUID is NOT zero. */
-	b       1b
+	b       ap_wait_loop
 
-2:
+clear_bss:
+	/* clear bss */
+	ldr     x1, =__bss_start
+	ldr     x2, =__bss_end
+	sub	x2, x2, x1	/* x2 = __bss_end - __bss_start */
+	lsr	x2, x2, #3      /* x2 = x2 >> 3 ( x2 =x2 / 8 )  */
+clear_bss_loop:
+	cbz     w2, setup_bsp_stack
+	str     xzr, [x1], #8
+	sub     w2, w2, #1
+	cbnz    w2, clear_bss_loop
+setup_bsp_stack:
 	/*
 	 * setup stack for a boot processor
 	 */

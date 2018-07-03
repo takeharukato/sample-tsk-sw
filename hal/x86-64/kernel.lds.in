@@ -16,14 +16,17 @@ SECTIONS
 	.rodata : { *(.rodata .rodata.*) }
 
 	/* writable data  */
-	.data : { *(.data .gnu.linkonce.d.* .got*) 
+	.data : { *(.data .gnu.linkonce.d.* .got*) }
+	. = ALIGN(__PAGE_SIZE__);
+	 __bss_start = .;		/* BSS */
+	.bss : { 
 	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
 	bsp_stack = .;
 	. += (__PAGE_SIZE__ * __KSTACK_PAGES__);
 	bsp_stack_end = .;
-	}
-	 __bss_start = .;		/* BSS */
-	.bss : { *(.bss) }
+	*(.bss) }
+	. = ALIGN(__PAGE_SIZE__);
+        __bss_end = .;
 	_edata = .;			/* End of data section */
 	/* payload */
 	. = ALIGN(__PAGE_SIZE__);

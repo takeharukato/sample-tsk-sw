@@ -24,6 +24,7 @@
 
 #include <kern/freestanding.h>
 
+#include <hal/addrinfo.h>
 #include <hal/psw.h>
 
 #define THR_CNTR_MASK         (0xffULL) /*< Mask value for counters */
@@ -90,14 +91,7 @@ ti_clr_preempt_active(thread_info_t *tinfo) {
 
 	tinfo->preempt &= ~THR_PRMPT_CTRL_PREEMPT_ACTIVE;
 }
-static inline void *
-hal_get_sp(void) {
-	uint64_t sp;
 
-	__asm__ __volatile__("mov %0, sp\n\t" : "=r"(sp));
-
-	return (void *)sp;
-}
 static inline void *
 hal_get_sp(void) {
 	uint64_t sp;

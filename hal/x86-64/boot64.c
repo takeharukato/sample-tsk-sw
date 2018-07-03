@@ -7,27 +7,14 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include <float.h>
-#include <iso646.h>
-#include <limits.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <kern/freestanding.h>
+#include <kern/printf.h>
 
 #include <hal/hal.h>
 
 #define CHECK_FLAG(flags,bit)   \
 	((flags) & (1 << (bit))) /* Check if the bit BIT in FLAGS is set. */
 
-/** パニック関数
- */
-static void
-boot_panic(const char *string) {
-
-	kprintf ("boot panic : %s \n", string);
-	while(1);
-}
 /** ブートヘッダを表示
  */
 static void
@@ -90,6 +77,11 @@ show_boot_headers(multiboot_info_t *mbi) {
 
 	return ;
 }
+
+void
+hal_kernel_init(void){
+}
+
 /** 64bit モードでのブートアップ
  */
 void 
@@ -98,7 +90,7 @@ boot_main(unsigned long magic, unsigned long addr) {
 	/* Am I booted by a Multiboot-compliant boot loader? */
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
 		    kprintf ("Invalid magic number: 0x%x\n", (unsigned) magic);
-		    boot_panic("Can not boot kernel\n");
+		    panic("Can not boot kernel\n");
 	}
 
 	init_raw_console();

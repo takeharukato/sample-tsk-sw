@@ -1,6 +1,14 @@
 top=../..
 include ${top}/Makefile.inc
+
+QEMU ?= qemu-system-x86_64
+QEMU_KERNEL ?= ${top}/kernel.elf
+QEMU_OPT ?= -m 4096M -vga std -serial stdio
+QEMU_DBG_OPT := -S -gdb tcp::1234
+GRUB2_RESCUE=grub2-mkrescue
+
 CFLAGS += -I${top}/include
+ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
 objects = thr_context.o ctxsw_glue.o kconsole.o
 ifeq ($(CONFIG_HAL),y)
 objects += boot.o boot64.o raw_console.o machdep.o segment.o
@@ -28,6 +36,22 @@ kernel.lds: kernel.lds.in ${top}/.config
 	       -e 's|__PAGE_SIZE__|${CONFIG_HAL_PAGE_SIZE}|g' 		\
 	       -e 's|__KSTACK_PAGES__|${CONFIG_KSTACK_PAGE_NR}|g'	\
 	$< > $@
+
+${top}/kernel.iso: ${QEMU_KERNEL}
+	mkdir -p ${top}/rfs/boot/grub
+	mkdir -p ${top}/rfs/boot/modules
+	cp ${top}/hal/x86-64/grub.cfg ${top}/rfs/boot/grub
+	cp ${top}/kernel.elf ${top}/rfs/boot
+	${GRUB2_RESCUE} -o ${top}/kernel.iso ${top}/rfs
+	if [ -d ${top}/rfs ]; then     					\
+	  	rm -fr ${top}/rfs;					\
+	fi;
+
+run: ${top}/kernel.iso
+	${QEMU} ${QEMU_OPT} -cdrom $<
+
+run-debug: ${top}/kernel.iso
+	${QEMU} ${QEMU_OPT} ${QEMU_DBG_OPT} -cdrom $<
 
 clean:
 	${RM} *.o ${lib}
