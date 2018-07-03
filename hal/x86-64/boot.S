@@ -1,3 +1,4 @@
+/* -*- mode: asm; coding:utf-8 -*- */
 /* boot.S - bootstrap the kernel */
 /* Copyright (C) 1999  Free Software Foundation, Inc.
 
@@ -15,166 +16,167 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define ASM	1
-#include "hal/multiboot.h"
+#define ASM_FILE
+#include <kern/param.h>
 
-#define LOAD_ADDRESS 0x100000 // 1MB
-#define PGTABLE_BASE 0x8000
-	
+#include <hal/asm-offset.h>
+#include <hal/multiboot2.h>
+#include <hal/thread_info.h>
+#include <hal/boot64.h>
+#include <hal/x86-64.h>
+#include <hal/segments.h>
+#include <hal/pgtbl.h>
+
+#define  MBH_MAGIC                              MULTIBOOT2_HEADER_MAGIC
+#define  MBH_ARCH                               MULTIBOOT_ARCHITECTURE_I386
+#define  MBH_LENGTH                             (mbhdr_end - mbhdr)
+#define  MBH_CHECKSUM                           -(MBH_MAGIC + MBH_ARCH + MBH_LENGTH)
+
+.section .boot_text, "ax"
 .code32
-.text
 
-	.globl	start, _start, _edata
+.global mbhdr
+.align MULTIBOOT_INFO_ALIGN
+mbhdr:
+		# Basic
+		.long           MBH_MAGIC
+		.long           MBH_ARCH
+		.long           MBH_LENGTH
+		.long           MBH_CHECKSUM
 
-	/* Align 32 bits boundary.  */
-	.align	4
+		# End tag
+		.word           0,0
+		.long           0x8
+mbhdr_end:
+
+.global start
+.extern bsp_stack
+.extern pre_gdt_p
+.extern _phys_bss_start
+.extern _phys_bss_end
+
 start:
-_start:
-	jmp		multiboot_entry
-	/* Multiboot header.  */
-.align	4
-multiboot_header:
-	/* magic */
-	.long	MULTIBOOT_HEADER_MAGIC
-	/* flags */
-	.long	MULTIBOOT_HEADER_FLAGS
-	/* checksum */
-	.long	-(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
-	/* header_addr */
-	.long	multiboot_header
-	/* load_addr */
-	.long	_start
-	/* load_end_addr */
-	.long	_edata
-	/* bss_end_addr */
-	.long	_end
-	/* entry_addr */
-	.long	multiboot_entry
+		cld
+		cli
+		# Store GRUB data
+		movl    %eax, %edx
+		movl    %ebx, %esi
 
-	/* This entry is not used actually.  */
-multiboot_entry:
-	/* Initialize the stack pointer.  */
-	movl	$stack32_end, %esp
-	/* Reset EFLAGS.  */
-	pushl	$0
-	popf
-
-	/* Push the pointer to the Multiboot information structure.  */
-	pushl	%ebx
-	/* Push the magic value.  */
-	pushl	%eax
-	movl	%ebx, __boot_structure
-	movl	%eax, __boot_magic	
-
-	// zero out 3 pages of ram where we're going to build some page tables
-	xor     %eax, %eax
-	mov     $PGTABLE_BASE, %edi
-	mov     $0x3000, %ecx
-	rep     stosb
-
-	// top level page table
-	mov     $((PGTABLE_BASE + 0x1000) | 0x3), %eax
-	mov     %eax, PGTABLE_BASE
-	mov     $((PGTABLE_BASE + 0x2000) | 0x3), %eax
-	mov     %eax, (PGTABLE_BASE + 0x1000)
-
-	// 2MB pages to identity map the first 32MB ram
-	mov     $(0 | (1<<7) | 3), %eax
-	mov     %eax, (PGTABLE_BASE + 0x2000)
-	add     $0x200000, %eax
-	mov     %eax, (PGTABLE_BASE + 0x2008)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2010)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2018)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2020)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2028)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2030)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2038)
-	/* 16MB - 32MB */
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2040)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2048)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2050)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2058)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2060)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2078)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2080)
-	add     $0x200000, %eax        
-	mov     %eax, (PGTABLE_BASE + 0x2088)
+		xorl    %eax, %eax
+clear_bsp_stack:
+	        movl    $_bsp_stack_start, %edi
+	        movl    $_bsp_stack_end , %ecx
+	        subl    %edi, %ecx      /* %rcx = __bsp_stack_end(%rcx) -
+						__bsp_stack_start(%rdi) */
+	        shrl    $2, %ecx        /* %rcx = %rcx / 4  */
+	        rep     stosl
 	
-	// set the page table base
-	mov     $PGTABLE_BASE, %eax
-	mov     %eax, %cr3
+clear_bss:
+	        movl    $_phys_bss_start, %edi
+	        movl    $_phys_bss_end , %ecx
+	        subl    %edi, %ecx      /* %rcx = __bss_end(%rcx) - __bss_start(%rdi) */
+	        shrl    $2, %ecx        /* %rcx = %rcx / 4  */
+	        rep     stosl
 
-	// load the 64bit gdt
-	lgdt	gdt64
+	        # Store Grub data to %edi
+		movl    %edx, %edi
+setup_bsp_stack:	
+		# Setup Stack
+		movl    $(bsp_stack + STACK_SIZE - TI_SIZE), %esp
+		# Set thread info magic, cpu number
+		movl    $THR_THREAD_INFO_MAGIC, TI_MAGIC_OFFSET(%esp)
+		movl    $0x0, TI_PREEMPT_OFFSET(%esp)
+	
+        	# Setup pre-GDT
+		lgdt    pre_gdt_p
+		ljmp    $GDT_KERN_CODE32, $1f
+1:
+        	# Setup data segment selectors
+		mov     $GDT_KERN_DATA32, %eax
+		mov     %ax, %ds
+		mov     %ax, %es
+		mov     %ax, %ss
+		xorl    %eax, %eax
+		mov     %ax, %fs
+		mov     %ax, %gs
 
-	// set CR4.PAE
-	mov     %cr4, %eax          
-	bts     $5, %eax
-	mov     %eax, %cr4        
+		# Init FPU
+		fninit
 
-	// enable long mode      
-	// EFER.LME=1            
-	mov     $0xc0000080, %ecx
-	rdmsr   
-	bts     $8, %eax             
-	wrmsr  
+.extern pre_pml4
+.extern pre_pdpt_low
+.extern pre_pdpt_high
+.extern pre_pd
 
-	// enable paging, which will really enable long mode (CR0.PG)
-	mov     %cr0, %eax
-	bts     $31, %eax
-	mov     %eax, %cr0
+	        movl    $(pre_pdpt_low), %eax
+	        orl     $PAGE_PRESENT, %eax
+	        movl    %eax, pre_pml4
 
-	ljmp	$0x08,$(long_64_mode)
+	        movl    $(pre_pdpt_high), %eax
+	        orl     $PAGE_PRESENT, %eax
+	        movl    %eax, pre_pml4 + (PGTBL_ENTRY_SIZE * PML4_INDEX(KERN_VMA_BASE))
+
+	        movl    $(pre_pd), %eax
+		orl     $PAGE_PRESENT, %eax
+	        movl    %eax, pre_pdpt_low  + (PGTBL_ENTRY_SIZE * PDPT_INDEX(KERN_PHY_BASE))
+	        movl    %eax, pre_pdpt_high + (PGTBL_ENTRY_SIZE * PDPT_INDEX(KERN_VMA_BASE))
+
+	        xorl    %eax, %eax    # physical_address 0x0 ...
+	        orl     $PAGE_2MB, %eax
+	        orl     $PAGE_WRITABLE, %eax
+	        orl     $PAGE_PRESENT, %eax
+	        movl    %eax, pre_pd + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_PHY_BASE))
+	        movl    %eax, pre_pd + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_VMA_BASE))
+
+		# Setup long mode page table
+	        movl $(pre_pml4), %eax
+	        movl %eax, %cr3
+
+		#enable PAE and PSE and OSFXSR and OSXMMEXCPT 
+	        movl    %cr4, %eax              # read Control register 4
+	        orl     $CR4_PAE, %eax          # enable PAE
+	        orl     $CR4_PSE, %eax          # enable PSE
+		orl	$CR4_OS_FXSR, %eax      # enable OSFXSR
+		orl	$CR4_OS_XMMEXCEPT, %eax # enable OSXMMEXCPT 
+	        movl    %eax, %cr4              # re-write
+
+        	#enter long mode
+	        movl    $EFER, %ecx
+	        rdmsr   # read EFER
+	        bts     $8, %eax # enable long mode 
+	        wrmsr   # rewrite
+
+	        #enable paging, disable FPU Emulation and enable monitor FPU
+		movl    $CR0_FPU_EMULATION, %ecx 
+		notl	%ecx
+		movl    %cr0, %eax
+		andl	%ecx, %eax
+	        orl     $CR0_PAGING, %eax
+	        orl     $CR0_MONITOR_FPU, %eax
+	        movl    %eax, %cr0
+
+	        ljmp    $GDT_KERN_CODE64, $.entry_long
 
 .code64
-long_64_mode:
-clear_bss:
-	xorq	%rax, %rax
-	movq	$__bss_start , %rdi
-	movq	$__bss_end , %rcx
-	subq	%rdi, %rcx	/* %rcx = __bss_end(%rcx) - __bss_start(%rdi) */
-	shrq	$3, %rcx	/* %rcx = %rcx / 8  */
-	rep	stosq
-setup_bsp_stack:
-	mov	$bsp_stack_end, %rsp
+.extern boot_entry_addr
+.entry_long:
+	        # Setup Stack (Higher)
+	        movq    $(KERN_VMA_BASE), %rax
+	        addq    %rax, %rsp
 
-	movq	__boot_structure, %rsi
-	movq	__boot_magic, %rdi
-	callq   boot_main
-loop:	hlt
-	jmp	loop
+	        # Setup data segment selectors
+	        mov     $GDT_KERN_DATA64, %eax
+	        mov     %ax, %ds
+	        mov     %ax, %es
+	        mov     %ax, %ss
 
-gdt64:
-	// first entry, also the gdt descriptor
-	.word 0xffff
-	.long gdt64
-	.word 0
-	// entry 64bit code segment
-	.long 0x00000000  // base & limit are ignored
-	.long 0x00af9a00  // type: 64 bit, code, <present>, priviledge 0
-	
-.data
-.align 4
-stack32:
-	.skip 0x4000
-stack32_end:
-	
-.align 8
-__boot_structure:
-	.skip 0x8
-__boot_magic:
-	.skip 0x8
-__multiboot_end:
+	        # Just in Case
+	        pushq   %rsi
+	        pushq   %rdi
+	        movq    $(KERN_VMA_BASE), %rax
+	        addq    %rax, %rsi
+		movq	(boot_entry_addr), %rax
+		call    *%rax
+loop:
+	        hlt
+	        jmp loop

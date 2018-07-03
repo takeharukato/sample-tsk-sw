@@ -4,57 +4,66 @@
  */
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
+KERN_VMA_BASE = 0xFFFF800000000000;
+KERN_BASE = 0x100000;
 
-ENTRY(_start)
+ENTRY(start)
 SECTIONS
 {
-	. = 0x100000;
-
-	/* text/read-only data */
-	.text :	{ *(.text .gnu.linkonce.t.*) }
-
-	.rodata : { *(.rodata .rodata.*) }
-
-	/* writable data  */
-	.data : { *(.data .gnu.linkonce.d.* .got*) }
-	. = ALIGN(4096);
-	 __bss_start = .;		/* BSS */
-	.bss : { 
+    . = KERN_BASE;
+    _kernel_start = .;
+    .boot : {
+        *(.boot_text)
+        *(.boot_data)
 	. = ALIGN(4096 * 1);
+	_bsp_stack_start = .;
 	bsp_stack = .;
 	. += (4096 * 1);
-	bsp_stack_end = .;
-	*(.bss) }
-	. = ALIGN(4096);
-        __bss_end = .;
-	_edata = .;			/* End of data section */
-	/* payload */
-	. = ALIGN(4096);
-	_payload_start = .;
-	.payload : { *(.payload) }
-	_payload_end = .;
-	. = ALIGN(4096);
-	_end = . ;
-  	_kend = .;
-	_kheap_start = .;
-	. += (2*1024*1024);
-	_kheap_end = .;
+	_bsp_stack_end = .;
+    }
 
-  /* Sections to be discarded */
-  /DISCARD/ : {
-	*(.text.exit)
-	*(.data.exit)
-	*(.exitcall.exit)
-	}
+    . += KERN_VMA_BASE;
+    .text : AT(ADDR(.text) - KERN_VMA_BASE) {
+        *(.text .rela.text .stub .text.* .gnu.linkonce.t.*)
+        _rodata_start = .;
+        *(.rodata .rodata.* .gnu.linkonce.r.*)
+        _rodata_end = .;
+    }
 
-  /* Stabs debugging sections.  */
-  .stab 0 : { *(.stab) }
-  .stabstr 0 : { *(.stabstr) }
-  .stab.excl 0 : { *(.stab.excl) }
-  .stab.exclstr 0 : { *(.stab.exclstr) }
-  .stab.index 0 : { *(.stab.index) }
-  .stab.indexstr 0 : { *(.stab.indexstr) }
-  .comment 0 : { *(.comment) }
+    .data : AT(ADDR(.data) - KERN_VMA_BASE) {
+        _data_start = .;
+        *(.data)
+        _data_end = .;
+    }
 
+    . = ALIGN(0x1000);
+    .bss :  AT(ADDR(.bss) - KERN_VMA_BASE) {
+        _phys_bss_start = ( . - KERN_VMA_BASE );
+        *(.bss)
+	*(COMMON)
+        _phys_bss_end = ( . - KERN_VMA_BASE );
+    }
+    . = ALIGN(0x1000);
+    _edata = .;			/* End of data section */
+    . = ALIGN(4096);
+    _payload_start = .;
+    .payload : { *(.payload) }
+    _payload_end = .;
+    . = ALIGN(4096);
+    _end = .  - KERN_VMA_BASE;
+    _kernel_end = . - KERN_VMA_BASE;
+    _kheap_start = .;
+    . += (2*1024*1024);
+    _kheap_end = .;
+
+    /DISCARD/ :
+    {
+	         *(.gcc_except_table)
+                 *(.eh_frame)
+                 *(.note)
+                 *(.comment)
+                 *(.rel.*)
+                 *(.rela.*)
+    }
 }
 

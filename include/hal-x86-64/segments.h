@@ -6,121 +6,140 @@
 /*  Segment descriptor in Intel chips                                 */
 /*                                                                    */
 /**********************************************************************/
-#if !defined(_HAL_SEGMENTS_H)
-#define  _HAL_SEGMENTS_H 
-#if !defined(ASM)
+#if !defined(__HAL_SEGMENTS_H)
+#define __HAL_SEGMENTS_H
 
-#include <kern/freestanding.h>
+#define GDT_NULL1_SEL              0
+#define GDT_NULL2_SEL              1
+#define GDT_KERN_CODE32_SEL	   2
+#define GDT_KERN_DATA32_SEL	   3
+#define GDT_KERN_CODE64_SEL	   4
+#define GDT_KERN_DATA64_SEL	   5
+#define GDT_USER_CODE64_SEL	   6
+#define GDT_USER_DATA64_SEL	   7
+#define GDT_TSS64_SEL	           8
 
-/*
- *  セグメント ディスクリプタ
- *  インテルR エクステンデッド・メモリ64 テクノロジ・ソフトウェア・デベロッパーズ・ガイド
- *  1-9ページ参照
- *  基本的にIA32のセグメント ディスクリプタを64ビット拡張し, 予約ビットがlong modeビットに変更されている.
- */
-typedef struct  _segment_desc {
-	uint64_t limit_low:16;      /*  セグメント・リミット 15:00                             */
-	uint64_t base_low:24;       /*  ベース・アドレス                                       */
-	uint64_t type:5;            /*  タイプ                                                 */
-	uint64_t dpl:2;             /*  ディスクリプタ特権レベル                               */
-	uint64_t p:1;               /*  セグメント存在ビット                                   */
-	uint64_t limit_high:4;      /*  セグメント・リミット(上位)                             */
-	uint64_t avl:1;             /*  OSで使用されるフィールド(未使用)                       */
-	uint64_t long_mode:1;       /*  long modeビット                                        */
-	uint64_t db:1;              /*  オペレーションサイズ 0=16ビット, 1=32ビット            */
-	uint64_t g:1;               /*  粒度(グラニュティ)ビット  1=ページ単位, 0=バイト単位   */
-	uint64_t base_high:8;       /*  セグメントベース(上位)                                 */
-}__attribute__  ((packed)) segment_desc_t;
+#define GDT_NULL1                0x0
+#define GDT_NULL2                0x8
+#define GDT_KERN_CODE32	        0x10
+#define GDT_KERN_DATA32	        0x18
+#define GDT_KERN_CODE64	        0x20
+#define GDT_KERN_DATA64	        0x28
+#define GDT_USER_CODE64	        0x33
+#define GDT_USER_DATA64	        0x3b
+#define GDT_TSS64	        0x40
 
-typedef struct _descriptor_tbl{
-	unsigned long dt_limit:16;
-	unsigned long dt_base:64 __attribute__  ((packed)) ;
-}__attribute__ ((packed)) descriptor_tbl_t;
+#if defined(ASM_FILE)
 
+#define GDT_NULL_ENTRY 	.quad	0x0
 
-typedef struct _x86_64_tss {
-        uint32_t       tss_rsvd0;
-        uint64_t       tss_rsp0 __attribute__  ((packed));      /* kernel stack pointer ring 0 */
-        uint64_t       tss_rsp1 __attribute__  ((packed));      /* kernel stack pointer ring 1 */
-        uint64_t       tss_rsp2 __attribute__  ((packed));      /* kernel stack pointer ring 2 */
-        uint32_t       tss_rsvd1;
-        uint32_t       tss_rsvd2;
-        uint64_t       tss_ist1 __attribute__  ((packed));      /* Interrupt stack table 1 */
-        uint64_t       tss_ist2 __attribute__  ((packed));      /* Interrupt stack table 2 */
-        uint64_t       tss_ist3 __attribute__  ((packed));      /* Interrupt stack table 3 */
-        uint64_t       tss_ist4 __attribute__  ((packed));      /* Interrupt stack table 4 */
-        uint64_t       tss_ist5 __attribute__  ((packed));      /* Interrupt stack table 5 */
-        uint64_t       tss_ist6 __attribute__  ((packed));      /* Interrupt stack table 6 */
-        uint64_t       tss_ist7 __attribute__  ((packed));      /* Interrupt stack table 7 */
-        uint32_t       tss_rsvd3;
-        uint32_t       tss_rsvd4;
-        uint16_t       tss_rsvd5;
-        uint16_t       tss_iobase;     /* io bitmap offset */
-}x86_64_tss_t;
+#define GDT_KERNEL	        0x90	
+#define GDT_SEG_64	        0xA0
+#define GDT_SEG_32	        0xC0
+#define GDT_USER	        0xf0
 
-/*
- * Gate descriptors (e.g. indirect descriptors, trap, interrupt etc. 128 bit)
- * Only interrupt and trap gates have gd_ist.
- */
-typedef struct	gate_descriptor {
-	uint64_t gd_looffset:16;	/* gate offset (lsb) */
-	uint64_t gd_selector:16;	/* gate segment selector */
-	uint64_t gd_ist:3;		/* IST table index */
-	uint64_t gd_xx:5;		/* unused */
-	uint64_t gd_type:5;		/* segment type */
-	uint64_t gd_dpl:2;		/* segment descriptor priority level */
-	uint64_t gd_p:1;		/* segment descriptor present */
-	uint64_t gd_hioffset:48 __attribute__ ((packed));	/* gate offset (msb) */
-	uint64_t sd_xx1:32;
-} __attribute__ ((packed)) gate_descriptor_t;
+#define GDT_CS		         0xb
+#define GDT_DS		         0x3
 
-void init_descriptor(void);
-void lgdt(void *);
-#endif   /* !defined(ASM)  */
+#define SET_GDT_ENTRY(arch, mode, type, base, limit)	\
+	.word   (((limit) >> 12) & 0xffff);             \
+	.word   ((base) & 0xffff);                      \
+	.byte   (((base) >> 16) & 0xff);                \
+	.byte   ((mode) | (type));			\
+	.byte   ((arch) | (((limit) >> 28) & 0xf));     \
+	.byte   (((base) >> 24) & 0xff)
+#else
 
-#define	SD_T_NULL	 0	/* system null */
-#define	SD_T_SYS286TSS	 1	/* system 286 TSS available */
-#define	SD_T_SYSLDT	 2	/* system 64 bit local descriptor table */
-#define	SD_T_SYS286BSY	 3	/* system 286 TSS busy */
-#define	SD_T_SYS286CGT	 4	/* system 286 call gate */
-#define	SD_T_SYSTASKGT	 5	/* system task gate */
-#define	SD_T_SYS286IGT	 6	/* system 286 interrupt gate */
-#define	SD_T_SYS286TGT	 7	/* system 286 trap gate */
-#define	SD_T_SYSNULL2	 8	/* system null again */
-#define SD_T_TSS         9      /* system Task State Segment */
-#define	SD_T_SYSRSV3	10	/* system null again */
-#define	SD_T_SYSBSY	11	/* system busy 64 bit TSS */
-#define	SD_T_SYSCGT	12	/* system 64 bit call gate */
-#define	SD_T_SYSRSV4	13	/* system null again */
-#define	SD_T_SYSIGT	14	/* system 64 bit interrupt gate */
-#define	SD_T_SYSTGT	15	/* system 64 bit trap gate */
+#define X86_IDT_INTR_TYPE_ATTR                        (0xe) /* 32/64 bit Interrupt(0xf=110b) */
+#define X86_IDT_TRAP_TYPE_ATTR                        (0xf) /* 32/64 bit Trap(0xf=111b)      */
+#define X86_DESC_DPL_KERNEL                           (0)
+#define X86_DESC_DPL_USER                             (3)
+#define X86_DESC_RDONLY                               (0)
+#define X86_DESC_RDWR                                 (1)
+#define X86_DESC_NONEXEC                              (0)
+#define X86_DESC_EXEC                                 (1)
+#define X86_DESC_32BIT_MODE                           (0)
+#define X86_DESC_64BIT_MODE                           (1)
+#define X86_DESC_64BIT_SEG                            (0)
+#define X86_DESC_32BIT_SEG                            (1)
+#define X86_DESC_BYTE_SIZE                            (0)
+#define X86_DESC_PAGE_SIZE                            (1)
 
+#define X86_64_SEGMENT_CPUINFO_OFFSET                 (1024)
 
-#define	SD_T_MEMRO	16	/* memory read only */
-#define	SD_T_MEMROA	17	/* memory read only accessed */
-#define	SD_T_MEMRW	18	/* memory read write */
-#define	SD_T_MEMRWA	19	/* memory read write accessed */
-#define	SD_T_MEMROD	20	/* memory read only expand dwn limit */
-#define	SD_T_MEMRODA	21	/* memory read only expand dwn limit accessed */
-#define	SD_T_MEMRWD	22	/* memory read write expand dwn limit */
-#define	SD_T_MEMRWDA	23	/* memory read write expand dwn limit accessed */
-#define	SD_T_MEME	24	/* memory execute only */
-#define	SD_T_MEMEA	25	/* memory execute only accessed */
-#define	SD_T_MEMER	26	/* memory execute read */
-#define SD_T_MRE        27      /* memory execute read accessed */
+typedef struct _region_descriptor {
+	uint16_t rd_limit:16;           /* segment extent */
+	uint64_t rd_base:64 __attribute__((packed));   /* base address  */
+} __attribute__((packed)) region_descriptor;
 
-#define PL_KERN          0
-#define PL_USER          3
-/*
- * セグメントディスクリプタのセレクタ
- */
-#define NULL_CS            0       /* Null ディスクリプタ */
-#define KERN_CS            1       /* Kernel Code Descriptor */
-#define KERN_DS            2       /* Kernel Data Descriptor */
-#define USER_CS            3       /* User 64 bit Code Descriptor */
-#define USER_DS            4       /* User 64 bit Data Descriptor */
-#define GPROC0_SEL         5       /* TSS(TSS for Kernel Trap) */
-#define GPROC0_SEL_REST    6       /* TSS(TSS for Kernel Trap) */
-#define GDT_NR             7       /* GDTのエントリ数  */
-#define IDT_NR           256       /* IDTのエントリ数 */
-#endif  /*  _HAL_SEGMENTS_H   */
+typedef struct _tss64 {
+	uint32_t  resv1;
+	uint64_t   rsp0;
+	uint64_t   rsp1;
+	uint64_t   rsp2;
+	uint64_t  resv2;
+	uint64_t   ist1;
+	uint64_t   ist2;
+	uint64_t   ist3;
+	uint64_t   ist4;
+	uint64_t   ist5;
+	uint64_t   ist6;
+	uint64_t   ist7;
+	uint64_t  resv3;
+	uint16_t  resv4;
+	uint16_t  iomap;
+} __attribute__((packed)) tss64;
+
+typedef struct _gdt_descriptor{
+	uint16_t     limit0;
+	uint16_t      base0;
+	uint8_t       base1;
+	unsigned   access:1;
+	unsigned       rw:1;
+	unsigned       dc:1;
+	unsigned     exec:1;
+	unsigned    resv0:1;
+	unsigned      dpl:2;
+	unsigned  present:1;
+	unsigned   limit1:4;
+	unsigned      avl:1;
+	unsigned     mode:1;
+	unsigned     size:1;
+	unsigned     gran:1;
+	uint8_t       base2;
+}__attribute__((packed)) gdt_descriptor;
+
+typedef struct _idt_descriptor{
+	uint16_t base0;
+	uint16_t sel;
+	unsigned ist:3;
+	unsigned resv0:5;
+	unsigned type:4;
+	unsigned resv1:1;
+	unsigned dpl:2;
+	unsigned present:1;
+	uint16_t base1;
+	uint32_t base2;
+	uint32_t resv2;
+} __attribute__((packed)) idt_descriptor;
+
+#define X86_64_IDT_INITIALIZER(_isr, _sel, _ist, _type, _dpl, _present) {	        \
+	.base0 = (uint16_t)( ( (uint64_t)(_isr) ) & 0xffff),		                \
+	.base1 = (uint16_t)( ( ( ( (uint64_t)(_isr) ) & 0xffff0000) >> 16 ) & 0xffff ), \
+	.base2 = (uint32_t)( ( ( (uint64_t)(_isr) )  >> 32 ) & 0xffffffff ),            \
+	.sel = (_sel),                                                                  \
+	.ist = (_ist),                                                                  \
+	.type = (_type),                                                                \
+	.dpl  = (_dpl),                                                                 \
+	.present = 1,                                                                   \
+	}
+void init_segments(void *_local_page, tss64 **tssp);
+void init_idt(idt_descriptor **_idtp);
+void lgdtr(void *_gdtr, uint16_t _code_seg, uint16_t _data_seg);
+void lidtr(void *_idtr);
+void load_interrupt_descriptors(void *_p, size_t _size);
+void ltr(uint16_t seg);
+
+#endif  /*  !ASM_FILE  */
+
+#endif  /*  __HAL_SEGMENTS_H  */

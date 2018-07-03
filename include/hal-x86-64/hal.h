@@ -12,7 +12,7 @@
 #include "hal/ctxsw.h"
 #include "hal/psw.h"
 #include "hal/addrinfo.h"
-#include "hal/multiboot.h"
+#include "hal/multiboot2.h"
 #include "hal/port.h"
 #include "hal/raw_console.h"
 #include "hal/boot64.h"
