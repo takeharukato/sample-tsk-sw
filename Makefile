@@ -67,7 +67,7 @@ clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\
 	done
-	${RM} *.o ${targets} *.tmp *.elf *.asm *.map
+	${RM} *.o ${targets} *.tmp *.elf *.asm *.map *.iso
 
 distclean:clean
 	for dir in ${cleandirs} ; do \
