@@ -2,9 +2,9 @@ top=.
 include Makefile.inc
 targets=kernel.elf kernel.asm kernel.map
 
-subdirs=common kern hal user
+subdirs=common kern dev hal user
 cleandirs=include ${subdirs} tools configs
-kernlibs = user/libuser.a kern/libkern.a common/libcommon.a hal/hal/libhal.a
+kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a hal/hal/libhal.a
 mconf=tools/kconfig/mconf
 
 all:${targets}

@@ -15,3 +15,20 @@ config CONFIG_HAL_OPT_FLAGS
 config CONFIG_HAL_PAGE_SIZE
        int
        default 4096
+
+choice
+       prompt "Console serial port"
+       default CONFIG_CON_SERIAL_COM1
+
+config CONFIG_CON_SERIAL_COM1
+       bool "COM1"
+
+config CONFIG_CON_SERIAL_COM2
+       bool "COM2"
+
+config CONFIG_CON_SERIAL_COM3
+       bool "COM3"
+
+config CONFIG_CON_SERIAL_COM4
+       bool "COM4"
+endchoice

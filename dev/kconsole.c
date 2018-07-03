@@ -3,24 +3,71 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  kernel console                                                    */
+/*                                                                    */
 /*                                                                    */
 /**********************************************************************/
 
 #include <kern/kernel.h>
 
 static kconsole_list_t kcons = KCONSOLE_LIST_INITILIZER(kcons);
-volatile unsigned int * const UART0DR = (unsigned int *) 0x09000000;
- 
+
 /** 一文字出力関数
     @param[in] ch 出力する文字
  */
 void
 kputchar(int ch){
 	psw_t psw;
+	kconsole_list_t *kcp = &kcons;
+	kconsole_t *con;
+	list_t *cp;
 
 	psw_disable_and_save_interrupt(&psw);
-	*UART0DR = (unsigned int)(ch); /* Transmit char */
+	list_for_each(cp, kcp, head) {
+		con = CONTAINER_OF(cp, kconsole_t, link);
+		if (con->putchar != NULL) {
+			con->putchar(ch);
+		}
+	}
+	psw_restore_interrupt(&psw);
+}
+
+/** 画面クリア
+ */
+void
+kcls(void){
+	psw_t psw;
+	kconsole_list_t *kcp = &kcons;
+	kconsole_t *con;
+	list_t *cp;
+
+	psw_disable_and_save_interrupt(&psw);
+	list_for_each(cp, kcp, head) {
+		con = CONTAINER_OF(cp, kconsole_t, link);
+		if (con->cls != NULL) {
+			con->cls();
+		}
+	}
+	psw_restore_interrupt(&psw);
+}
+
+/** カーソル位置更新
+    @param[in] x X座標
+    @param[in] y Y座標
+ */
+void
+klocate(int x, int y){
+	psw_t psw;
+	kconsole_list_t *kcp = &kcons;
+	kconsole_t *con;
+	list_t *cp;
+
+	psw_disable_and_save_interrupt(&psw);
+	list_for_each(cp, kcp, head) {
+		con = CONTAINER_OF(cp, kconsole_t, link);
+		if (con->locate != NULL) {
+			con->locate(x, y);
+		}
+	}
 	psw_restore_interrupt(&psw);
 }
 

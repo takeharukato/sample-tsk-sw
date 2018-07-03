@@ -14,7 +14,7 @@
 
 static kconsole_t uart_console = KCONSOLE_INITILIZER(uart_console);
 
-extern void kputchar(int ch);
+extern void aarch64_kputchar(int ch);
 extern void *bsp_stack;
 
 #define CHECK_FLAG(flags,bit)   \
@@ -50,7 +50,7 @@ hal_kernel_init(void) {
 void 
 boot_main(void) {
 
-	uart_console.putchar = kputchar;
+	uart_console.putchar = aarch64_kputchar;
 	register_kconsole(&uart_console);
 
 	kprintf("boot\n");

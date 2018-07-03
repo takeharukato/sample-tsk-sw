@@ -3,29 +3,23 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  64bit boot code                                                   */
+/*  kernel console                                                    */
 /*                                                                    */
 /**********************************************************************/
 
-#include <kern/freestanding.h>
-#include <kern/printf.h>
+#include <kern/kernel.h>
 
-#include <hal/hal.h>
-#include <hal/uart.h>
 
-void
-hal_kernel_init(void){
-}
-
-/** 64bit モードでのブートアップ
+volatile unsigned int * const UART0DR = (unsigned int *) 0x09000000;
+ 
+/** 一文字出力関数
+    @param[in] ch 出力する文字
  */
-void 
-boot_main(uint64_t __attribute__ ((unused)) magic, 
-    uint64_t __attribute__ ((unused)) mbaddr) {
+void
+aarch64_kputchar(int ch){
+	psw_t psw;
 
-	uart8250_init();
-
-	kprintf("X86-64 sample booted.\n");
-
-	while(1);
+	psw_disable_and_save_interrupt(&psw);
+	*UART0DR = (unsigned int)(ch); /* Transmit char */
+	psw_restore_interrupt(&psw);
 }
