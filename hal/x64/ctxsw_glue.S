@@ -2,7 +2,7 @@
 /*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
 /*  Copyright 2001 Takeharu KATO                                      */
 /*                                                                    */
-/*  thread context handling routines for x86-64 ABI                   */
+/*  thread context handling routines for x64 ABI                      */
 /*                                                                    */
 /**********************************************************************/
 #define THR_FUNCTION_OFFSET  8  /*< スタック内での関数アドレス格納位置  */
@@ -12,8 +12,8 @@
 
 	.globl	__start_thread, thr_thread_start
 
-/** x86-64用のスレッドスタート関数呼び出しルーチン
-	@note x86-64は, 引数のレジスタ渡しを徹底するため, スタックからデータを取り出し,
+/** x64用のスレッドスタート関数呼び出しルーチン
+	@note x64は, 引数のレジスタ渡しを徹底するため, スタックからデータを取り出し,
 	スタック経由で渡された関数ポインタと引数アドレスをレジスタに設定してから
 	thread_start関数を呼び出す.
  */

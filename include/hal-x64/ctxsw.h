@@ -11,13 +11,13 @@
 
 struct _thread;
 
-/** X86-64のスタック切り替え
+/** x64のスタック切り替え
     @param[in] prev 切り替えられるスレッドのスタックアドレスを格納しているポインタ変数のアドレス
     @param[in] next 切り替えるスレッドのスタックアドレスを格納しているポインタ変数のアドレス
-    @note PSW(Processor Status Word - X86-64の場合, RFLAGSとRIPの組)と
+    @note PSW(Processor Status Word - x64の場合, RFLAGSとRIPの組)と
           AMD64 ABI Draft 0.99.5(http://www.x86-64.org/documentation/abi.pdf)で規定された
           callee savedレジスタのうち x87 FPU 制御ワード以外のレジスタを退避/復元する
-	  x86-64のcallee savedレジスタ(AMD64 ABI Draft 0.99.5 Figure 3.4: Register Usage参照)
+	  x64のcallee savedレジスタ(AMD64 ABI Draft 0.99.5 Figure 3.4: Register Usage参照)
  */
 static inline void
 hal_do_context_switch(void **prev, void **next) {

@@ -40,7 +40,7 @@ kernel.lds: kernel.lds.in ${top}/.config
 ${top}/kernel.iso: ${QEMU_KERNEL}
 	mkdir -p ${top}/rfs/boot/grub
 	mkdir -p ${top}/rfs/boot/modules
-	cp ${top}/hal/x86-64/grub.cfg ${top}/rfs/boot/grub
+	cp ${top}/hal/${CPU}/grub.cfg ${top}/rfs/boot/grub
 	cp ${top}/kernel.elf ${top}/rfs/boot
 	${GRUB2_RESCUE} -o ${top}/kernel.iso ${top}/rfs
 	if [ -d ${top}/rfs ]; then     					\

@@ -1,4 +1,4 @@
-CPU ?= `uname -m|sed -e "s/amd64/x86-64/" -e "s/x86_64/x86-64/" -e "s/i?86/ia32/"`
+CPU ?= `uname -m|sed -e "s/x86-64/x64/" -e "s/amd64/x64/" -e "s/x86_64/x64/" -e "s/i?86/ia32/"`
 
 CC=${CROSS_COMPILE}gcc
 AR=${CROSS_COMPILE}ar

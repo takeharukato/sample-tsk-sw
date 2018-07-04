@@ -3,7 +3,7 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Architechture specific types for x86-64                           */
+/*  Architechture specific types for x64                              */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_TYPES_H)

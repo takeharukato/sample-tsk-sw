@@ -25,7 +25,7 @@ boot_main(uint64_t __attribute__ ((unused)) magic,
 
 	uart8250_init();
 
-	kprintf("X86-64 sample booted.\n");
+	kprintf("OS sample for X64 booted.\n");
 
 	while(1);
 }

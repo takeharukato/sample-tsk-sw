@@ -23,7 +23,7 @@
 #include <hal/multiboot2.h>
 #include <hal/thread_info.h>
 #include <hal/boot64.h>
-#include <hal/x86-64.h>
+#include <hal/x64.h>
 #include <hal/segments.h>
 #include <hal/pgtbl.h>
 

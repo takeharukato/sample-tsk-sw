@@ -65,7 +65,7 @@
 #define X86_DESC_BYTE_SIZE                            (0)
 #define X86_DESC_PAGE_SIZE                            (1)
 
-#define X86_64_SEGMENT_CPUINFO_OFFSET                 (1024)
+#define X64_SEGMENT_CPUINFO_OFFSET                 (1024)
 
 typedef struct _region_descriptor {
 	uint16_t rd_limit:16;           /* segment extent */
@@ -123,7 +123,7 @@ typedef struct _idt_descriptor{
 	uint32_t resv2;
 } __attribute__((packed)) idt_descriptor;
 
-#define X86_64_IDT_INITIALIZER(_isr, _sel, _ist, _type, _dpl, _present) {	        \
+#define X64_IDT_INITIALIZER(_isr, _sel, _ist, _type, _dpl, _present) {	        \
 	.base0 = (uint16_t)( ( (uint64_t)(_isr) ) & 0xffff),		                \
 	.base1 = (uint16_t)( ( ( ( (uint64_t)(_isr) ) & 0xffff0000) >> 16 ) & 0xffff ), \
 	.base2 = (uint32_t)( ( ( (uint64_t)(_isr) )  >> 32 ) & 0xffffffff ),            \

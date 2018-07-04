@@ -3,7 +3,7 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  X86-64 Exception definitions                                      */
+/*  x64 Exception definitions                                         */
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_EXCEPTION_H)
