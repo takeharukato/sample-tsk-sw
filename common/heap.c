@@ -44,7 +44,7 @@ kheap_sbrk(intptr_t inc){
 
 	prev = kheap.cur;
 	if ( ( kheap.cur + inc < kheap.start ) || ( kheap.cur + inc >=  kheap.end ) )
-		return (void *)-1;
+		return HEAP_SBRK_FAILED;
 
 	kheap.cur += inc;
 

@@ -9,6 +9,7 @@
 
 #include <kern/freestanding.h>
 #include <kern/printf.h>
+#include <kern/heap.h>
 
 #include <hal/hal.h>
 #include <hal/uart.h>

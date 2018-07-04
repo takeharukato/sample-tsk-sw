@@ -20,8 +20,8 @@ config CONFIG_ID_BITMAP_UNIT
 
 config CONFIG_HEAP_SIZE
 	int "heap memory size(UNIT:MB)"
-	default 2
-	range 1 64
+	default 64
+	range 1 768
 	help
 	  This sets the value of kernel heap memory size
 

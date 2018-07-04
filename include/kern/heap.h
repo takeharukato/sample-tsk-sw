@@ -12,6 +12,8 @@
 #include <kern/freestanding.h>
 #include <kern/mutex.h>
 
+#define HEAP_SBRK_FAILED      ((void *)(-1))
+
 typedef struct _kernel_heap{
 	void *start;  /*< Start address of kernel heap */
 	void *end;    /*< End address of kernel heap */
