@@ -61,6 +61,9 @@
 #define CR4_PCID_ENABLE         (1 << 17)
 #define CR4_OS_XSAVE            (1 << 18)
 
+#define PAGE_SHIFT               (CONFIG_HAL_PAGE_SHIFT)               /*  4KiB  */
+#define KERN_STRAIGHT_PAGE_SIZE  (CONFIG_HAL_STRAIGHT_PAGE_SIZE)         /*  2MiB  */
+
 #if !defined(ASM_FILE)
 #include <kern/freestanding.h>
 

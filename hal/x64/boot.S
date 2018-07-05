@@ -26,6 +26,7 @@
 #include <hal/x64.h>
 #include <hal/segments.h>
 #include <hal/pgtbl.h>
+#include <hal/kmap.h>
 
 #define  MBH_MAGIC                              MULTIBOOT2_HEADER_MAGIC
 #define  MBH_ARCH                               MULTIBOOT_ARCHITECTURE_I386

@@ -1,13 +1,16 @@
-/* -*- mode: c; coding:utf-8 -*- */
+/* -*- mode: C; coding:utf-8 -*- */
 /**********************************************************************/
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Page table definitions                                            */
+/*  X64 page table definitions                                        */
 /*                                                                    */
 /**********************************************************************/
-#if !defined(_HAL_PGTBL_H)
-#define  _HAL_PGTBL_H 
+#if !defined(__HAL_PGTBL_H)
+#define __HAL_PGTBL_H
+
+#include <kern/param.h>
+
 #define PT_INDEX_SHIFT          (12)
 #define PD_INDEX_SHIFT          (21)
 #define PDPT_INDEX_SHIFT        (30)
@@ -37,7 +40,8 @@
 
 #if !defined(ASM_FILE)
 
-#include <kern/freestanding.h>
+#include <stdint.h>
+#include <hal/kmap.h>
 
 #define PAGE_EXECUTE_DISABLE    (1ULL << 63)  /* int型の幅を超えるため !ASM_FILEが必要  */
 
@@ -170,4 +174,4 @@ load_pgtbl(const uintptr_t pgtbl_addr) {
 }
 #endif  /*  !ASM_FILE  */
 
-#endif  /*  _HAL_PGTBL_H   */
+#endif  /*  __HAL_PGTBL_H  */

@@ -53,7 +53,7 @@ SECTIONS
     _end = .  - KERN_VMA_BASE;
     _kernel_end = . - KERN_VMA_BASE;
     _kheap_start = .;
-    . += (2*1024*1024);
+    . += (64*1024*1024);
     _kheap_end = .;
 
     /DISCARD/ :

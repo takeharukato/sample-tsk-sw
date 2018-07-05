@@ -16,6 +16,20 @@ config CONFIG_HAL_PAGE_SIZE
        int
        default 4096
 
+config CONFIG_HAL_PAGE_SHIFT
+       int
+       default 12
+
+config CONFIG_HAL_STRAIGHT_PAGE_SIZE
+       int
+       default 0x200000
+
+config CONFIG_HAL_MEMORY_SIZE_MB
+       prompt "Max memory size(UNIT:MB)"
+       int
+       default 128
+       range 16 1024
+
 choice
        prompt "Console serial port"
        default CONFIG_CON_SERIAL_COM1

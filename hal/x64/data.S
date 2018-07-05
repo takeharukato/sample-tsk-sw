@@ -31,6 +31,7 @@
 .global	pre_pdpt_low
 .global	pre_pdpt_high
 .global	pre_pd
+.global kmap_pml4
 .global	gdt
 .global	idt
 .global	idt_ptr
@@ -78,6 +79,11 @@ pre_pdpt_high:
 .p2align 12
 pre_pd:
     .zero   PAGE_SIZE
+
+.p2align 12
+kmap_pml4:
+    .zero   PAGE_SIZE
+
 .p2align 12
 gdt:
     .zero   PAGE_SIZE
