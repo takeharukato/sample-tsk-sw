@@ -2,6 +2,10 @@ define ia_target
 set architecture i386:x86-64:intel
 end
 
+define aarch64_target
+set architecture aarch64
+end
+
 define remote_target
 target remote localhost:1234
 end
@@ -32,4 +36,39 @@ b _el0_sync32
 b _el0_irq32
 b _el0_fiq32
 b _el0_error32
+end
+
+define set_x64_vectors
+b vector0
+b vector1
+b vector2
+b vector3
+b vector4
+b vector5
+b vector6
+b vector7
+b vector8
+b vector9
+b vector10
+b vector11
+b vector12
+b vector13
+b vector14
+b vector15
+b vector16
+b vector17
+b vector18
+b vector19
+b vector20
+b vector21
+b vector22
+b vector23
+b vector24
+b vector25
+b vector26
+b vector27
+b vector28
+b vector29
+b vector30
+b vector31
 end

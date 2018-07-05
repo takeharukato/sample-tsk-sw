@@ -1,6 +1,6 @@
 top=.
 include Makefile.inc
-targets=kernel.elf kernel.asm kernel.map
+targets=kernel.elf kernel-dbg.elf kernel.asm kernel.map
 
 subdirs=common kern dev hal user
 cleandirs=include ${subdirs} tools configs
@@ -35,7 +35,11 @@ kernel.map: kernel.elf
 	${RM} $@
 	${NM} $< |${SORT} > $@
 
-kernel.elf: include/kern/autoconf.h subsystem
+kernel.elf: kernel-dbg.elf
+	${CP}	$< $@
+	${STRIP} -g $@
+
+kernel-dbg.elf: include/kern/autoconf.h subsystem
 ifeq ($(CONFIG_HAL),y)
 	${CC} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\

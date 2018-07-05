@@ -1,16 +1,21 @@
-gdbでのデバッグ方法
+# gdbでのデバッグ方法
 
 ## 実行手順
-以下の手順を実行する。
+
+以下の手順を実行します:
 
 1. make run-debug
-2. 別のターミナルから aarch64-none-elf-gdb を実行
-3. symbol-file kernel.elf を実行して, シンボルをロード
-4. b _start を実行してエントリアドレスでブレークするよう指定
-5. target remote localhost:1234 を実行してQEMUに接続
-6. continueを実行して開始
+1. 別のターミナルから gdbを実行
+   * AArch64版の場合 --- aarch64-none-elf-gdb を実行してください。
+   * x64版の場合 --- 
+1. symbol-file kernel.elf を実行して, シンボルをロード
+1. b _start を実行してエントリアドレスでブレークするよう指定
+1. target remote localhost:1234 を実行してQEMUに接続
+1. continueを実行して開始
 
 ## 実行例
+
+AArch64版をデバッグする際の手順の例を以下に示します:
 
 ```shell-session
 $ aarch64-none-elf-gdb
@@ -28,8 +33,8 @@ Find the GDB manual and other documentation resources online at:
 <http://www.gnu.org/software/gdb/documentation/>.
 For help, type "help".
 Type "apropos word" to search for commands related to "word".
-(gdb) symbol-file kernel.elf
-Reading symbols from kernel.elf...done.
+(gdb) symbol-file kernel-dbg.elf
+Reading symbols from kernel-dbg.elf...done.
 (gdb) b _start
 Breakpoint 1 at 0x80000: file start.S, line 19.
 (gdb) target remote localhost:1234
@@ -39,3 +44,41 @@ determining executable automatically.  Try using the "file" command.
 0x0000000000000000 in ?? ()
 
 ```
+
+## .gdbinitファイル
+`tools/gdb/_gdbinit`にデバッグ作業を手助けするための.gdbinit(GDB用のマクロ)が入っています。
+本ファイルの内容を${HOME}/.gdbinitに追記してから, gdbを起動することで
+以下のコマンドマクロが使えるようになります。 
+
+* ia_target --- x64ターゲット(i386:x86-64:intel)向けの環境を設定します。
+* remote_target --- QEMUのリモートターゲット(localhostのポート:1234番)
+  に接続します。
+* aarch64_target --- AArch64ターゲット(aarch64)向けの環境を設定します。
+* load_symbol --- デバッグシンボルを読み込みます。
+* six -- 1命令ステップし, 次に実行される命令($pcの指し示す命令)を表示
+します。
+* set_aarch64_vectors ---AArch64版の割込み/例外ベクタにブレークポイン
+  トを設定します。
+
+
+## x64版のgdbのコンパイル手順
+gdbのリモートデバッグ機能とQEmuを接続するためには,
+`tools/gdb/gdb-7.10-qemu-x86-64.patch`をgdbに適用してgdbを
+構築し直す必要があります。
+
+gdbのリモートデバッグ機能に対応したgdbの構築方法を以下に示します。
+
+1.`http://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz` からgdbのソースアーカイブ
+を取得します。
+1. `tar xf gdb-7.10.tar.gz` を実行してソースを展開します。
+1. `pushd gdb-7.10`を実行して, ソースディレクトリに移動します。
+1. `./configure --prefix=${HOME}/cross/x64
+   --program-prefix="x64-elf-"`を実行します。
+1. `make` を実行します。
+1. `mkdir -p ${HOME}/cross/x64`
+1. `make install` を実行します。
+
+gdbは, x64-elf-ターゲットをサポートしていないので, --program-prefixオプ
+ションを付けることでコマンド名をかえています。
+上記実行後, `${HOME}/cross/x64/x64-elf-gdb`をQEmuのx86-64ターゲット上
+のプログラムをリモートデバッグすることができます。

@@ -3,7 +3,7 @@ include ${top}/Makefile.inc
 
 QEMU ?= qemu-system-x86_64
 QEMU_KERNEL ?= ${top}/kernel.elf
-QEMU_OPT ?= -m ${CONFIG_HAL_MEMORY_SIZE_MB}M  -nographic -serial mon:stdio
+QEMU_OPT ?= -m ${CONFIG_HAL_MEMORY_SIZE_MB} -nographic -serial mon:stdio
 QEMU_DBG_OPT := -S -gdb tcp::1234
 GRUB2_RESCUE=grub2-mkrescue
 
