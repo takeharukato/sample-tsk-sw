@@ -78,6 +78,7 @@ gdbのリモートデバッグ機能に対応したgdbの構築方法を以下�
 1. `make` を実行します。
 1. `mkdir -p ${HOME}/cross/x64`
 1. `make install` を実行します。
+1. `popd` を実行します。
 
 gdbは, x64-elf-ターゲットをサポートしていないので, --program-prefixオプ
 ションを付けることでコマンド名をかえています。
