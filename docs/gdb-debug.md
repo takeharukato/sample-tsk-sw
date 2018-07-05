@@ -5,13 +5,14 @@
 以下の手順を実行します:
 
 1. make run-debug
-1. 別のターミナルから gdbを実行
+1. 別のターミナルから gdbを実行します。
    * AArch64版の場合 --- aarch64-none-elf-gdb を実行してください。
-   * x64版の場合 --- 
-1. symbol-file kernel.elf を実行して, シンボルをロード
-1. b _start を実行してエントリアドレスでブレークするよう指定
-1. target remote localhost:1234 を実行してQEMUに接続
-1. continueを実行して開始
+   * x64版の場合 --- x64-elf-gdb(以下の「x64版のgdbのコンパイル手順」
+     参照)を実行してください。 
+1. symbol-file kernel.elf を実行して, シンボルをロードします。
+1. b _start を実行してエントリアドレスでブレークするよう指定します。
+1. target remote localhost:1234 を実行してQEMUに接続します。
+1. continueを実行して開始します。
 
 ## 実行例
 
@@ -80,5 +81,5 @@ gdbのリモートデバッグ機能に対応したgdbの構築方法を以下�
 
 gdbは, x64-elf-ターゲットをサポートしていないので, --program-prefixオプ
 ションを付けることでコマンド名をかえています。
-上記実行後, `${HOME}/cross/x64/x64-elf-gdb`をQEmuのx86-64ターゲット上
+上記実行後, `${HOME}/cross/x64/x64-elf-gdb`を用いてQEmuのx86-64ターゲット上
 のプログラムをリモートデバッグすることができます。

@@ -51,11 +51,13 @@ mbhdr:
 mbhdr_end:
 
 .global start
+.global _start	
 .extern bsp_stack
 .extern pre_gdt_p
 .extern _phys_bss_start
 .extern _phys_bss_end
 
+_start:
 start:
 		cld
 		cli
