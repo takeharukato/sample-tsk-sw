@@ -2,15 +2,15 @@
 
 ## 本文書について
 
-本文書では, GNU Debugger(gdb)とQEmuのシステムシミュレータを用いたリモー
+本文書では, GNU Debugger(GDB)とQEmuのシステムシミュレータを用いたリモー
 トデバッグ手順について説明します。
 
 ## `${HOME}/.gdbinit`ファイルの準備
 
 まず, `${HOME}/.gdbinit`ファイルにデバッグ支援用のマクロを追記します。
 
-`tools/gdb/_gdbinit`にデバッグ作業を手助けするための.gdbinit(GDB用のマクロ)が入っています。
-本ファイルの内容を${HOME}/.gdbinitに追記してから, gdbを起動することで
+`tools/gdb/_gdbinit`にデバッグ作業を手助けするための`.gdbinit`(GDB用のマクロ)が入っています。
+本ファイルの内容を`${HOME}/.gdbinit`に追記してから, `gdb`を起動することで
 以下のコマンドマクロが使えるようになります。 
 
 * `aarch64_target` --- AArch64ターゲット(aarch64)向けの環境を設定します。
@@ -27,7 +27,7 @@
 
 ## 実行手順
 
-QEmuとgdbを用いたデバッグの手順を以下に示します。
+GDBとQEmuを用いたデバッグの手順を以下に示します:
 
 1. `make run-debug`を実行します。
 1. 別のターミナルから `gdb`を実行します。
@@ -41,11 +41,11 @@ QEmuとgdbを用いたデバッグの手順を以下に示します。
 1. `gdb`のプロンプトから`b _start`を実行してエントリアドレスでブレーク
    するよう指定します(任意)。
 1. `gdb`のプロンプトからデバッグの目的に応じて他のブレークポイントなどを設定します。
-1. `gdb`のプロンプトからcontinueを実行して, デバッグを開始します。
+1. `gdb`のプロンプトから`continue`を実行して, デバッグを開始します。
 
 ## 実行例
 
-AArch64版をデバッグする際の手順の例を以下に示します:
+AArch64版のカーネルをデバッグする際の手順の例を以下に示します:
 
 ```shell-session
 $ aarch64-none-elf-gdb
@@ -77,13 +77,13 @@ AARCH64_DAIF_IRQ) /* Disable FIQ and IRQ */
 ```
 
 ## x64版のgdbのコンパイル手順
-gdbのリモートデバッグ機能とQEmuを接続するためには,
-`tools/gdb/gdb-7.10-qemu-x86-64.patch`をgdbに適用してgdbを
+GDBのリモートデバッグ機能とQEmuを接続するためには,
+`tools/gdb/gdb-7.10-qemu-x86-64.patch`をGDBに適用してGDBを
 構築し直す必要があります。
 
-gdbのリモートデバッグ機能に対応したgdbの構築方法を以下に示します。
+QEmuのリモートデバッグ機能に対応したGDBの構築方法を以下に示します。
 
-1. `http://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz` からgdbのソースアーカイブを取得します。
+1. `http://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz` からGDBのソースアーカイブを取得します。
 1. `tar xf gdb-7.10.tar.gz` を実行してソースを展開します。
 1. `pushd gdb-7.10`を実行して, ソースディレクトリに移動します。
 1. `./configure --prefix=${HOME}/cross/x64
@@ -93,7 +93,8 @@ gdbのリモートデバッグ機能に対応したgdbの構築方法を以下�
 1. `make install` を実行します。
 1. `popd` を実行します。
 
-gdbは, x64-elf-ターゲットをサポートしていないので, --program-prefixオプ
+GDBは, x64-elfターゲットをサポートしていないので, --program-prefixオプ
 ションを付けることでコマンド名をかえています。
 上記実行後, `${HOME}/cross/x64/x64-elf-gdb`を用いてQEmuのx86-64ターゲット上
 のプログラムをリモートデバッグすることができます。
+
