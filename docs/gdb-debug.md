@@ -1,52 +1,14 @@
 # gdbでのデバッグ方法
 
-## 実行手順
+## 本文書について
 
-以下の手順を実行します:
+本文書では, GNU Debugger(gdb)とQEmuのシステムシミュレータを用いたリモー
+トデバッグ手順について説明します。
 
-1. make run-debug
-1. 別のターミナルから gdbを実行します。
-   * AArch64版の場合 --- aarch64-none-elf-gdb を実行してください。
-   * x64版の場合 --- x64-elf-gdb(以下の「x64版のgdbのコンパイル手順」
-     参照)を実行してください。 
-1. symbol-file kernel.elf を実行して, シンボルをロードします。
-1. b _start を実行してエントリアドレスでブレークするよう指定します。
-1. target remote localhost:1234 を実行してQEMUに接続します。
-1. continueを実行して開始します。
+## `${HOME}/.gdbinit`ファイルの準備
 
-## 実行例
+まず, `${HOME}/.gdbinit`ファイルにデバッグ支援用のマクロを追記します。
 
-AArch64版をデバッグする際の手順の例を以下に示します:
-
-```shell-session
-$ aarch64-none-elf-gdb
-GNU gdb (GDB) 7.12.50.20160823-git
-Copyright (C) 2016 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
-and "show warranty" for details.
-This GDB was configured as "--host=x86_64-pc-linux-gnu --target=aarch64-none-elf".
-Type "show configuration" for configuration details.
-For bug reporting instructions, please see:
-<http://www.gnu.org/software/gdb/bugs/>.
-Find the GDB manual and other documentation resources online at:
-<http://www.gnu.org/software/gdb/documentation/>.
-For help, type "help".
-Type "apropos word" to search for commands related to "word".
-(gdb) symbol-file kernel-dbg.elf
-Reading symbols from kernel-dbg.elf...done.
-(gdb) b _start
-Breakpoint 1 at 0x80000: file start.S, line 19.
-(gdb) target remote localhost:1234
-Remote debugging using localhost:1234
-warning: No executable has been specified and target does not support
-determining executable automatically.  Try using the "file" command.
-0x0000000000000000 in ?? ()
-
-```
-
-## .gdbinitファイル
 `tools/gdb/_gdbinit`にデバッグ作業を手助けするための.gdbinit(GDB用のマクロ)が入っています。
 本ファイルの内容を${HOME}/.gdbinitに追記してから, gdbを起動することで
 以下のコマンドマクロが使えるようになります。 
@@ -63,15 +25,56 @@ determining executable automatically.  Try using the "file" command.
 * `set_x64_vectors`  --- x64版の割込み/例外エントリにブレークポイントを
 設定します(将来サポート予定)。
 
-上記マクロを使用した際の典型的な実行手順は, 以下の通りです:
+## 実行手順
 
-1. `x64_target`または`aarch64_target`を実行し, ターゲットを選択します。
-1. `load_symbol`によってシンボル情報を読み込みます。
-1. `set_aarch64_vectors`または`set_x64_vectors` を実行し, 例外/割込み
-   エントリ処理にブレークポイントを設定します(任意).
-1. デバッグの目的に応じてブレークポイントなどを設定します。
-1. continueを実行して, デバッグを開始します。
+QEmuとgdbを用いたデバッグの手順を以下に示します。
 
+1. `make run-debug`を実行します。
+1. 別のターミナルから `gdb`を実行します。
+   * AArch64版の場合 --- `aarch64-none-elf-gdb` を実行してください。
+   * x64版の場合 --- `x64-elf-gdb`(以下の「x64版のgdbのコンパイル手順」
+     参照)を実行してください。 
+1. `gdb`のプロンプトから`x64_target`または`aarch64_target`を実行し, ターゲットを選択します。
+1. `gdb`のプロンプトから`load_symbol`を実行してシンボル情報を読み込みます。
+1. `gdb`のプロンプトから`set_aarch64_vectors`または`set_x64_vectors` を実行し, 例外/割込み
+   エントリ処理にブレークポイントを設定します(任意)。
+1. `gdb`のプロンプトから`b _start`を実行してエントリアドレスでブレーク
+   するよう指定します(任意)。
+1. `gdb`のプロンプトからデバッグの目的に応じて他のブレークポイントなどを設定します。
+1. `gdb`のプロンプトからcontinueを実行して, デバッグを開始します。
+
+## 実行例
+
+AArch64版をデバッグする際の手順の例を以下に示します:
+
+```shell-session
+$ aarch64-none-elf-gdb
+GNU gdb (GDB) 7.12.50.20160823-git
+Copyright (C) 2016 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "--host=x86_64-pc-linux-gnu
+--target=aarch64-none-elf".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see: <http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at: <http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word".
+(gdb) aarch64_target
+The target architecture is assumed to be aarch64
+(gdb) load_symbol
+(gdb) b _start
+Breakpoint 1 at 0x40000000: file boot.S, line 22.
+(gdb) remote_target
+warning: No executable has been specified and target does not support
+determining executable automatically.  Try using the "file" command.
+start () at boot.S:22
+22              msr     daifset, #(AARCH64_DAIF_FIQ |
+AARCH64_DAIF_IRQ) /* Disable FIQ and IRQ */
+(gdb)
+```
 
 ## x64版のgdbのコンパイル手順
 gdbのリモートデバッグ機能とQEmuを接続するためには,
