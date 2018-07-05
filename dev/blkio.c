@@ -22,9 +22,9 @@ buffer_cache_blk_get(int32_t dev, uint64_t blockno){
 	wq_reason rc;
 	psw_t psw;
 
-loop:
-	//acquire(&global_buffer_cache.lock);
 	psw_disable_and_save_interrupt(&psw);
+loop:
+	//spinlock_lock(&global_buffer_cache.lock);
 	list_for_each(lp, &global_buffer_cache, head){  // Is the block already cached?
 		
 		b = CONTAINER_OF(lp, blk_buf, mru);
@@ -33,7 +33,7 @@ loop:
 			if ( !(b->flags & B_BUSY) ) {
 
 				b->flags |= B_BUSY;
-				//release(&global_buffer_cache.lock);
+				//spinlock_unlock(&global_buffer_cache.lock);
 				goto found;
 			} else {
 
