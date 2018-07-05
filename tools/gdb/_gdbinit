@@ -1,9 +1,9 @@
-define ia_target
-set architecture i386:x86-64:intel
-end
-
 define aarch64_target
 set architecture aarch64
+end
+
+define x64_target
+set architecture i386:x86-64:intel
 end
 
 define remote_target

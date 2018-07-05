@@ -51,15 +51,26 @@ determining executable automatically.  Try using the "file" command.
 本ファイルの内容を${HOME}/.gdbinitに追記してから, gdbを起動することで
 以下のコマンドマクロが使えるようになります。 
 
-* ia_target --- x64ターゲット(i386:x86-64:intel)向けの環境を設定します。
-* remote_target --- QEMUのリモートターゲット(localhostのポート:1234番)
+* `aarch64_target` --- AArch64ターゲット(aarch64)向けの環境を設定します。
+* `x64_target` --- x64ターゲット(i386:x86-64:intel)向けの環境を設定します。
+* `remote_target` --- QEMUのリモートターゲット(localhostのポート:1234番)
   に接続します。
-* aarch64_target --- AArch64ターゲット(aarch64)向けの環境を設定します。
-* load_symbol --- デバッグシンボルを読み込みます。
-* six -- 1命令ステップし, 次に実行される命令($pcの指し示す命令)を表示
+* `load_symbol` --- デバッグシンボルを読み込みます。
+* `six` -- 1命令ステップし, 次に実行される命令($pcの指し示す命令)を表示
 します。
-* set_aarch64_vectors ---AArch64版の割込み/例外ベクタにブレークポイン
+* `set_aarch64_vectors` --- AArch64版の割込み/例外ベクタにブレークポイン
   トを設定します。
+* `set_x64_vectors`  --- x64版の割込み/例外エントリにブレークポイントを
+設定します(将来サポート予定)。
+
+上記マクロを使用した際の典型的な実行手順は, 以下の通りです:
+
+1. `x64_target`または`aarch64_target`を実行し, ターゲットを選択します。
+1. `load_symbol`によってシンボル情報を読み込みます。
+1. `set_aarch64_vectors`または`set_x64_vectors` を実行し, 例外/割込み
+   エントリ処理にブレークポイントを設定します(任意).
+1. デバッグの目的に応じてブレークポイントなどを設定します。
+1. continueを実行して, デバッグを開始します。
 
 
 ## x64版のgdbのコンパイル手順
