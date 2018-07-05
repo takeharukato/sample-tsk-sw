@@ -1,2 +1,3 @@
 vector.S
 asm-offset.s
+kernel.lds

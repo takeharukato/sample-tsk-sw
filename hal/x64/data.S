@@ -37,7 +37,7 @@
 .global	idt_ptr
 
 .extern boot_main
-.extern	bsp_stack
+
 boot_entry_addr:
 	.quad boot_main
 

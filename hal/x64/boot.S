@@ -62,21 +62,14 @@ start:
 		cld
 		cli
 		# Store GRUB data
+		# Note: We need %esi for string instructions
 		movl    %eax, %edx
 		movl    %ebx, %esi
 
-		xorl    %eax, %eax
-clear_bsp_stack:
-	        movl    $_bsp_stack_start, %edi
-	        movl    $_bsp_stack_end , %ecx
-	        subl    %edi, %ecx      /* %rcx = __bsp_stack_end(%rcx) -
-						__bsp_stack_start(%rdi) */
-	        shrl    $2, %ecx        /* %rcx = %rcx / 4  */
-	        rep     stosl
-	
 clear_bss:
-	        movl    $_phys_bss_start, %edi
-	        movl    $_phys_bss_end , %ecx
+		xorl    %eax, %eax
+		movl    $(__bss_start - KERN_VMA_BASE), %edi
+	        movl    $(__bss_end - KERN_VMA_BASE), %ecx
 	        subl    %edi, %ecx      /* %rcx = __bss_end(%rcx) - __bss_start(%rdi) */
 	        shrl    $2, %ecx        /* %rcx = %rcx / 4  */
 	        rep     stosl
@@ -85,7 +78,7 @@ clear_bss:
 		movl    %edx, %edi
 setup_bsp_stack:	
 		# Setup Stack
-		movl    $(bsp_stack + STACK_SIZE - TI_SIZE), %esp
+		movl    $(bsp_stack + STACK_SIZE - TI_SIZE - KERN_VMA_BASE), %esp
 		# Set thread info magic, cpu number
 		movl    $THR_THREAD_INFO_MAGIC, TI_MAGIC_OFFSET(%esp)
 		movl    $0x0, TI_PREEMPT_OFFSET(%esp)

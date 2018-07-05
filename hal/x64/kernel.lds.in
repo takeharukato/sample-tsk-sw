@@ -15,11 +15,6 @@ SECTIONS
     .boot : {
         *(.boot_text)
         *(.boot_data)
-	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
-	_bsp_stack_start = .;
-	bsp_stack = .;
-	. += (__PAGE_SIZE__ * __KSTACK_PAGES__);
-	_bsp_stack_end = .;
     }
 
     . += KERN_VMA_BASE;
@@ -36,14 +31,21 @@ SECTIONS
         _data_end = .;
     }
 
-    . = ALIGN(0x1000);
+    . = ALIGN(__PAGE_SIZE__);
     .bss :  AT(ADDR(.bss) - KERN_VMA_BASE) {
-        _phys_bss_start = ( . - KERN_VMA_BASE );
+        __bss_start = .;
+
+	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
+	_bsp_stack_start = .; 
+	bsp_stack = .;
+	. += (__PAGE_SIZE__ * __KSTACK_PAGES__);
+	_bsp_stack_end = .;
+
         *(.bss)
 	*(COMMON)
-        _phys_bss_end = ( . - KERN_VMA_BASE );
+        __bss_end = .;
     }
-    . = ALIGN(0x1000);
+    . = ALIGN(__PAGE_SIZE__);
     _edata = .;			/* End of data section */
     . = ALIGN(__PAGE_SIZE__);
     _payload_start = .;
