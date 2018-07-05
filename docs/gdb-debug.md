@@ -83,8 +83,7 @@ gdbのリモートデバッグ機能とQEmuを接続するためには,
 
 gdbのリモートデバッグ機能に対応したgdbの構築方法を以下に示します。
 
-1.`http://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz` からgdbのソースアーカイブ
-を取得します。
+1. `http://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz` からgdbのソースアーカイブを取得します。
 1. `tar xf gdb-7.10.tar.gz` を実行してソースを展開します。
 1. `pushd gdb-7.10`を実行して, ソースディレクトリに移動します。
 1. `./configure --prefix=${HOME}/cross/x64
