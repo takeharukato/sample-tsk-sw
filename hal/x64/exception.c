@@ -3,15 +3,32 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  scheduler definition                                              */
+/*  Exception handler                                                 */
 /*                                                                    */
 /**********************************************************************/
-#if !defined(_KERN_SCHED_H)
-#define  _KERN_SCHED_H
 
-void sched_init(void);
-void sched_schedule(void);
-void sched_set_ready(thread_t *);
-void sched_rotate_queue(void);
-void sched_delay_disptach(void);
-#endif  /*  _KERN_SCHED_H   */
+#include <kern/kernel.h>
+
+#include <hal/exception.h>
+
+void
+hal_handle_exception(exception_frame *exc) {
+	
+	kprintf("An exception occur:\n");
+}
+
+void
+hal_common_trap_handler(exception_frame *exc){
+	thread_info_t *ti;
+
+	ti = hal_get_current_thread_info();
+
+	sched_delay_disptach();  /*  遅延ディスパッチ  */
+
+	return;
+}
+
+void
+x64_init_exception(void) {
+	
+}

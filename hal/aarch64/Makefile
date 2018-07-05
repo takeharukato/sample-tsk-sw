@@ -26,7 +26,7 @@ ${top}/include/hal/asm-offset.h: gen-asm-offset
 asm-offset.s: asm-offset.c
 	${CC} ${ASM_OFFSET_CFLAGS} -S -o $@ $<
 
-gen-asm-offset: asm-offset.s
+gen-asm-offset: asm-offset.s ${top}/tools/asmoffset/gen-asm-offset.py
 	${top}/tools/asmoffset/gen-asm-offset.py \
 	-i ${top}/hal/hal/asm-offset.s \
 	-o ${top}/include/hal/asm-offset.h
@@ -45,7 +45,7 @@ run-debug: ${QEMU_KERNEL}
 	${QEMU} ${QEMU_OPT} -kernel ${QEMU_KERNEL} ${QEMU_DBG_OPT}
 
 clean:
-	${RM} *.o ${lib}
+	${RM} *.o ${lib} asm-offset.s ${top}/include/hal/asm-offset.h
 
 distclean:clean
 	${RM} *~

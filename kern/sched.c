@@ -97,6 +97,30 @@ out:
 	psw_restore_interrupt(&psw);	
 }
 
+#if defined(CONFIG_HAL)
+void
+sched_delay_disptach(void) {
+	thread_info_t *ti;
+
+	ti = hal_get_current_thread_info();
+	/*
+	 * Delay dispatching
+	 */
+	if  ( ( ti_refer_preempt_count(ti) > 0 ) ||
+	    ( ti_refer_irq_count(ti) > 0 ) )
+		return; /* Dispatching is NOT allowed */
+		
+	if ( ti_check_need_dispatch(ti) ) {
+		
+		/* Clear a delay scheduling request */
+		ti_clr_delay_dispatch(ti);
+		sched_schedule(); 
+	}
+	
+	return;
+}
+#endif  /* CONFIG_HAL */
+
 /** スケジューラの初期化
  */
 void

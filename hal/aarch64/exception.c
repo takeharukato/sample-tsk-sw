@@ -54,23 +54,8 @@ hal_common_trap_handler(exception_frame *exc){
 		ti_update_preempt_count(ti, THR_IRQCNT_SHIFT, -1);
 	}
 
-	/*
-	 * Delay dispatching
-	 */
-	if  ( ( ti_refer_preempt_count(ti) > 0 ) ||
-	    ( ti_refer_irq_count(ti) > 0 ) )
-		goto out; /* Dispatching is disabled */
-		
-	if ( ti_check_need_dispatch(ti) ) {
-		
-		/* Clear a delay scheduling request */
-		ti_clr_delay_dispatch(ti);
-		sched_schedule(); 
-	}
-out:
+	sched_delay_disptach();  /*  遅延ディスパッチ  */
+
 	return;
 }
 
-void
-hal_do_delay_dispatch(exception_frame *exc){
-}
