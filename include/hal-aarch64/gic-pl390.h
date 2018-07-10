@@ -1,10 +1,10 @@
 /* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
 /*  OS kernel sample                                                  */
-/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  PrimeCell Generic Interrupt Controller (PL390)                    */
-/*                                                                    */
+/*  This code derived from GIC driver in TOPPERS/ASP kernel.          */
+/*  See: https://www.toppers.jp/asp-kernel.html                       */
 /**********************************************************************/
 #if !defined(_HAL_GIC_PL390_H)
 #define  _HAL_GIC_PL390_H 

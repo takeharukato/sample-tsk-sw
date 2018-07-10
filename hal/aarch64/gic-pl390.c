@@ -1,10 +1,10 @@
 /* -*- mode: c; coding:utf-8 -*- */
 /**********************************************************************/
 /*  OS kernel sample                                                  */
-/*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
 /*  Arm Generic Interrupt Controller(PL390)                           */
-/*                                                                    */
+/*  This code derived from GIC driver in TOPPERS/ASP kernel.          */
+/*  See: https://www.toppers.jp/asp-kernel.html                       */
 /**********************************************************************/
 
 #include <kern/kernel.h>
