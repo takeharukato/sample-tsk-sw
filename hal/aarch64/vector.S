@@ -10,6 +10,7 @@
 
 #include <hal/aarch64.h>
 #include <hal/exception.h>
+#include <hal/asm-macros.h>
 #include <hal/asm-offset.h>
 
 .section ".text.boot"

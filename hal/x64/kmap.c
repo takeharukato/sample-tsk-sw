@@ -21,7 +21,7 @@ static kmap_info kmap_pgtbl={&kmap_pml4, (void *)PHY_TO_KERN_STRAIGHT(&kmap_pml4
 
 void
 map_kernel_page(uintptr_t paddr, uintptr_t vaddr, 
-    uintptr_t page_attr, void *kpgtbl) {
+    uint64_t page_attr, void *kpgtbl) {
 	int             rc;
 	pml4e          ent1;
 	pdpe           ent2;

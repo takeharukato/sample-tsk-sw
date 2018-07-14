@@ -3,14 +3,14 @@ include ${top}/Makefile.inc
 
 QEMU ?= qemu-system-aarch64
 QEMU_KERNEL ?= ${top}/kernel.elf
-QEMU_OPT ?= -M virt -cpu cortex-a57 -m 128 -nographic -serial mon:stdio
+QEMU_OPT ?= -M virt -cpu cortex-a57 -m ${CONFIG_HAL_MEMORY_SIZE_MB} -nographic -serial mon:stdio
 QEMU_DBG_OPT := -S -gdb tcp::1234
 
 CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
 objects = early_console.o thr_context.o ctxsw.o
 ifeq ($(CONFIG_HAL),y)
-objects += boot.o boot64.o data.o exception.o vector.o gic-pl390.o timer.o
+objects += boot.o boot64.o kmap.o data.o exception.o vector.o gic-pl390.o timer.o
 endif
 
 lib=libhal.a

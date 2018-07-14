@@ -29,12 +29,6 @@
 #define AARCH64_EXC_FIQ_AARCH32   (0x33)
 #define AARCH64_EXC_SERR_AARCH32  (0x34)
 
-#if defined(ASM_FILE)
-#define vector_base_align .align 12  /* The vector base must be placed in 4096 bytes align */
-#define vector_entry_align .align 7  /* Each vector entry must be placed in 256 bytes align */
-#define text_align	.align	2    /* Text alignment */
-#endif  /*  ASM_FILE  */
-
 #if !defined(ASM_FILE)
 #include <stdint.h>
 typedef struct _exception_frame{

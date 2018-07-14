@@ -8,17 +8,16 @@
 /**********************************************************************/
 
 #include <kern/kernel.h>
-
+#include <kern/heap.h>
 #include <hal/hal.h>
 #include <hal/timer.h>
+#include <hal/kmap.h>
 
 static kconsole_t uart_console = KCONSOLE_INITILIZER(uart_console);
 
+extern void setup_mmu(void);
 extern void aarch64_kputchar(int ch);
 extern void *bsp_stack;
-
-#define CHECK_FLAG(flags,bit)   \
-	((flags) & (1 << (bit))) /* Check if the bit BIT in FLAGS is set. */
 
 /** パニック関数
  */
@@ -54,7 +53,7 @@ boot_main(void) {
 	register_kconsole(&uart_console);
 
 	kprintf("boot\n");
-
+	setup_mmu();
 	kern_init();
 	while(1);
 }

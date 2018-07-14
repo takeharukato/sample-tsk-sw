@@ -10,3 +10,23 @@
 #include <kern/param.h>
 
 .data
+
+.p2align 12
+.global pre_ttbr0_l1tbl
+pre_ttbr0_l1tbl:
+    .zero   PAGE_SIZE
+
+.p2align 12
+.global pre_ttbr0_l2tbl
+pre_ttbr0_l2tbl:
+    .zero   PAGE_SIZE
+
+.p2align 12
+.global pre_ttbr1_l1tbl
+pre_ttbr1_l1tbl:
+    .zero   PAGE_SIZE
+
+.p2align 12
+.global pre_ttbr1_l2tbl
+pre_ttbr1_l2tbl:
+    .zero   PAGE_SIZE
