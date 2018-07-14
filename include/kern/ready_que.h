@@ -13,10 +13,10 @@
 
 #include <kern/list.h>
 
-#define RDQ_SYS_PRIORITY  (7)  /*< Priority of system threads  */
-#define RDQ_USER_PRIORITY (1)  /*< Priority of user threads  */
+#define RDQ_SYS_PRIORITY  (8)  /*< Priority of system threads  */
+#define RDQ_USER_PRIORITY (8)  /*< Priority of user threads  */
 #define RDQ_PRIORITY_MAX (RDQ_USER_PRIORITY + RDQ_SYS_PRIORITY)
-#define RDQ_USER_QUE_IDX  (0)  /*< Index for user threads    */
+#define RDQ_USER_RR_IDX   (0)  /*< Index for round robin threads    */
 
 /** Ready queue
  */
@@ -31,9 +31,9 @@ typedef struct _thread_ready_queue{
  */
 #define rdq_index2prio(idx) ((idx) - 1)
 
-void rdq_add_thread(thread_ready_queue_t *, thread_t *);
-void rdq_remove_thread(thread_ready_queue_t *, thread_t *);
-void rdq_rotate_queue(thread_ready_queue_t *);
-thread_t *rdq_find_runnable_thread(thread_ready_queue_t *);
-void rdq_init_ready_queue(thread_ready_queue_t *);
+void rdq_add_thread(thread_t *);
+void rdq_remove_thread(thread_t *);
+void rdq_rotate_queue(void);
+thread_t *rdq_find_runnable_thread(void);
+void rdq_init_ready_queue(void);
 #endif  /*  _KERN_READY_QUE_H  */

@@ -133,7 +133,7 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 	 * 属性情報のチェック
 	 */
 	if ( (attrp != NULL) &&
-	    ( (attrp->prio < RDQ_PRIORITY_MAX) && (attrp->prio > RDQ_USER_QUE_IDX) ) )
+	    ( (attrp->prio < RDQ_PRIORITY_MAX) && (attrp->prio > RDQ_USER_RR_IDX) ) )
 		(&thr->attr)->prio = attrp->prio;  /*  優先度を設定する  */
 	else
 		(&thr->attr)->prio = 0;

@@ -71,8 +71,7 @@ wque_wait_on_queue(wait_queue *wq) {
 	init_list_node(&ep->link);
 
 	psw_disable_and_save_interrupt(&psw);
-	if (THR_THREAD_ON_RDQ(current))
-		rdq_remove_thread(current->rdq, current);
+	rdq_remove_thread(current);
 	wque_add_thread(wq, ep, current);
 	
 	ep->thr->status = THR_TSTATE_WAIT;

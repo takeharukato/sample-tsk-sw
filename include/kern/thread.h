@@ -43,8 +43,6 @@ typedef struct _thread_attr{
 	.stack_size = stk_size,			\
 	}
 
-struct _thread_ready_queue;
-
 /** Thread definiion
  */
 typedef struct _thread{
@@ -52,15 +50,10 @@ typedef struct _thread{
 	tid_t                 tid;  /*< Thread ID                  */
 	list_t               link;  /*< link for thread queue      */
 	list_t           mgr_link;  /*< link for thread manager    */
-	struct _thread_ready_queue *rdq;  /*< Ready queue which the thread belongs to */
 	exit_code_t     exit_code;  /*< Exit code                  */
 	thread_attr_t        attr;  /*< Thread attribute           */
 	uptime_cnt          slice;  /*< Remaining time slices      */
 }thread_t;
-
-/** Confirm the thread is linked to the ready queue
- */
-#define THR_THREAD_ON_RDQ(thr) (thr->rdq != NULL)
 
 /** Thread queue
  */

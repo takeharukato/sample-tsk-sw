@@ -9,8 +9,6 @@
 
 #include <kern/kernel.h>
 
-static thread_ready_queue_t rd_queue;
-
 /** 実行可能なスレッドを選択する
     @retval NULL スケジュール可能なスレッドがいない(レディーキューが空)
     @retval 次に動作させるスレッドのスレッド管理情報
@@ -21,7 +19,7 @@ select_next_thread(void) {
 	thread_t *next;
 
 	psw_disable_and_save_interrupt(&psw);
-	next = rdq_find_runnable_thread(&rd_queue);
+	next = rdq_find_runnable_thread();
 
 	/* 実行可能なスレッドがなければ, アイドルスレッドを選択  */	
 	if (next == NULL)
@@ -40,7 +38,7 @@ sched_set_ready(thread_t *thr) {
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	rdq_add_thread(&rd_queue, thr);  /* レディーキューに追加する  */
+	rdq_add_thread(thr);  /* レディーキューに追加する  */
 	psw_restore_interrupt(&psw);
 }
 
@@ -51,7 +49,7 @@ sched_rotate_queue(void) {
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	rdq_rotate_queue(&rd_queue);
+	rdq_rotate_queue();
 	psw_restore_interrupt(&psw);	
 }
 
@@ -126,5 +124,5 @@ sched_delay_disptach(void) {
 void
 sched_init(void) {
 
-	rdq_init_ready_queue(&rd_queue);
+	rdq_init_ready_queue();
 }
