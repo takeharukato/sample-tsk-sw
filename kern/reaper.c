@@ -71,10 +71,8 @@ reaper_init_thread(void){
 	memset(&attr, 0, sizeof(thread_attr_t));
 
 	attr.prio = REAPER_THREAD_PRIO;  /*< 優先度付きのシステムプロセス  */
-	thrmgr_reserve_threadid(REAPER_THREAD_TID); /*< スレッドIDを予約する  */
 
-	thr_create_thread(&reaper_thread, &attr, reaper, NULL);
+	thr_create_thread(1, &reaper_thread, &attr, reaper, NULL);
 
-	thrmgr_put_threadid(reaper_thread->tid);  /*< 自動設定されたIDを返却する  */
 	reaper_thread->tid = REAPER_THREAD_TID;   /*< スレッドIDを設定する  */
 }

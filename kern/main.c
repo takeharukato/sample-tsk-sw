@@ -15,7 +15,7 @@ void
 kern_init(void) {
 	
 	idle_init_idle();
-	thrmgr_init_thread_manager();
+
 	sched_init();
 
 	reaper_init_thread();

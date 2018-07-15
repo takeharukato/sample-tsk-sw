@@ -93,7 +93,7 @@ thr_thread_switch(thread_t *prev, thread_t *next) {
     @retval ENOMEM スレッド生成に必要なメモリが不足している
  */
 int
-thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), void *arg){
+thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), void *arg){
 	int               rc;
 	void   *thread_stack;
 	thread_t        *thr;
@@ -125,7 +125,7 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 
 	set_thread_stack(thr, thread_stack, stack_size);
 
-	rc = thrmgr_get_threadid(&thr->tid);
+	thr->tid = id;
 	if (rc != 0)
 		goto free_thread_out;  /* ID獲得に失敗した  */
 
@@ -146,8 +146,6 @@ thr_create_thread(thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), 
 	thr->slice = CONFIG_TIMER_TIME_SLICE;
 
 	thr->status = THR_TSTATE_RUN;
-
-	thrmgr_thread_manager_add(thrmgr_refer_thread_manager(), thr);
 
 	sched_set_ready(thr);  /* レディーキューに追加する  */
 
@@ -177,7 +175,6 @@ thr_exit_thread(int code){
 	thr_unlink_thread(current);   /* レディーキューから外す  */
 	current->exit_code = (exit_code_t)code; /* 終了コードを設定  */
 	current->status = THR_TSTATE_EXIT;  /* スレッドを終了状態にする  */
-	thrmgr_thread_manager_remove(thrmgr_refer_thread_manager(), current);  /* スレッド一覧から取り除く  */
 
 	reaper_add_exit_thread(current);  /*< 回収スレッドにスレッドの回収を依頼する  */
 out:	
@@ -204,7 +201,6 @@ thr_destroy_thread(thread_t *thr){
 		goto out;
 	}
 
-	thrmgr_put_threadid(thr->tid); /* IDの返却          */
 	kfree(attr->stack_top);  /* スタックの開放          */
 	kfree(thr);              /* スレッド管理情報の開放  */
 out:	

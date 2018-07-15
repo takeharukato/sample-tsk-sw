@@ -23,7 +23,6 @@
 #include <kern/id_bitmap.h>
 #include <kern/wqueue.h>
 #include <kern/thread.h>
-#include <kern/thread_manager.h>
 #include <kern/ready_que.h>
 #include <kern/reaper.h>
 #include <kern/idle_thread.h>

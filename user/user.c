@@ -43,7 +43,7 @@ void
 user_init(void) {
 	thread_t *thrA, *thrB, *thrC;
 
-	thr_create_thread(&thrA, NULL, threadA, NULL);
-	thr_create_thread(&thrB, NULL, threadB, NULL);
-	thr_create_thread(&thrC, NULL, threadC, (void *)0x5a5a5a5a5a);
+	thr_create_thread(1, &thrA, NULL, threadA, NULL);
+	thr_create_thread(2, &thrB, NULL, threadB, NULL);
+	thr_create_thread(3, &thrC, NULL, threadC, (void *)0x5a5a5a5a5a);
 }
