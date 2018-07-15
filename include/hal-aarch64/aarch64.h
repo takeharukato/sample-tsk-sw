@@ -295,6 +295,52 @@
 #define AARCH64_MAIR_ATTR6_SHIFT    (48)     /*< ATTR6 */
 #define AARCH64_MAIR_ATTR7_SHIFT    (56)     /*< ATTR7 */
 
+#define AARCH64_MAIR_DEV_nGnRnE_ATTR (0)  /*< Device NoGather, 
+					    NoReorder, No Early Write Acknowledgement  */
+#define AARCH64_MAIR_DEV_nGnRE_ATTR  (1)  /*< Device NoGather, 
+					    NoReorder, Early Write Acknowledgement  */
+#define AARCH64_MAIR_MEM_NC_ATTR     (2)  /*< Non-cached memory  */
+#define AARCH64_MAIR_MEM_ATTR        (3)  /*< Cached memory  */
+
+#define AARCH64_MAIR_VAL                                                          \
+ ( (  ( AARCH64_MAIR_ATTR_UPPER_DEVMEM  | AARCH64_MAIR_ATTR_LOWER_DEV_NG_NR_NE )  \
+      << AARCH64_MAIR_ATTR0_SHIFT )                                             | \
+    ( (AARCH64_MAIR_ATTR_UPPER_DEVMEM  | AARCH64_MAIR_ATTR_LOWER_DEV_NG_NR_E)     \
+	<< AARCH64_MAIR_ATTR1_SHIFT )                                           | \
+  (  (AARCH64_MAIR_ATTR_UPPER_MEM_ONC  | AARCH64_MAIR_ATTR_LOWER_MEM_INC)         \
+      << AARCH64_MAIR_ATTR2_SHIFT )                                             | \
+  ( (AARCH64_MAIR_ATTR_UPPER_MEM_OWBNT | AARCH64_MAIR_ATTR_LOWER_MEM_IWBNTRW )    \
+      << AARCH64_MAIR_ATTR3_SHIFT ) )
+
+#define AARCH64_TCR_VAL ( ( ULL_C(0x0) << AARCH64_TCR_EL1_TBI0_SHIFT )       | \
+		( AARCH64_TCR_IPS_4GB << AARCH64_TCR_EL1_IPS_SHIFT )         | \
+		( AARCH64_TCR_TG1_4KB << AARCH64_TCR_EL1_TG1_SHIFT )         | \
+		( AARCH64_TCR_SH_INNER_SHARE << AARCH64_TCR_EL1_SH1_SHIFT )  | \
+		( AARCH64_TCR_ORGN_WBRAWA << AARCH64_TCR_EL1_ORGN1_SHIFT )   | \
+		( AARCH64_TCR_IRGN_WBRAWA << AARCH64_TCR_EL1_IRGN1_SHIFT )   | \
+		( AARCH64_TCR_EPD_DISABLE << AARCH64_TCR_EL1_EPD1_SHIFT )    | \
+		( AARCH64_TCR_A1_TTBR0 << AARCH64_TCR_EL1_A1_SHIFT )         | \
+		( AARCH64_TCR_TSZ_4G << AARCH64_TCR_EL1_T1SZ_SHIFT )         | \
+		( AARCH64_TCR_TG0_4KB << AARCH64_TCR_EL1_TG0_SHIFT )         | \
+		( AARCH64_TCR_SH_INNER_SHARE  << AARCH64_TCR_EL1_SH0_SHIFT ) | \
+		( AARCH64_TCR_ORGN_WBRAWA << AARCH64_TCR_EL1_ORGN0_SHIFT )   | \
+		( AARCH64_TCR_IRGN_WBRAWA << AARCH64_TCR_EL1_IRGN0_SHIFT )   | \
+		( AARCH64_TCR_EPD_ENABLE  << AARCH64_TCR_EL1_EPD0_SHIFT )    | \
+ 	        ( AARCH64_TCR_TSZ_4G << AARCH64_TCR_EL1_T0SZ_SHIFT )  )
+
+/* Mandatory reserved bits, Instruction cache enable, 
+ * Stack Alignment Check Enable for EL0, Stack Alignment Check Enable,
+ * Data cache enable, Alignment check enable, Enable MMU 
+ */
+#define AARCH64_SCTLR_VAL 					\
+	( AARCH64_SCTLR_RESVD_BITS |				\
+	  AARCH64_SCTLR_I          |				\
+	  AARCH64_SCTLR_SA0        |				\
+	  AARCH64_SCTLR_SA         |				\
+	  AARCH64_SCTLR_C          |				\
+	  AARCH64_SCTLR_A          |				\
+	  AARCH64_SCTLR_M )          
+
 #if !defined(ASM_FILE)
 #include <stdint.h>
 
@@ -341,6 +387,21 @@ hal_get_sp(void) {
 	__asm__ __volatile__("mov %0, sp\n\t" : "=r"(sp));
 
 	return (void *)sp;
+}
+
+static inline uint64_t 
+get_system_control_register(void) {
+	uint64_t reg;
+
+	__asm__ __volatile__ ("mrs %0, sctlr_el1\n\t" : "=r" (reg) :: "memory");
+	return reg;
+}
+
+static inline void
+set_system_control_register(uint64_t reg) {
+
+	__asm__ __volatile__ ("msr sctlr_el1, %0\n\t" : : "r" (reg) : "memory");
+
 }
 
 void aarch64_setup_vector(void);
