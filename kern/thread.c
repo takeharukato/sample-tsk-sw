@@ -9,8 +9,8 @@
 
 #include <kern/kernel.h>
 
-/** スレッド情報をクリアする
-    @param[in] tinfo スレッド情報のアドレス
+/** Clear specified thread information
+    @param[in] tinfo A pointer of the thread information
  */
 static void
 clr_thread_info(thread_info_t *tinfo) {
@@ -18,10 +18,10 @@ clr_thread_info(thread_info_t *tinfo) {
 	tinfo->preempt = 0;
 }
 
-/** スレッドのスタックアドレスを設定する
-    @param[in] thr       スレッド管理情報
-    @param[in] stack_top スタックの先頭アドレス
-    @param[in] size      スタックのサイズ
+/** Set up thread's kernel stack
+    @param[in] thr       Thread structure
+    @param[in] stack_top Top of the stack
+    @param[in] size      Stack size
  */
 static void
 set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
@@ -30,28 +30,42 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 
 	attr->stack_top = stack_top;
 	attr->stack_size = size;
-	tinfo = thr_refer_thread_info(thr);
-	clr_thread_info(tinfo);
-	tinfo->thr   = thr;
-	tinfo->magic = THR_THREAD_INFO_MAGIC;
-	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, STACK_ALIGN);  /* スタック位置設定  */
+
+	/*
+	 *  Adjust the start address of the stack to stack alignment  
+	 */
+
+	/* Calculate a first available address in the stack.
+	 * Note: thread_info structure exists on the bottom of stack.
+	 *       So this address is "the address of thread information - STACK_ALIGN."
+	 */
+	tinfo = thr_refer_thread_info(thr);  /* Thread info address */
+	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, STACK_ALIGN);  
+
+	clr_thread_info(tinfo); /* Clear thread information */
+	tinfo->thr   = thr;     /* Link thread and thread information to each other */
+	tinfo->magic = THR_THREAD_INFO_MAGIC;  /* This magic number indicate 
+						  the bottom of the stack */
 }
 
-/** スレッドを開始する
+/** Start a thread
+    @param[in] fn start function of the thread
+    @param[in] arg first argument of the thread
  */
 void
-thr_thread_start(void (*fn)(void *), void   *arg){
+thr_thread_start(void (*fn)(void *), void *arg){
 
-	psw_enable_interrupt();  /* 割り込みを許可する  */
-	fn(arg);                /* スレッド開始関数を呼び出す  */
-	thr_exit_thread(0);        /* スレッド開始関数から帰ったら自スレッドを終了する  */
-	/* ここには来ない. */
+	psw_enable_interrupt();  /* Enable interrupt by cpu flag  */
+	fn(arg);                 /* Call specified thread.  */
+	thr_exit_thread(0);      /* Termiate itself when start function end  */
+
+	/* Never come here */
 
 	return ;
 }
 
-/** スレッド管理情報のリンクを取り外す
-    @param[in] thr スレッド管理情報
+/** Remove a thread structure from a queue
+    @param[in] thr a pointer to a thread structure
  */
 void
 thr_unlink_thread(thread_t *thr){
@@ -62,8 +76,8 @@ thr_unlink_thread(thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** スレッド管理情報のスタック配置部分を参照する
-    @param[in] thr スレッド管理情報
+/** Refer thread information related to the specified thread.
+    @param[in] thr a pointer to the thread's data structure
  */
 thread_info_t *
 thr_refer_thread_info(thread_t *thr) {
@@ -72,9 +86,9 @@ thr_refer_thread_info(thread_t *thr) {
 	return 	(thread_info_t *)(attr->stack_top + attr->stack_size - sizeof(thread_info_t));
 }
 
-/** スレッドのコンテキストスイッチを行う
-    @param[in] prev スイッチされるスレッドのスレッド管理情報
-    @param[in] next スイッチするスレッドのスレッド管理情報
+/** Switch thread context
+    @param[in] prev The thread to be switched from
+    @param[in] next The thread to be switched to
  */
 void 
 thr_thread_switch(thread_t *prev, thread_t *next) {
@@ -83,34 +97,41 @@ thr_thread_switch(thread_t *prev, thread_t *next) {
 	    &(((thread_attr_t *)(&next->attr))->stack));
 	return;
 }
-/** スレッドを生成する
-    @param[in] thrp  スレッド管理情報のポインタ変数のアドレス
-    @param[in] attrp スレッド属性情報
-    @param[in] start スレッド開始関数のアドレス
-    @param[in] arg   スレッド開始関数の引数
-    @retval 0 正常終了
-    @retval ENOENT スレッドIDをすべて使い切った
-    @retval ENOMEM スレッド生成に必要なメモリが不足している
+/** Create thread
+    @param[in] thrp   Address of the pointer variable which points the thread structure 
+    @param[in] attrp  Thread attributes
+    @param[in] start  Start function of the thread
+    @param[in] arg    An argument of the start function of the thread
+    @retval 0 success
+    @retval ENOENT    The system exhaust ID
+    @retval ENOMEM    The system exhaust memory
  */
 int
-thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp, void (*start)(void *), void *arg){
+thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp, 
+    void (*start)(void *), void *arg){
 	int               rc;
 	void   *thread_stack;
 	thread_t        *thr;
 	size_t    stack_size;
 
 	/*
-	 * スタックのセットアップ
+	 * Setup a stack
 	 */
 	if ( (attrp == NULL) || (attrp->stack_top == NULL) || (attrp->stack_size == 0) ) {
 
+		/* 
+		 * Allocate new stack when user did not specify stack area
+		 */
 		stack_size = STACK_SIZE;
 		rc = kposix_memalign(&thread_stack, stack_size, stack_size);
 		if ( rc != 0 ) {
+
 			rc = ENOMEM;
 			goto out;
 		}
 	} else {
+
+		kassert(attrp->stack_size == STACK_SIZE);
 		thread_stack = attrp->stack_top;
 		stack_size = attrp->stack_size;
 	}
@@ -126,20 +147,24 @@ thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp, void (*start)
 	set_thread_stack(thr, thread_stack, stack_size);
 
 	thr->tid = id;
-	if (rc != 0)
-		goto free_thread_out;  /* ID獲得に失敗した  */
 
 	/*
-	 * 属性情報のチェック
+	 * Setup thread attribute
 	 */
 	if ( (attrp != NULL) &&
 	    ( (attrp->prio < RDQ_PRIORITY_MAX) && (attrp->prio > RDQ_USER_RR_IDX) ) )
-		(&thr->attr)->prio = attrp->prio;  /*  優先度を設定する  */
+		(&thr->attr)->prio = attrp->prio;  /*  Set thread priority  */
 	else
 		(&thr->attr)->prio = 0;
 
-	hal_setup_thread_function(thr, start, arg);  /* スレッド開始アドレスを設定する  */
+        /* 
+	 *  Setup start address of the thread function.
+	 */
+	hal_setup_thread_function(thr, start, arg);  
 	
+	/*
+	 * Initialize some data structute in this thread struct.
+	 */
 	init_list_node(&thr->link);
 	thr->exit_code = 0;
 
@@ -147,7 +172,7 @@ thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp, void (*start)
 
 	thr->status = THR_TSTATE_RUN;
 
-	sched_set_ready(thr);  /* レディーキューに追加する  */
+	sched_set_ready(thr);  /* Enqueue this thread into the ready queue  */
 
 	rc = 0;
 	*thrp = thr;
@@ -164,30 +189,36 @@ free_stack_out:
 	return rc;
 }
 
-/** 自スレッドの終了
-    @param[in] code 終了コード
+/** Terminate current thread
+    @param[in] code Terminate code
  */
 void
 thr_exit_thread(int code){
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	thr_unlink_thread(current);   /* レディーキューから外す  */
-	current->exit_code = (exit_code_t)code; /* 終了コードを設定  */
-	current->status = THR_TSTATE_EXIT;  /* スレッドを終了状態にする  */
 
-	reaper_add_exit_thread(current);  /*< 回収スレッドにスレッドの回収を依頼する  */
+	thr_unlink_thread(current);   /* Remove this thread from the ready_que  */
+	current->exit_code = (exit_code_t)code; /* Set terminate code  */
+	current->status = THR_TSTATE_EXIT;  /*  Set the thread state as terminate  */
+
+	reaper_add_exit_thread(current);  /*  We ask the reaper thread to 
+					   *  release remaining resources 
+					   *  (e.g., thread stack )
+					   */
 out:	
 	psw_restore_interrupt(&psw);
 
-	sched_schedule();  /* 自スレッド終了に伴うスケジュール  */
+	sched_schedule();  /*  This thread release its cpu, 
+			       thus we should call scheduler to find 
+			       the next runnable thread */
 
 	return;
 }
 
-/** スレッドの破棄
-   @param[in] thr 破棄するスレッドのスレッド管理情報 
-   @retval EBUSY 終了していないスレッドを破棄しようとした
+/** Destroy thread
+   @param[in] thr Thread to be destroyed
+   @retval EBUSY Specified thread has not terminated yet.
  */
 int
 thr_destroy_thread(thread_t *thr){
@@ -196,21 +227,25 @@ thr_destroy_thread(thread_t *thr){
 	thread_attr_t *attr = &thr->attr;
 
 	psw_disable_and_save_interrupt(&psw);
+
 	if ( thr->status != THR_TSTATE_DEAD ) {
+
 		rc = EBUSY;
 		goto out;
 	}
 
-	kfree(attr->stack_top);  /* スタックの開放          */
-	kfree(thr);              /* スレッド管理情報の開放  */
+	kfree(attr->stack_top);  /* Free its stack          */
+	kfree(thr);              /* Free thread structure   */
+
 out:	
 	psw_restore_interrupt(&psw);
+
 	return rc;
 }
 
-/** スレッドIDの獲得
-    @param[in] thr スレッド管理情報
-    @retval    スレッドID
+/** Get thread ID
+    @param[in] thr Thread structure
+    @retval    Thread ID
  */
 tid_t
 thr_get_tid(thread_t *thr) {
@@ -228,8 +263,8 @@ thr_get_current_tid(void) {
 	return current->tid;
 }
 
-/** スレッドキューの初期化
-    @param[in] que 初期化対象のスレッドキュー
+/** Initialize thread queue
+    @param[in] que Thread queue to be initialized
  */
 void
 thr_init_thread_queue(thread_queue_t *que) {
@@ -241,9 +276,9 @@ thr_init_thread_queue(thread_queue_t *que) {
 }
 
 
-/** スレッドキューにスレッドを追加する
-    @param[in] que 追加先のスレッドキュー
-    @param[in] thr スレッド管理情報
+/** Add a thread to a thread queue
+    @param[in] que Thread queue
+    @param[in] thr Thread structure
  */
 void 
 thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
@@ -254,9 +289,9 @@ thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** スレッドキューからスレッドを取り外す
-    @param[in] que 追加先のスレッドキュー
-    @param[in] thr スレッド管理情報
+/** Remove a thread from a thread queue
+    @param[in] que Thread queue
+    @param[in] thr Thread structure
  */
 void 
 thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
@@ -267,10 +302,10 @@ thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
 	psw_restore_interrupt(&psw);
 }
 
-/** スレッドキューが空であることを確認する
-    @param[in] que 確認対象のスレッドキュー
-    @retval 真 スレッドキューが空である
-    @retval 偽 スレッドキューが空でない
+/** Confirm the thread queue is empty
+    @param[in] que Thread queue
+    @retval True   Thread queue is empty
+    @retval False  Thread queue is NOT empty
  */
 int 
 thr_thread_queue_empty(thread_queue_t *que) {
@@ -284,10 +319,10 @@ thr_thread_queue_empty(thread_queue_t *que) {
 	return rc;
 }
 
-/** スレッドキューの先頭要素を取り出す
-    @param[in] que 取り出す対象のスレッドキュー
-    @return    スレッド管理情報のアドレス  スレッドキューの先頭要素がある場合
-    @return    NULL                        スレッドキューが空の場合
+/** Get the first thread in the thread queue
+    @param[in] que Thread queue
+    @return    Thread structure if thread queue is not empty
+    @return    NULL if thread queue is empty
  */
 thread_t *
 thr_thread_queue_get_top(thread_queue_t *que) {
@@ -296,7 +331,7 @@ thr_thread_queue_get_top(thread_queue_t *que) {
 	
 	psw_disable_and_save_interrupt(&psw);
 
-	if (list_is_empty(&que->head)) 
+	if ( list_is_empty(&que->head) ) 
 		thr =  NULL;
 	else 
 		thr = CONTAINER_OF(list_get_top(&que->head), thread_t, link);
