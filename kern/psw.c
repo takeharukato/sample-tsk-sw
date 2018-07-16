@@ -9,8 +9,8 @@
 
 #include <kern/kernel.h>
 
-/** CPUレベルで割込みを禁止する
-    @param[in] pswp 割り込み禁止前のプロセサステータスワード返却域
+/** Save processor status word and disable interrupt by CPU
+    @param[in] pswp Memory area to store the processor status word
  */
 void
 psw_disable_and_save_interrupt(psw_t *pswp) {
@@ -21,8 +21,8 @@ psw_disable_and_save_interrupt(psw_t *pswp) {
 	*pswp = psw;
 }
 
-/** CPUレベルで割込み状態を復元する
-    @param[in] pswp プロセサステータスワード返却域
+/** Restore processor status word
+    @param[in] pswp Memory area of the status of the processor status word
  */
 void
 psw_restore_interrupt(psw_t *pswp) {

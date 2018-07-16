@@ -3,7 +3,7 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  Thread manager                                                    */
+/*  Thread Management                                                 */
 /*                                                                    */
 /**********************************************************************/
 

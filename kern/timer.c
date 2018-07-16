@@ -26,7 +26,7 @@ timer_update_thread_time(void){
 
 	psw_disable_and_save_interrupt(&psw);
 
-	if ( current == idle_refer_idle_thread())
+	if ( current == idle_refer_idle_thread() )
 		goto out;
 
 	if ( current->slice > 0 )
