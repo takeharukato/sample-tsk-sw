@@ -1,7 +1,7 @@
 top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
-objects=bitops.o id_bitmap.o string.o malloc.o heap.o list.o printf.o
+objects=bitops.o string.o malloc.o heap.o list.o printf.o
 lib=libcommon.a
 
 all:${lib}

@@ -20,7 +20,6 @@
 #include <kern/kconsole.h>
 #include <kern/printf.h>
 #include <kern/malloc.h>
-#include <kern/id_bitmap.h>
 #include <kern/wqueue.h>
 #include <kern/thread.h>
 #include <kern/ready_que.h>
