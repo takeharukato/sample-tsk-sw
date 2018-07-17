@@ -25,8 +25,15 @@ static struct _x64_cpu{
 
 void
 hal_kernel_init(void){
+	thread_t *idle;
+	thread_attr_t *attrp;
 
-	init_x64_pic();
+	idle = idle_refer_idle_thread();
+	attrp = &idle->attr;
+	attrp->stack_top = &bsp_stack;
+	attrp->stack_size = STACK_SIZE;
+
+	x64_init_pic();
 	x64_timer_init();
 }
 
@@ -41,12 +48,11 @@ boot_main(uint64_t __attribute__ ((unused)) magic,
 	kprintf("OS sample for X64 booted.\n");
 
 	x64_map_kernel(CONFIG_HAL_MEMORY_SIZE_MB*1024UL*1024);
-	kprintf("kernel mapped \n");
 
 	x64_cpu.gdtp = kheap_sbrk(PAGE_SIZE);
 	kassert( x64_cpu.gdtp != HEAP_SBRK_FAILED );
-	init_segments(x64_cpu.gdtp, (tss64 **)(&x64_cpu.tssp));
-	init_idt(&x64_cpu.idtp);
+	x64_init_segments(x64_cpu.gdtp, (tss64 **)(&x64_cpu.tssp));
+	x64_init_idt(&x64_cpu.idtp);
 
 	kern_init();
 

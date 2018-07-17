@@ -171,7 +171,7 @@ i8259_update_irq_mask(intr_mask_state msk) {
     また, 初期状態として, PIC1とPIC2との接続箇所を除き割込みをマスク
     しておく。
  */
-int
+static int
 init_i8259_pic(struct _irq_ctrlr *ctrlr){
 	int i, rc;
 
@@ -203,7 +203,8 @@ init_i8259_pic(struct _irq_ctrlr *ctrlr){
 
 	return 0;
 }
-void
+
+static void
 finalize_i8259_pic(struct _irq_ctrlr *_ctrlr __attribute__((unused))){
 	int i;
 
@@ -237,7 +238,7 @@ i8259_find_pending_irq(struct _exception_frame *exc, irq_no *irqp){
 	return IRQ_FOUND;
 }
 void
-init_x64_pic(void){
+x64_init_pic(void){
 	int i;
 
 	init_i8259_pic(&i8259_ctrlr);

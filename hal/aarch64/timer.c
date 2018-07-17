@@ -121,7 +121,7 @@ aarch64_timer_handler(irq_no irq, struct _exception_frame *exc, void *private){
 }
 
 void
-hal_init_timer(uint64_t timer_interval_ms){
+aarch64_init_timer(uint64_t timer_interval_ms){
 
 	aarch64_timer_config.interval_us  = timer_interval_ms * 1000;
 	stop_timer();

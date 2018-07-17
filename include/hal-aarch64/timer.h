@@ -15,5 +15,5 @@
 #include <hal/exception.h>
 #include <hal/board.h>
 
-void hal_init_timer(uint64_t _timer_interval);
+void aarch64_init_timer(uint64_t _timer_interval);
 #endif  /*  _HAL_TIMER_H   */

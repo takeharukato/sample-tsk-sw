@@ -73,7 +73,7 @@ map_kernel_page(uintptr_t paddr, uintptr_t vaddr, uint64_t page_attr, void *kpgt
 /** Setup AArch64 MMU
  */
 void
-setup_mmu(void) {
+aarch64_setup_mmu(void) {
 	uint64_t      attr;
 	uint64_t       reg;
 	uintptr_t    paddr;

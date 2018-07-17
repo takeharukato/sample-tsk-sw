@@ -601,7 +601,7 @@ show_interrupt_vectors(void) {
 #endif  /*  DEBUG_SHOW_INTR_VECTOR  */
 
 void
-load_interrupt_descriptors(void *p, size_t size) {
+x64_load_interrupt_descriptors(void *p, size_t size) {
 	region_descriptor rd;
 
 	rd.rd_limit = size - 1;
@@ -612,7 +612,7 @@ load_interrupt_descriptors(void *p, size_t size) {
 }
 
 void
-init_idt(idt_descriptor **idtp) {
+x64_init_idt(idt_descriptor **idtp) {
 	int i;
 
 	for(i = 0; i < NR_TRAPS; ++i) {
@@ -630,7 +630,7 @@ init_idt(idt_descriptor **idtp) {
 #endif  /*  DEBUG_SHOW_INIT_IDT  */
 	show_interrupt_vectors();
 
-	load_interrupt_descriptors(&idt_tbl[0], sizeof(idt_descriptor) * NR_TRAPS );
+	x64_load_interrupt_descriptors(&idt_tbl[0], sizeof(idt_descriptor) * NR_TRAPS );
 
 	*idtp = &idt_tbl[0];
 }

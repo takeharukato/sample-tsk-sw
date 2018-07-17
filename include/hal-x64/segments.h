@@ -133,11 +133,11 @@ typedef struct _idt_descriptor{
 	.dpl  = (_dpl),                                                                 \
 	.present = 1,                                                                   \
 	}
-void init_segments(void *_local_page, tss64 **tssp);
-void init_idt(idt_descriptor **_idtp);
+void x64_init_segments(void *_local_page, tss64 **tssp);
+void x64_init_idt(idt_descriptor **_idtp);
+void x64_load_interrupt_descriptors(void *_p, size_t _size);
 void lgdtr(void *_gdtr, uint16_t _code_seg, uint16_t _data_seg);
 void lidtr(void *_idtr);
-void load_interrupt_descriptors(void *_p, size_t _size);
 void ltr(uint16_t seg);
 
 #endif  /*  !ASM_FILE  */

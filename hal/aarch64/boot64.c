@@ -9,24 +9,11 @@
 
 #include <kern/kernel.h>
 #include <kern/heap.h>
+
 #include <hal/hal.h>
 #include <hal/timer.h>
 #include <hal/kmap.h>
-
-static kconsole_t uart_console = KCONSOLE_INITILIZER(uart_console);
-
-extern void setup_mmu(void);
-extern void aarch64_kputchar(int ch);
-extern void *bsp_stack;
-
-/** パニック関数
- */
-static void
-boot_panic(const char *string) {
-
-	kprintf ("boot panic : %s \n", string);
-	while(1);
-}
+#include <hal/boot64.h>
 
 /** スレッドなどの初期化後のアーキ依存初期化処理
  */
@@ -41,7 +28,7 @@ hal_kernel_init(void) {
 	attrp->stack_size = STACK_SIZE;
 
 	aarch64_init_interrupt();
-	hal_init_timer(CONFIG_TIMER_INTERVAL_MS);
+	aarch64_init_timer(CONFIG_TIMER_INTERVAL_MS);
 }
 
 /** 64bit モードでのブートアップ
@@ -49,11 +36,13 @@ hal_kernel_init(void) {
 void 
 boot_main(void) {
 
-	uart_console.putchar = aarch64_kputchar;
-	register_kconsole(&uart_console);
+	aarch64_uart_init();
 
-	kprintf("boot\n");
-	setup_mmu();
+	kprintf("OS sample for AArch64 booted.\n");
+
+	aarch64_setup_mmu();
+
 	kern_init();
+
 	while(1);
 }

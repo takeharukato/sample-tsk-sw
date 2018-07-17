@@ -142,7 +142,7 @@ init_gdt_descriptor_table_entry(gdt_descriptor *gdtp, uintptr_t addr, uintptr_t 
 }
 
 void
-init_segments(void *gdtp, tss64 **tssp){
+x64_init_segments(void *gdtp, tss64 **tssp){
 	uint64_t                *gdt;
 	uint64_t                addr;
 

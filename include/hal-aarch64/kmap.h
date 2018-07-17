@@ -36,5 +36,6 @@
 	( KERN_STRAIGHT_PAGE_NEXT((addr)) - 1 )
 
 void map_kernel_page(uintptr_t _paddr, uintptr_t _vaddr, uint64_t _page_attr, void *_kpgtbl);
+void aarch64_setup_mmu(void);
 #endif  /*  ASM_FILE  */
 #endif  /*  _HAL_KMAP_H   */

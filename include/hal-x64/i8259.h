@@ -245,6 +245,6 @@
 
 typedef uint16_t intr_mask_state;
 void i8259_update_irq_mask(intr_mask_state _msk);
-void init_x64_pic(void);
+void x64_init_pic(void);
 #endif  /*  ASM_FILE  */
 #endif  /*  _HAL_I8259_H   */
