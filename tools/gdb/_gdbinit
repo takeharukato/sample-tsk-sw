@@ -72,3 +72,17 @@ b vector29
 b vector30
 b vector31
 end
+
+define x64_setup
+x64_target
+remote_target
+load_symbol
+set_x64_vectors
+end
+
+define aarch64_setup
+aarch64_target
+remote_target
+load_symbol
+set_aarch64_vectors
+end
