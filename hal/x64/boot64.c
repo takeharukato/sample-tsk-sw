@@ -18,9 +18,9 @@
 #include <hal/i8254.h>
 
 static struct _x64_cpu{
-	void *gdtp;
+	void           *gdtp;
 	idt_descriptor *idtp;
-	tss64 *tssp;
+	tss64          *tssp;
 }x64_cpu;
 
 void

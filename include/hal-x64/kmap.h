@@ -12,11 +12,13 @@
 
 #define KERN_HIGH_IO_AREA         (0xFE000000)
 #define KERN_HIGH_MEMORY_BASE     (0x100000000)
+
+#define KERN_VMA_BASE             (0x0000000000000000)  
 #define KERN_PHY_BASE             (0x0000000000000000)
+
 #define KERN_PHY_MIN              (0x0000000000000000)  /* 0 */
 #define KERN_PHY_MAX              (0x0000000040000000)  /* 1GiB */
 
-#define KERN_VMA_BASE             (0xFFFF800000000000)                                 
 #define KERN_HIGH_IO_BASE         (0xFFFFFFFFFC000000)
 #define KERN_HIGH_IO_SIZE         (KERN_HIGH_MEMORY_BASE - KERN_HIGH_IO_AREA)
                                      

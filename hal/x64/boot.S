@@ -82,11 +82,12 @@ setup_bsp_stack:
 		# Set thread info magic, cpu number
 		movl    $THR_THREAD_INFO_MAGIC, TI_MAGIC_OFFSET(%esp)
 		movl    $0x0, TI_PREEMPT_OFFSET(%esp)
-	
+setup_pre_gdt:	
         	# Setup pre-GDT
 		lgdt    pre_gdt_p
 		ljmp    $GDT_KERN_CODE32, $1f
 1:
+setup_pre_data_segments:	
         	# Setup data segment selectors
 		mov     $GDT_KERN_DATA32, %eax
 		mov     %ax, %ds
@@ -95,7 +96,7 @@ setup_bsp_stack:
 		xorl    %eax, %eax
 		mov     %ax, %fs
 		mov     %ax, %gs
-
+init_fpu:
 		# Init FPU
 		fninit
 
@@ -103,7 +104,7 @@ setup_bsp_stack:
 .extern pre_pdpt_low
 .extern pre_pdpt_high
 .extern pre_pd
-
+setup_pre_pgtbl:
 	        movl    $(pre_pdpt_low), %eax
 	        orl     $PAGE_PRESENT, %eax
 	        movl    %eax, pre_pml4
@@ -123,11 +124,12 @@ setup_bsp_stack:
 	        orl     $PAGE_PRESENT, %eax
 	        movl    %eax, pre_pd + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_PHY_BASE))
 	        movl    %eax, pre_pd + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_VMA_BASE))
-
+load_pre_pgtbl:
 		# Setup long mode page table
 	        movl $(pre_pml4), %eax
 	        movl %eax, %cr3
 
+setup_ctrl_regs:
 		#enable PAE and PSE and OSFXSR and OSXMMEXCPT 
 	        movl    %cr4, %eax              # read Control register 4
 	        orl     $CR4_PAE, %eax          # enable PAE
@@ -136,12 +138,14 @@ setup_bsp_stack:
 		orl	$CR4_OS_XMMEXCEPT, %eax # enable OSXMMEXCPT 
 	        movl    %eax, %cr4              # re-write
 
+enter_long_mode:
         	#enter long mode
 	        movl    $EFER, %ecx
 	        rdmsr   # read EFER
 	        bts     $8, %eax # enable long mode 
 	        wrmsr   # rewrite
 
+enable_mmu_and_fpu:
 	        #enable paging, disable FPU Emulation and enable monitor FPU
 		movl    $CR0_FPU_EMULATION, %ecx 
 		notl	%ecx
@@ -151,11 +155,12 @@ setup_bsp_stack:
 	        orl     $CR0_MONITOR_FPU, %eax
 	        movl    %eax, %cr0
 
-	        ljmp    $GDT_KERN_CODE64, $.entry_long
+jump_to_longmode:
+	        ljmp    $GDT_KERN_CODE64, $entry_long
 
 .code64
 .extern boot_entry_addr
-.entry_long:
+entry_long:
 	        # Setup Stack (Higher)
 	        movq    $(KERN_VMA_BASE), %rax
 	        addq    %rax, %rsp
