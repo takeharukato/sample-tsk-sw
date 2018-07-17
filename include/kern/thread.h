@@ -49,7 +49,7 @@ typedef struct _thread{
 	thr_state_t        status;  /*< Status of the thread       */
 	tid_t                 tid;  /*< Thread ID                  */
 	list_t               link;  /*< link for thread queue      */
-	list_t           mgr_link;  /*< link for thread manager    */
+	thread_info_t      *tinfo;  /*< link for thread info       */
 	exit_code_t     exit_code;  /*< Exit code                  */
 	thread_attr_t        attr;  /*< Thread attribute           */
 	uptime_cnt          slice;  /*< Remaining time slices      */
@@ -132,11 +132,7 @@ ti_refer_exc_count(thread_info_t *ti) {
  */
 static inline thread_info_t *
 get_current_thread_info(void) {
-	uint64_t sp;
-
-	sp = (uint64_t)hal_get_sp();
-	return (thread_info_t *)(TRUNCATE_ALIGN(sp, current->attr.stack_size) + 
-	    current->attr.stack_size - sizeof(thread_info_t));
+	return current->tinfo;
 }
 
 #endif  /*  _KERN_THREAD_H */

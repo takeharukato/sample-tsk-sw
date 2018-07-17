@@ -43,7 +43,8 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 	attr->stack = (void *)TRUNCATE_ALIGN(((void *)(tinfo)) - 1, STACK_ALIGN);  
 
 	clr_thread_info(tinfo); /* Clear thread information */
-	tinfo->thr   = thr;     /* Link thread and thread information to each other */
+	tinfo->thr = thr;     /* Link thread and thread information to each other */
+	thr->tinfo  = tinfo;
 	tinfo->magic = THR_THREAD_INFO_MAGIC;  /* This magic number indicate 
 						  the bottom of the stack */
 }

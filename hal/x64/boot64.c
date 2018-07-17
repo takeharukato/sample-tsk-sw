@@ -12,6 +12,7 @@
 #include <kern/heap.h>
 
 #include <hal/hal.h>
+#include <hal/thread_info.h>
 #include <hal/uart.h>
 #include <hal/kmap.h>
 #include <hal/segments.h>
@@ -30,8 +31,12 @@ hal_kernel_init(void){
 
 	idle = idle_refer_idle_thread();
 	attrp = &idle->attr;
+
 	attrp->stack_top = &bsp_stack;
 	attrp->stack_size = STACK_SIZE;
+
+	idle->tinfo = attrp->stack_top + idle->attr.stack_size - sizeof(thread_info_t);
+	idle->tinfo->thr = idle->tinfo;
 
 	x64_init_pic();
 	x64_timer_init();

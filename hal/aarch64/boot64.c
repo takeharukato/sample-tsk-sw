@@ -24,8 +24,12 @@ hal_kernel_init(void) {
 
 	idle = idle_refer_idle_thread();
 	attrp = &idle->attr;
+
 	attrp->stack_top = &bsp_stack;
 	attrp->stack_size = STACK_SIZE;
+
+	idle->tinfo = attrp->stack_top + idle->attr.stack_size - sizeof(thread_info_t);
+	idle->tinfo->thr = idle->tinfo;
 
 	aarch64_init_interrupt();
 	aarch64_init_timer(CONFIG_TIMER_INTERVAL_MS);
