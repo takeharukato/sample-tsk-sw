@@ -401,9 +401,17 @@ static inline void
 set_system_control_register(uint64_t reg) {
 
 	__asm__ __volatile__ ("msr sctlr_el1, %0\n\t" : : "r" (reg) : "memory");
-
 }
-
+#if defined(CONFIG_HAL)
+static inline void
+hal_suspend_cpu(void){
+	__asm__ __volatile__ ("wfi\n\t" ::: "memory");
+}
+#else
+static inline void
+hal_suspend_cpu(void){
+}
+#endif  /*  CONFIG_HAL  */
 void aarch64_setup_vector(void);
 #endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_AARCH64_H   */

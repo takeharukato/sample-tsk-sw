@@ -65,7 +65,6 @@ config CONFIG_TIMER_INTERVAL_MS
 config CONFIG_TIMER_TIME_SLICE
        int "Timer slice of threads (UNIT: ticks)"
        default 10
-       depends on CONFIG_HAL
        help
 	  This sets the value of the timer slice for each thread in the round robin scheduling class by tick counts.
 

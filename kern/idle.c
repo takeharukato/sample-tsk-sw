@@ -16,10 +16,21 @@ thread_t *current = &idle_thread;   /* Current variable indicate the idle thread
  */
 void
 do_idle_loop(void) {
+	thread_info_t *ti;
+	psw_t psw;
 
+	ti = hal_get_current_thread_info();
+
+	psw_enable_interrupt();
 	for(;;) {
-		
+
+		psw_disable_and_save_interrupt(&psw);
+
 		sched_schedule();
+
+		if ( !ti_check_need_dispatch(ti) )
+			hal_suspend_cpu();
+		psw_restore_interrupt(&psw);
 	}
 }
 
