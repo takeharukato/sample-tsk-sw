@@ -104,6 +104,7 @@
 #define GIC_PRI_SHIFT               (4)
 #define GIC_PRI_MASK                (0x0f)
 
+#define UART_BASE                   (QEMU_VIRT_UART_BASE)
 #define AARCH64_TIMER_IRQ           (27)  /** Timer IRQ  */
 
 

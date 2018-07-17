@@ -9,8 +9,9 @@
 
 #include <kern/kernel.h>
 
+#include <hal/board.h>
 
-volatile unsigned int * const UART0DR = (unsigned int *) 0x09000000;
+volatile uint32_t * const UART0DR = (uint32_t *)UART_BASE;
  
 /** 一文字出力関数
     @param[in] ch 出力する文字
