@@ -32,4 +32,4 @@ config CONFIG_HAL_MEMORY_SIZE_MB
        int
        default 128
        range 16 1024
-
+       depends on CONFIG_HAL

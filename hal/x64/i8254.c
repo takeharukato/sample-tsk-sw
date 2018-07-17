@@ -12,7 +12,6 @@
 #include <hal/port.h>
 #include <hal/i8254.h>
 
-#define HZ (100)
 #define X64_TIMER_IRQ (0)
 
 static int 
@@ -30,7 +29,7 @@ void
 x64_timer_init(void) {
 	uint32_t  divisor;
 
-	divisor = I8254_INPFREQ / HZ;
+	divisor = I8254_INPFREQ / (1000 / CONFIG_TIMER_INTERVAL_MS);
 	 
 	/* Square Wave(方形波ジェネレータ)モード, バイナリカウンタ, 16bitカウンタに設定  */
 	out_port_byte(I8254_PORT_MODECNTL, I8254_CMD_INTERVAL_TIMER);

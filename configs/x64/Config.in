@@ -2,15 +2,18 @@ config CONFIG_HAL_CFLAGS
        prompt "CFLAGS for Hardware Abstraction Layer"
        string
        default "-ffreestanding -m64 -mcmodel=large -mno-red-zone -mno-aes -mno-avx -mno-mmx -mno-sse -msoft-float -fno-asynchronous-unwind-tables -fno-omit-frame-pointer -fno-optimize-sibling-calls" 
+       depends on CONFIG_HAL
 
 config CONFIG_HAL_LDFLAGS
        string
        default "-Wl,-z,max-page-size=0x1000 -Wl,--build-id=none"
+       depends on CONFIG_HAL
 
 config CONFIG_HAL_OPT_FLAGS
        prompt "Additional optimize flags for HAL"
        string 
        default "-mtune=generic"
+       depends on CONFIG_HAL
 
 config CONFIG_HAL_PAGE_SIZE
        int
@@ -29,10 +32,12 @@ config CONFIG_HAL_MEMORY_SIZE_MB
        int
        default 128
        range 16 1024
+       depends on CONFIG_HAL
 
 choice
        prompt "Console serial port"
        default CONFIG_CON_SERIAL_COM1
+       depends on CONFIG_HAL
 
 config CONFIG_CON_SERIAL_COM1
        bool "COM1"
