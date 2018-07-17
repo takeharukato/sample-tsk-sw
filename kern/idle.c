@@ -19,7 +19,7 @@ do_idle_loop(void) {
 	thread_info_t *ti;
 	psw_t psw;
 
-	ti = hal_get_current_thread_info();
+	ti = get_current_thread_info();
 
 	ti_set_delay_dispatch(ti);
 

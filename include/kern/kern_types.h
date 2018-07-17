@@ -22,4 +22,7 @@ typedef int32_t          irq_prio;  /*< IRQ priority                 */
 typedef uint32_t         irq_attr;  /*< IRQ Attribute                */
 typedef uint8_t          precnt_t;  /*< Preemption counters          */
 typedef uint64_t       uptime_cnt;  /*< Jiffies                      */
+
+struct _thread;
+extern struct _thread *current;  /*< The pointer for the current thread  */
 #endif  /*  _KERN_KERN_TYPES_H  */

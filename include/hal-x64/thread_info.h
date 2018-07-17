@@ -23,7 +23,6 @@
 #if !defined(ASM_FILE)
 
 #include <kern/freestanding.h>
-
 #include <hal/addrinfo.h>
 #include <hal/psw.h>
 
@@ -40,6 +39,7 @@
 typedef uint64_t  preempt_state_t;  /*< dispatch state  */
 /** Thread info in kernel stack
  */
+struct _thread;
 typedef struct _thread_info{
 	preempt_state_t	preempt;   /*< Dispatch state  */
 	struct _thread     *thr;   /*< Thread info     */
@@ -99,17 +99,6 @@ hal_get_sp(void) {
 	__asm__ __volatile__("mov %%rsp, %0" : "=r" (sp));  
 
 	return (void *)sp;
-}
-
-/** 現在のスレッドのスレッド情報を得る
- */
-static inline thread_info_t *
-hal_get_current_thread_info(void) {
-	uint64_t sp;
-
-	sp = (uint64_t)hal_get_sp();
-	return (thread_info_t *)(TRUNCATE_ALIGN(sp, STACK_SIZE) + 
-	    STACK_SIZE - sizeof(thread_info_t));
 }
 
 #endif  /*  ASM_FILE  */

@@ -128,4 +128,15 @@ ti_refer_exc_count(thread_info_t *ti) {
 	return ti_refer_pre_count(ti, THR_EXCCNT_SHIFT);
 }
 
+/** 現在のスレッドのスレッド情報を得る
+ */
+static inline thread_info_t *
+get_current_thread_info(void) {
+	uint64_t sp;
+
+	sp = (uint64_t)hal_get_sp();
+	return (thread_info_t *)(TRUNCATE_ALIGN(sp, current->attr.stack_size) + 
+	    current->attr.stack_size - sizeof(thread_info_t));
+}
+
 #endif  /*  _KERN_THREAD_H */

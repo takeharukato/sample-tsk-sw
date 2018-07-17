@@ -66,7 +66,7 @@ sched_schedule(void) {
 	psw_disable_and_save_interrupt(&psw);
 
 #if defined(CONFIG_HAL)
-	ti = hal_get_current_thread_info();
+	ti = get_current_thread_info();
 	ti_set_preempt_active(ti);  /* Set preempt-active flag. */
 
 	if ( ( ti_refer_preempt_count(ti) > 0 ) ||
@@ -100,7 +100,7 @@ void
 sched_delay_disptach(void) {
 	thread_info_t *ti;
 
-	ti = hal_get_current_thread_info();
+	ti = get_current_thread_info();
 	/*
 	 * Delay dispatching
 	 */

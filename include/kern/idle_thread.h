@@ -13,8 +13,6 @@
 
 #include <kern/thread.h>
 
-extern thread_t *current;  /*< The pointer for the current thread  */
-
 void do_idle_loop(void);
 thread_t *idle_refer_idle_thread(void);
 void idle_init_idle(void);

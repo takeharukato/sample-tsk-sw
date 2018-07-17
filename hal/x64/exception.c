@@ -74,7 +74,7 @@ void
 hal_common_trap_handler(exception_frame *exc){
 	thread_info_t *ti;
 
-	ti = hal_get_current_thread_info();
+	ti = get_current_thread_info();
 
 	if ( exc->trapno < X86_NR_EXCEPTIONS ) {
 		

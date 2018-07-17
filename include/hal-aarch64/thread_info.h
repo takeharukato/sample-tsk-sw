@@ -94,16 +94,5 @@ ti_clr_preempt_active(thread_info_t *tinfo) {
 
 	tinfo->preempt &= ~THR_PRMPT_CTRL_PREEMPT_ACTIVE;
 }
-
-/** 現在のスレッドのスレッド情報を得る
- */
-static inline thread_info_t *
-hal_get_current_thread_info(void) {
-	uint64_t sp;
-
-	sp = (uint64_t)hal_get_sp();
-	return (thread_info_t *)(TRUNCATE_ALIGN(sp, STACK_SIZE) + 
-	    STACK_SIZE - sizeof(thread_info_t));
-}
 #endif  /*  ASM_FILE  */
 #endif  /*  _HAL_THREAD_INFO_H   */

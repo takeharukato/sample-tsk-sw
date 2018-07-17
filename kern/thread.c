@@ -131,7 +131,6 @@ thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp,
 		}
 	} else {
 
-		kassert(attrp->stack_size == STACK_SIZE);
 		thread_stack = attrp->stack_top;
 		stack_size = attrp->stack_size;
 	}
