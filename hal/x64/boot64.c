@@ -15,14 +15,19 @@
 #include <hal/uart.h>
 #include <hal/kmap.h>
 #include <hal/segments.h>
+#include <hal/i8254.h>
 
 static struct _x64_cpu{
 	void *gdtp;
 	idt_descriptor *idtp;
 	tss64 *tssp;
 }x64_cpu;
+
 void
 hal_kernel_init(void){
+
+	init_x64_pic();
+	x64_timer_init();
 }
 
 /** 64bit モードでのブートアップ
@@ -42,5 +47,8 @@ boot_main(uint64_t __attribute__ ((unused)) magic,
 	kassert( x64_cpu.gdtp != HEAP_SBRK_FAILED );
 	init_segments(x64_cpu.gdtp, (tss64 **)(&x64_cpu.tssp));
 	init_idt(&x64_cpu.idtp);
+
+	kern_init();
+
 	while(1);
 }

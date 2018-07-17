@@ -1,8 +1,7 @@
 top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
-subdirs-dist=templates
-subdirs=
+subdirs=gdb shell asmoffset templates x64
 
 all: kconfig/mconf
 	for dir in ${subdirs-build} ; do 	\

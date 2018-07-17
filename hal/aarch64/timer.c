@@ -116,6 +116,8 @@ aarch64_timer_handler(irq_no irq, struct _exception_frame *exc, void *private){
 
 	timer_update_uptime();
 	timer_update_thread_time();
+
+	return IRQ_HANDLED;
 }
 
 void
