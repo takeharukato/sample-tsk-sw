@@ -54,14 +54,25 @@ typedef uint64_t psw_t;  /*< プロセサステータスワード  */
 			     "popfq\n\t"                \
 	   ::"m"(psw));					\
    }while(0)
+/*
+ * Note: Strictly speaking, there is a race condition between sti and hlt.
+ *       But this might not cause serious problem in typical cases.
+ */
+#define hal_suspend_cpu() do{			\
+		__asm__ __volatile__(		\
+			"sti\n\t"		\
+			"hlt\n\t"		\
+			: : :"memory");		\
+}while(0)
 #else  /*  CONFIG_HAL  */
 #define psw_enable_interrupt()  do{}while(0)
 #define psw_disable_interrupt() do{}while(0)
 #define barrier() do{}while(0)
 #define __save_psw(psw) do{}while(0)
 #define __restore_psw(psw) do{}while(0)
-#endif  /*  CONFIG_HAL  */
 #define hal_suspend_cpu() do{}while(0)
+#endif  /*  CONFIG_HAL  */
+
 void psw_disable_and_save_interrupt(psw_t *);
 void psw_restore_interrupt(psw_t *);
 #endif  /*  _KERN_PSW_H   */
