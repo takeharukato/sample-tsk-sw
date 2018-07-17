@@ -198,7 +198,7 @@ thr_exit_thread(int code){
 
 	psw_disable_and_save_interrupt(&psw);
 
-	thr_unlink_thread(current);   /* Remove this thread from the ready_que  */
+	rdq_remove_thread(current);   /* Remove this thread from the ready_que  */
 	current->exit_code = (exit_code_t)code; /* Set terminate code  */
 	current->status = THR_TSTATE_EXIT;  /*  Set the thread state as terminate  */
 

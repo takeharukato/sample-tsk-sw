@@ -18,7 +18,7 @@ static int
 x64_timer_handler(irq_no irq __attribute__((unused)), 
     struct _exception_frame *exc __attribute__((unused)), 
     void *private __attribute__((unused))){
-
+	
 	timer_update_uptime();
 	timer_update_thread_time();
 	

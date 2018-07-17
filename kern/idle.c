@@ -21,15 +21,15 @@ do_idle_loop(void) {
 
 	ti = hal_get_current_thread_info();
 
+	ti_set_delay_dispatch(ti);
+
 	psw_enable_interrupt();
 	for(;;) {
 
 		psw_disable_and_save_interrupt(&psw);
-
-		sched_schedule();
-
 		if ( !ti_check_need_dispatch(ti) )
 			hal_suspend_cpu();
+		sched_schedule();
 		psw_restore_interrupt(&psw);
 	}
 }
