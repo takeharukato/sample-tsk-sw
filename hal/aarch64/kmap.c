@@ -50,8 +50,8 @@ map_kernel_page(uintptr_t paddr, uintptr_t vaddr, uint64_t page_attr, void *kpgt
 	}
 
 #if defined(DEBUG_SHOW_KERNEL_MAP)
-	kprintf("boot_map_kernel_page LVL1->LVL2 (%p, %p):lvl2addr=%p, ent=0x%lx\n",
-	    paddr, vaddr, lvl2addr, ent1);
+	kprintf("boot_map_kernel_page LVL1->LVL2 (%p, %p):idx=%d lvl2addr=%p, ent=0x%lx\n",
+	    paddr, vaddr, LEVEL1_INDEX(vaddr), lvl2addr, ent1);
 #endif  /*  DEBUG_SHOW_KERNEL_MAP  */
 
 	lvl2addr = PHY_TO_KERN_STRAIGHT(lvl2addr);
@@ -64,8 +64,9 @@ map_kernel_page(uintptr_t paddr, uintptr_t vaddr, uint64_t page_attr, void *kpgt
 	    paddr | page_attr | AARCH64_PGTBL_BLK_ENT);
 
 #if defined(DEBUG_SHOW_KERNEL_MAP)
-	kprintf("boot_map_kernel_page LVL2->PAGE (%p, %p):paddr=%p, ent=0x%lx\n",
-	    paddr, vaddr, paddr, get_level2_ent((level2_tbl *)lvl2addr, vaddr));
+	kprintf("boot_map_kernel_page LVL2->PAGE (%p, %p):idx=%d paddr=%p, ent=0x%lx\n",
+	    paddr, vaddr, LEVEL2_INDEX(vaddr), paddr, 
+	    get_level2_ent((level2_tbl *)lvl2addr, vaddr));
 #endif  /*  DEBUG_SHOW_KERNEL_MAP  */
 }
 
