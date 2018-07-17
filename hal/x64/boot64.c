@@ -14,7 +14,13 @@
 #include <hal/hal.h>
 #include <hal/uart.h>
 #include <hal/kmap.h>
+#include <hal/segments.h>
 
+static struct _x64_cpu{
+	void *gdtp;
+	idt_descriptor *idtp;
+	tss64 *tssp;
+}x64_cpu;
 void
 hal_kernel_init(void){
 }
@@ -28,7 +34,13 @@ boot_main(uint64_t __attribute__ ((unused)) magic,
 	uart8250_init();
 
 	kprintf("OS sample for X64 booted.\n");
+
 	x64_map_kernel(CONFIG_HAL_MEMORY_SIZE_MB*1024UL*1024);
 	kprintf("kernel mapped \n");
+
+	x64_cpu.gdtp = kheap_sbrk(PAGE_SIZE);
+	kassert( x64_cpu.gdtp != HEAP_SBRK_FAILED );
+	init_segments(x64_cpu.gdtp, (tss64 **)(&x64_cpu.tssp));
+	init_idt(&x64_cpu.idtp);
 	while(1);
 }

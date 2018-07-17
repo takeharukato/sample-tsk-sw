@@ -27,8 +27,3 @@ hal_common_trap_handler(exception_frame *exc){
 
 	return;
 }
-
-void
-x64_init_exception(void) {
-	
-}

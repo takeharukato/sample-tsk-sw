@@ -11,7 +11,7 @@ CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
 objects = thr_context.o ctxsw_glue.o
 ifeq ($(CONFIG_HAL),y)
-objects += boot.o boot64.o data.o early_console.o kmap.o vector.o
+objects += boot.o boot64.o data.o early_console.o kmap.o vector.o segment.o idt.o lgdtr.o ltr.o lidtr.o traps.o exception.o
 endif
 
 lib=libhal.a
