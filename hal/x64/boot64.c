@@ -36,7 +36,7 @@ hal_kernel_init(void){
 	attrp->stack_size = STACK_SIZE;
 
 	idle->tinfo = attrp->stack_top + idle->attr.stack_size - sizeof(thread_info_t);
-	idle->tinfo->thr = idle->tinfo;
+	idle->tinfo->thr = idle;
 
 	x64_init_pic();
 	x64_timer_init();
