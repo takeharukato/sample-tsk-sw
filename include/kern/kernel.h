@@ -32,7 +32,6 @@
 #include <kern/mutex.h>
 #include <kern/heap.h>
 #include <kern/timer.h>
-#include <kern/spinlock.h>
 #include <kern/blkio.h>
 
 #include <hal/hal.h>
