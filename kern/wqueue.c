@@ -85,6 +85,38 @@ wque_wait_on_queue(wait_queue *wq) {
 	return reason;
 }
 
+
+/** Wait an event with mutex lock
+    @param[in] wq  wait queue
+    @param[in] mtx mutex
+ */
+wq_reason
+wque_wait_on_event_with_mutex(wait_queue *wq, struct _mutex *mtx) {
+	psw_t psw;
+	wait_queue_entry ent, *ep = &ent;
+	wq_reason reason;
+
+	init_list_node(&ep->link);
+
+	psw_disable_and_save_interrupt(&psw);
+
+	rdq_remove_thread(current);
+	wque_add_thread(wq, ep, current);
+	ep->thr->status = THR_TSTATE_WAIT;
+
+	mutex_release(mtx); 	/* We must hold the mutex during queue operations */
+
+	sched_schedule() ;
+
+	mutex_hold(mtx);   	/* We must hold the mutex during queue operations */
+
+	wque_remove_entry(wq, ep);
+	reason = wq->reason;
+	psw_restore_interrupt(&psw);
+
+	return reason;
+}
+
 /** Wake up all the threads in a wait queue
     @param[in] wq  wait queue
     @param[in] reason wakeup reason

@@ -35,10 +35,12 @@ typedef struct _wait_queue_entry{
 #define __WAIT_QUEUE_INITIALIZER(wq)  \
 	{__LIST_HEAD_INITIALIZER(wq.head)}
 
+struct _mutex;
 void wque_add_thread(wait_queue *_wque, wait_queue_entry *_ent, struct _thread  *_thr);
 void wque_remove_entry(wait_queue *_wque, wait_queue_entry *_ent);
 void wque_init_wait_queue(wait_queue *_wque);
 wq_reason wque_wait_on_queue(wait_queue *_wque);
+wq_reason wque_wait_on_event_with_mutex(wait_queue *_wq, struct _mutex *_mtx);
 void wque_wakeup(wait_queue *_wque, wq_reason _reason);
 int  is_wque_empty(wait_queue *_wque);
 #endif  /*  _KERN_WQUEUE_H   */

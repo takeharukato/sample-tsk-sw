@@ -31,7 +31,6 @@ typedef struct _blk_buf {
 }blk_buf;
 
 typedef struct _buffer_cache{
-	/* spinlock lock;        */
 	mutex                  mtx;
 	struct _blk_buf  buf[NBUF]; /* Block Buffers */
 	list_head_t           head; /* Linked list of all buffers(most recently used)  */

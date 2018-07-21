@@ -20,6 +20,7 @@ typedef struct _mutex{
 }mutex;
 #define __MUTEX_INITIALIZER(mtx) \
 	{ 0, NULL, __WAIT_QUEUE_INITIALIZER(mtx.wq) }
+
 void mutex_init(mutex *mtx);
 void mutex_destroy(mutex *mtx);
 int  mutex_try_hold(mutex *mtx);
