@@ -35,8 +35,12 @@ threadB(void *arg) {
 }
 void
 threadC(void *arg) {
+	blk_buf *b;
 
 	kprintf("threadC\n");
+
+	b = buffer_cache_blk_read(0, 0);
+	kprintf("contents:%c\n", b->data[0]);
 }
 
 void

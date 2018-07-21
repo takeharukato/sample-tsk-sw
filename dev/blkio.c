@@ -16,7 +16,7 @@ static buffer_cache global_buffer_cache;
 // In either case, return B_BUSY buffer.
 /* equivalent to bget */
 static blk_buf *
-buffer_cache_blk_get(int32_t dev, uint64_t blockno){
+buffer_cache_blk_get(dev_id dev, blk_no blockno){
 	blk_buf *b;
 	list_t  *lp;
 	wq_reason rc;
@@ -76,13 +76,13 @@ found:
 // Return a B_BUSY buf with the contents of the indicated block.
 /* equivalent to bread */
 blk_buf *
-buffer_cache_blk_read(int32_t dev, uint64_t blockno){
+buffer_cache_blk_read(dev_id dev, blk_no blockno){
 	blk_buf *b;
 
 	b = buffer_cache_blk_get(dev, blockno);
 	if ( !(b->flags & B_VALID) ) {
 
-		//iderw(b); DIRTYなら書き込み, それ以外なら読み込み
+		iderw(b); /* Read buffer */
 	}
 
 	return b;
@@ -98,7 +98,7 @@ buffer_cache_blk_write(blk_buf *b){
 		panic("buffer_cache_blk_write");
 
 	b->flags |= B_DIRTY;
-	//iderw(b); // DIRTYなら書き込み, それ以外なら読み込み
+	iderw(b);  /* Write buffer */
 
 	return b;
 }

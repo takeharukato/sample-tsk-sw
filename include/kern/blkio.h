@@ -14,7 +14,7 @@
 #include <kern/mutex.h>
 
 #define BLK_DEV_NODEV     (-1)
-#define B_BUSY            (0x1)  /*< buffer is locked by some process   */
+#define B_BUSY            (0x1)  /*< buffer is locked                   */
 #define B_VALID           (0x2)  /*< buffer has been read from disk     */
 #define B_DIRTY           (0x4)  /*< buffer needs to be written to disk */
 #define BSIZE             (512)  /*< Sector                             */
@@ -36,4 +36,12 @@ typedef struct _buffer_cache{
 	list_head_t           head; /* Linked list of all buffers(most recently used)  */
 } buffer_cache;
 
+
+void memide_init(void);
+int iderw(blk_buf *_b);
+
+void buffer_cache_init(void);
+void buffer_cache_blk_release(blk_buf *_b);
+blk_buf *buffer_cache_blk_write(blk_buf *_b);
+blk_buf * buffer_cache_blk_read(dev_id dev, blk_no blockno);
 #endif  /*  _KERN_BLKIO_H   */
