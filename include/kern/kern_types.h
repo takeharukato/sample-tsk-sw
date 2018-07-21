@@ -23,7 +23,7 @@ typedef uint32_t         irq_attr;  /*< IRQ Attribute                */
 typedef uint8_t          precnt_t;  /*< Preemption counters          */
 typedef uint64_t       uptime_cnt;  /*< Jiffies                      */
 typedef obj_id_t           dev_id;  /*< Device ID                    */
-typedef obj_id_t           blk_no;  /*< Disk block number            */
+typedef int64_t            blk_no;  /*< Disk block number            */
 typedef int             blk_state;  /*< Disk block status            */
 typedef int              rw_flags;  /*< File access flags            */
 typedef int64_t           ref_cnt;  /*< In kernel reference count    */

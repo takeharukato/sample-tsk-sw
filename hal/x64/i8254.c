@@ -26,7 +26,7 @@ x64_timer_handler(irq_no irq __attribute__((unused)),
 }
 
 void
-x64_timer_init(void) {
+x64_init_timer(void) {
 	uint32_t  divisor;
 
 	divisor = I8254_INPFREQ / (1000 / CONFIG_TIMER_INTERVAL_MS);
