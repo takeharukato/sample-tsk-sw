@@ -22,6 +22,8 @@ menuconfig:hal configs/Config.in ${mconf}
 	${RM} include/kern/autoconf.h
 	${mconf} configs/Config.in || :
 
+${FSIMG_FILE}:
+	echo "This is test image file" > $@
 
 include/kern/autoconf.h: .config
 	${RM} -f $@
@@ -39,7 +41,7 @@ kernel.elf: kernel-dbg.elf
 	${CP}	$< $@
 	${STRIP} -g $@
 
-kernel-dbg.elf: include/kern/autoconf.h subsystem
+kernel-dbg.elf: include/kern/autoconf.h ${FSIMG_FILE} subsystem
 ifeq ($(CONFIG_HAL),y)
 	${CC} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\
@@ -71,7 +73,7 @@ clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\
 	done
-	${RM} *.o ${targets} *.tmp *.elf *.asm *.map *.iso
+	${RM} *.o ${FSIMG_FILE} ${targets} *.tmp *.elf *.asm *.map *.iso
 
 distclean:clean
 	for dir in ${cleandirs} ; do \

@@ -14,7 +14,8 @@
 #include <hal/timer.h>
 #include <hal/kmap.h>
 #include <hal/boot64.h>
-
+extern char _fsimg_start;
+extern char _fsimg_end;
 /** スレッドなどの初期化後のアーキ依存初期化処理
  */
 void
@@ -39,8 +40,10 @@ hal_kernel_init(void) {
  */
 void 
 boot_main(void) {
+	char c;
 
 	aarch64_uart_init();
+	c = *(char *)&_fsimg_start;
 
 	kprintf("OS sample for AArch64 booted.\n");
 

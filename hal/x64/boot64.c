@@ -18,6 +18,9 @@
 #include <hal/segments.h>
 #include <hal/i8254.h>
 
+extern char _fsimg_start;
+extern char _fsimg_end;
+
 static struct _x64_cpu{
 	void           *gdtp;
 	idt_descriptor *idtp;
@@ -47,8 +50,11 @@ hal_kernel_init(void){
 void 
 boot_main(uint64_t __attribute__ ((unused)) magic, 
     uint64_t __attribute__ ((unused)) mbaddr) {
+	char c;
 
 	uart8250_init();
+
+	c = *(char *)&_fsimg_start;
 
 	kprintf("OS sample for X64 booted.\n");
 
