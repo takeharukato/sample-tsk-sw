@@ -1,6 +1,6 @@
 CPU ?= `uname -m|sed -e "s/x86-64/x64/" -e "s/amd64/x64/" -e "s/x86_64/x64/" -e "s/i?86/ia32/"`
-
-CC=${CROSS_COMPILE}gcc
+HOST_CC=gcc
+CC=${CROSS_COMPILE}${HOST_CC}
 AR=${CROSS_COMPILE}ar
 LD=${CROSS_COMPILE}ld
 RANLIB=${CROSS_COMPILE}ranlib
@@ -16,6 +16,7 @@ RM=rm -f
 LN=ln
 ARFLAGS=rvc
 OPT_FLAGS=-O0 -g
+HOST_CFLAGS=${OPT_FLAGS}
 CFLAGS=${OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
 LDFLAGS=
 
