@@ -8,7 +8,7 @@ QEMU_DBG_OPT := -S -gdb tcp::1234
 
 CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
-objects = early_console.o thr_context.o ctxsw.o
+objects = early_console.o thr_context.o ctxsw.o fsimg.o
 ifeq ($(CONFIG_HAL),y)
 objects += boot.o boot64.o kmap.o data.o exception.o vector.o gic-pl390.o timer.o
 endif
@@ -22,6 +22,12 @@ ${lib}:${objects}
 	${RANLIB} $@
 
 ${top}/include/hal/asm-offset.h: gen-asm-offset
+
+fsimg.S: fsimg.S.in ${FSIMG_FILE} ${top}/.config
+	${RM} $@
+	${SED} -e 's|__fsimg_file__|${FSIMG_FILE}|g' 	\
+       -e 's|__PAGE_SIZE__|${CONFIG_HAL_PAGE_SIZE}|g' 	\
+	fsimg.S.in > $@
 
 asm-offset.s: asm-offset.c
 	${CC} ${ASM_OFFSET_CFLAGS} -S -o $@ $<

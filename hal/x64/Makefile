@@ -9,7 +9,7 @@ GRUB2_RESCUE=grub2-mkrescue
 
 CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
-objects = thr_context.o ctxsw_glue.o
+objects = thr_context.o ctxsw_glue.o fsimg.o
 ifeq ($(CONFIG_HAL),y)
 objects += boot.o boot64.o data.o early_console.o kmap.o vector.o segments.o \
 	 idt.o lgdtr.o ltr.o lidtr.o traps.o exception.o i8259.o i8254.o
@@ -38,6 +38,12 @@ vector.S: ${top}/tools/x64/gen-vec.py
 	${top}/tools/x64/gen-vec.py > $@
 
 ${top}/include/hal/asm-offset.h: gen-asm-offset
+
+fsimg.S: fsimg.S.in ${FSIMG_FILE}
+	${RM} $@
+	${SED} -e 's|__fsimg_file__|${FSIMG_FILE}|g' 	\
+	       -e 's|__PAGE_SIZE__|${CONFIG_HAL_PAGE_SIZE}|g' 		\
+	fsimg.S.in > $@
 
 kernel.lds: kernel.lds.in ${top}/.config
 	${RM} $@

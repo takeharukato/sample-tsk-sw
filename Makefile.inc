@@ -19,6 +19,8 @@ OPT_FLAGS=-O0 -g
 CFLAGS=${OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
 LDFLAGS=
 
+FSIMG_FILE=${top}/fsimg.img
+
 .PHONY: clean distclean hal tools menuconfig gtags
 
 .SUFFIXES: .o .c .S

@@ -72,6 +72,8 @@ asm-offset.s
 asm-offset.h
 build.log
 configs/hal
+fsimg.img
+fsimg.S
 #
 #LaTeX
 #
