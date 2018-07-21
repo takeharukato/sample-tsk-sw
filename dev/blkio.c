@@ -25,6 +25,7 @@ buffer_cache_blk_get(int32_t dev, uint64_t blockno){
 	psw_disable_and_save_interrupt(&psw);
 loop:
 	//spinlock_lock(&global_buffer_cache.lock);
+	mutex_hold(&global_buffer_cache.mtx);
 	list_for_each(lp, &global_buffer_cache, head){  // Is the block already cached?
 		
 		b = CONTAINER_OF(lp, blk_buf, mru);
@@ -34,11 +35,13 @@ loop:
 
 				b->flags |= B_BUSY;
 				//spinlock_unlock(&global_buffer_cache.lock);
+				mutex_release(&global_buffer_cache.mtx);
 				goto found;
 			} else {
 
 				//sleep(b, &global_buffer_cache.lock);
-				rc = wque_wait_on_queue(&b->waiters);
+				rc = wque_wait_on_event_with_mutex(&b->waiters, 
+				    &global_buffer_cache.mtx);
 				/* This buffer_cached might be updated */
 				goto loop;
 			}
@@ -59,6 +62,7 @@ loop:
 			b->blockno = blockno;
 			b->flags = B_BUSY;
 			//release(&bcache.lock);
+			mutex_release(&global_buffer_cache.mtx);
 			goto found;
 		}
 	}
@@ -110,6 +114,7 @@ buffer_cache_blk_release(blk_buf *b){
 		panic("buffer_cache_blk_release");
 
 	//acquire(&bcache.lock);
+	mutex_hold(&global_buffer_cache.mtx);
 	psw_disable_and_save_interrupt(&psw);
 
 	list_del(&b->mru);
@@ -124,6 +129,7 @@ buffer_cache_blk_release(blk_buf *b){
 	wque_wakeup(&b->waiters, WQUE_REASON_WAKEUP);
 
 	//release(&bcache.lock);
+	mutex_release(&global_buffer_cache.mtx);
 	psw_restore_interrupt(&psw);
 }
 
@@ -133,12 +139,12 @@ buffer_cache_init(void){
 	blk_buf *b;
 
 	//initlock(&bcache.lock, "bcache");
+	mutex_init(&global_buffer_cache.mtx);
 
 	/*
 	 * Create linked list of buffers
 	 */
 	init_list_head(&global_buffer_cache.head);
-	mutex_init(&global_buffer_cache.mtx);
 
 	for(b = &global_buffer_cache.buf[0]; b < &global_buffer_cache.buf[NBUF]; ++b){
 
