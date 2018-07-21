@@ -2,7 +2,7 @@ top=.
 include Makefile.inc
 targets=kernel.elf kernel-dbg.elf kernel.asm kernel.map
 
-subdirs=common kern dev hal user
+subdirs=common kern dev hal user tools/fs
 cleandirs=include ${subdirs} tools configs
 kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a hal/hal/libhal.a
 mconf=tools/kconfig/mconf
@@ -22,8 +22,11 @@ menuconfig:hal configs/Config.in ${mconf}
 	${RM} include/kern/autoconf.h
 	${mconf} configs/Config.in || :
 
-${FSIMG_FILE}:
-	echo "This is test image file" > $@
+tools/fs/mkfs: 
+	${MAKE} -C tools/fs mkfs
+
+${FSIMG_FILE}: tools/fs/mkfs
+	tools/fs/mkfs $@
 
 include/kern/autoconf.h: .config
 	${RM} -f $@
