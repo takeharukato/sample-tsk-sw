@@ -74,6 +74,7 @@ build.log
 configs/hal
 fsimg.img
 fsimg.S
+tools/fs/mkfs
 #
 #LaTeX
 #
