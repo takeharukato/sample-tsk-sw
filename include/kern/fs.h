@@ -13,6 +13,8 @@
 #include <kern/kern_types.h>
 #include <kern/blkio.h>
 
+#define FS_MAGIC_NR              (0xdeadfeed)
+
 #define FS_IADDR_DIRECT_MIN      (0)
 #define FS_IADDR_DIRECT_NR       (12)
 #define FS_IADDR_IN_DIRECT_MIN   (FS_IADDR_DIRECT_NR)
@@ -40,14 +42,14 @@ typedef struct _superblock {
 
 /* inode in disk
  */
-typedef struct _dinode{
+typedef struct _d_inode{
 	imode_t                 i_mode;
 	ref_cnt                i_nlink;
 	obj_id_t                 i_uid;
 	obj_id_t                 i_gid;
 	obj_size_t              i_size;
 	obj_size_t i_addr[FS_IADDR_NR];
-}dinode;
+}d_inode;
 
 
 #define RESV_BLOCK_NR        (1)  /*  First block is reserved */
@@ -58,11 +60,16 @@ typedef struct _dinode{
 #define BITS_PER_BLOCK       (BSIZE*8)
 
 // Inodes per block.
-#define INODES_PER_BLOCK     (BSIZE / sizeof(struct _dinode))
-// Block containing inode i
-#define INUM2BLOCK(i)        (((i) / INODES_PER_BLOCK) + RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR)
+#define INODES_PER_BLOCK     (BSIZE / sizeof(struct _d_inode))
+#define FNAME_MAX             (59)
 
-// Block containing bit for block b
-#define BITMAP_BLOCK(blkno, ninodes) \
-	(b/BITS_PER_BLOCK + (ninodes)/INODES_PER_BLOCK + RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR)
+#define ROOT_DENT_INO         (2)
+
+/** Directory entry in a disk
+ */
+typedef struct _d_dirent{
+	uint32_t           d_ino;
+	char    name[FNAME_MAX+1];
+}d_dirent;
+
 #endif  /*  _KERN_FS_H   */
