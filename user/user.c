@@ -36,11 +36,13 @@ threadB(void *arg) {
 void
 threadC(void *arg) {
 	blk_buf *b;
+	superblock *sb;
 
 	kprintf("threadC\n");
 
-	b = buffer_cache_blk_read(0, 0);
-	kprintf("contents:%c\n", b->data[0]);
+	b = buffer_cache_blk_read(0, SUPER_BLOCK_BLK_NO );
+	sb = (superblock *)&b->data[0];
+	kprintf("FS magic:0x%x\n", sb->s_magic);
 }
 
 void

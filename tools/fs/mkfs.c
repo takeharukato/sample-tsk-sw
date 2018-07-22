@@ -80,56 +80,6 @@ write_sector(blk_no blk, void *src, size_t size){
 }
 
 static void
-write_super_block(size_t size, obj_size_t nr_files) {
-	int64_t    inode_blocks;
-	int64_t    remains;
-	int64_t    data_blocks;
-
-	sb = refer_sector(SUPER_BLOCK_BLK_NO);
-
-	inode_blocks = ( nr_files + (INODES_PER_BLOCK - 1) )/ INODES_PER_BLOCK;
-
-	sb->s_max_size = size/BSIZE;
-	sb->s_ninodes = nr_files;
-	sb->s_imap_blocks = ( nr_files + ( BITS_PER_BLOCK - 1 ) ) / BITS_PER_BLOCK; 
-
-
-	remains = sb->s_max_size
-		- (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR)
-		- sb->s_imap_blocks
-		- inode_blocks;
-
-	/* Calculate the number of data blocks
-	 * Note: Remaining blocks = data blocks + the number of blocks for data block bitmap
-	 * the number of blocks for data block bitmap 
-	    = ( 'data blocks' + (BITS_PER_BLOCK - 1) ) / BITS_PER_BLOCK
-	 * Remaining blocks = 
-	 *                    s_max_size( blocks in the device) - sector0 - super block 
-	 *                    - inode bit map blocks - inodes
-	 * remains =  [data blocks] + 
-	              ( ( [data blocks] + (BITS_PER_BLOCK - 1) ) / BITS_PER_BLOCK )
-	 */ 
-	data_blocks = ( remains * BITS_PER_BLOCK - (BITS_PER_BLOCK - 1) ) / 
-		(BITS_PER_BLOCK + 1) ;
-	sb->s_bmap_blocks = ( data_blocks + (BITS_PER_BLOCK - 1) ) / BITS_PER_BLOCK;
-	sb->s_nblocks = (uint32_t)data_blocks;
-	sb->s_firstdata_block = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR)
-		+ sb->s_imap_blocks + inode_blocks + sb->s_bmap_blocks;
-
-	printf("File system size(unit:KiB): %u\n", size / 1024);
-	printf("The number of files: %u\n", nr_files);
-	printf("File system size(unit:blk): %u\n", sb->s_max_size);
-	printf("The number of inodes: %u\n", sb->s_ninodes);
-	printf("Inode bitmap blocks(unit:blk): %u\n", sb->s_imap_blocks);
-	printf("Block bitmap blocks(unit:blk): %u\n", sb->s_bmap_blocks);
-	printf("Inode blocks(unit:blk): %u\n", inode_blocks);
-	printf("First blocks(unit:blk): %u(remains:%u)\n", sb->s_firstdata_block, remains);
-	printf("Number of data blocks(unit:blk): %u\n", sb->s_nblocks);
-
-	return;
-}
-
-static void
 mark_inode_used(uint32_t ino){
 	blk_no  blk;
 	uint8_t buf[BSIZE];
@@ -254,6 +204,26 @@ mark_data_block_free(blk_no blk){
 	write_sector(bitmap_blk, &buf[0], BSIZE);
 }
 
+static int
+read_disk_data_block(blk_no dblk, uint8_t *buf) {
+	blk_no blk;
+
+	blk = sb->s_firstdata_block + dblk;
+	read_sector(blk, &buf[0], BSIZE);
+
+	return 0;
+}
+
+static int
+write_disk_data_block(blk_no dblk, uint8_t *buf) {
+	blk_no blk;
+
+	blk = sb->s_firstdata_block + dblk;
+	write_sector(blk, &buf[0], BSIZE);
+
+	return 0;
+}
+
 static int 
 find_free_data_block(blk_no *blkp) {
 	int     rc;
@@ -288,7 +258,7 @@ find_free_data_block(blk_no *blkp) {
 }
 
 static int
-read_disk_inode(uint32_t ino, dinode *dinodep) {
+read_disk_inode(uint32_t ino, d_inode *dinodep) {
 	int     rc;
 	int64_t  i;
 	blk_no blk;
@@ -302,13 +272,13 @@ read_disk_inode(uint32_t ino, dinode *dinodep) {
 
 	read_sector(blk, &buf[0], BSIZE);
 
-	memmove(dinodep, ( (dinode *)&buf[0] ) + index , sizeof(dinode));
+	memmove(dinodep, ( (d_inode *)&buf[0] ) + index , sizeof(d_inode));
 
 	return 0;
 }
 
 static int
-write_disk_inode(uint32_t ino, dinode *dinodep) {
+write_disk_inode(uint32_t ino, d_inode *dinodep) {
 	int     rc;
 	int64_t  i;
 	blk_no blk;
@@ -322,7 +292,7 @@ write_disk_inode(uint32_t ino, dinode *dinodep) {
 
 	read_sector(blk, &buf[0], BSIZE);
 
-	memmove( ( (dinode *)&buf[0] ) + index, dinodep, sizeof(dinode));
+	memmove( ( (d_inode *)&buf[0] ) + index, dinodep, sizeof(d_inode));
 
 	write_sector(blk, &buf[0], BSIZE);
 
@@ -330,7 +300,7 @@ write_disk_inode(uint32_t ino, dinode *dinodep) {
 }
 
 static int
-get_free_inode(uint32_t *inop, dinode *dinodep){
+get_free_inode(uint32_t *inop){
 	int       rc;
 	uint32_t ino;
 
@@ -340,19 +310,108 @@ get_free_inode(uint32_t *inop, dinode *dinodep){
 
 	mark_inode_used(ino);
 
-	read_disk_inode(ino, dinodep);
-
 	*inop = ino;
 	rc = 0;
 error_out:
 	return rc;
 }
 
+static void
+write_root_dirent(void){
+	blk_no blk;
+	d_inode root_inode;
+	uint8_t buf[BSIZE];
+	d_dirent *dentp;
+
+	mark_inode_used(ROOT_DENT_INO);
+	find_free_data_block(&blk);
+
+	memset(&root_inode, 0, sizeof(d_inode));
+
+	root_inode.i_mode = FS_IMODE_DIR;
+	root_inode.i_nlink = 1;
+	root_inode.i_size = BSIZE;
+	root_inode.i_addr[0]=blk;
+
+	memset(&buf[0], 0, BSIZE);
+
+	dentp = (d_dirent *)&buf[0];
+	dentp->d_ino = ROOT_DENT_INO;
+	memmove(&dentp->name[0], ".", 2);
+	++dentp;
+
+	dentp->d_ino = ROOT_DENT_INO;
+	memmove(&dentp->name[0], "..", 3);
+	
+	write_disk_data_block(blk, &buf[0]);
+	write_disk_inode(ROOT_DENT_INO, &root_inode);
+}
+
+static void
+init_super_block(size_t size, obj_size_t nr_files) {
+	int64_t    inode_blocks;
+	int64_t    remains;
+	int64_t    data_blocks;
+
+	inode_blocks = ( nr_files + (INODES_PER_BLOCK - 1) )/ INODES_PER_BLOCK;
+
+	sb->s_max_size = size/BSIZE;
+	sb->s_ninodes = nr_files;
+	sb->s_imap_blocks = ( nr_files + ( BITS_PER_BLOCK - 1 ) ) / BITS_PER_BLOCK; 
+
+
+	remains = sb->s_max_size
+		- (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR)
+		- sb->s_imap_blocks
+		- inode_blocks;
+
+	/* Calculate the number of data blocks
+	 * Note: Remaining blocks = data blocks + the number of blocks for data block bitmap
+	 * the number of blocks for data block bitmap 
+	    = ( 'data blocks' + (BITS_PER_BLOCK - 1) ) / BITS_PER_BLOCK
+	 * Remaining blocks = 
+	 *                    s_max_size( blocks in the device) - sector0 - super block 
+	 *                    - inode bit map blocks - inodes
+	 * remains =  [data blocks] + 
+	              ( ( [data blocks] + (BITS_PER_BLOCK - 1) ) / BITS_PER_BLOCK )
+	 */ 
+	data_blocks = ( remains * BITS_PER_BLOCK - (BITS_PER_BLOCK - 1) ) / 
+		(BITS_PER_BLOCK + 1) ;
+	sb->s_bmap_blocks = ( data_blocks + (BITS_PER_BLOCK - 1) ) / BITS_PER_BLOCK;
+	sb->s_nblocks = (uint32_t)data_blocks;
+	sb->s_firstdata_block = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR)
+		+ sb->s_imap_blocks + inode_blocks + sb->s_bmap_blocks;
+
+	sb->s_magic = FS_MAGIC_NR;
+
+	mark_inode_used(0);
+	mark_inode_used(1);
+
+	printf("File system size(unit:KiB): %u\n", size / 1024);
+	printf("The number of files: %u\n", nr_files);
+	printf("File system size(unit:blk): %u\n", sb->s_max_size);
+	printf("The number of inodes: %u\n", sb->s_ninodes);
+	printf("Inode bitmap blocks(unit:blk): %u\n", sb->s_imap_blocks);
+	printf("Block bitmap blocks(unit:blk): %u\n", sb->s_bmap_blocks);
+	printf("Inode blocks(unit:blk): %u\n", inode_blocks);
+	printf("First blocks(unit:blk): %u\n", sb->s_firstdata_block);
+	printf("Number of data blocks(unit:blk): %u\n", sb->s_nblocks);
+
+	return;
+}
+
 static void 
 write_fs_image(size_t size, obj_size_t nr_files) {
+	uint8_t buf[BSIZE];
 
-	write_super_block(size, nr_files);
-	
+
+	init_super_block(size, nr_files);
+	write_root_dirent();
+
+	memset(&buf[0], 0, BSIZE);
+	memmove(&buf[0], sb, sizeof(superblock));
+	write_sector(SUPER_BLOCK_BLK_NO, &buf[0], BSIZE);
+
 	return;
 }
 
@@ -386,6 +445,8 @@ main(int argc, char *argv[]) {
            printf("output size = %d\n", size);
 
 	   map_file(imgfile, size);
+
+	   sb = refer_sector(SUPER_BLOCK_BLK_NO);
 
 	   write_fs_image(size, nr_files);
 
