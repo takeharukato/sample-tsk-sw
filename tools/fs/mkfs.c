@@ -52,9 +52,6 @@ map_file(const char *fname, size_t size){
 		fprintf(stderr, "Can not map file:%s\n", fname);
 		exit(EXIT_FAILURE);
 	}
-
-	/* write magic into block 0 */
-	memmove(fsimage_area, "This is a sample", strlen("This is a sample")+1);
 }
 
 static void*
