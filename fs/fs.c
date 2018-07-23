@@ -9,6 +9,8 @@
 
 #include <kern/kernel.h>
 
+inode_cache icache;
+
 void
 read_superblock(dev_id dev, superblock *sb){
     blk_buf *b;
@@ -87,5 +89,17 @@ release_data_block(dev_id dev, blk_no blk) {
 	buffer_cache_blk_release(b);
 
 	return 0;
+}
+
+
+void
+icache_init(void) {
+	int i;
+
+	mutex_init(&icache.mtx);
+	for(i = 0; NINODE > i; ++i) {
+
+		memset(&icache.inode, 0, sizeof(inode));
+	}
 }
 
