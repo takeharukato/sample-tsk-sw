@@ -72,4 +72,28 @@ typedef struct _d_dirent{
 	char    name[FNAME_MAX+1];
 }d_dirent;
 
+#define I_BUSY                 (0x1)
+#define I_VALID                (0x2)
+
+// in-memory copy of an inode
+typedef struct _inode {
+	dev_id       dev;  /* Device number   */
+	uint32_t    inum;  /* Inode number    */
+	ref_cnt      ref;  /* Reference count */
+	int        flags;  /* I_BUSY, I_VALID */
+
+	/* copy of disk inode  */
+	imode_t                 i_mode;
+	ref_cnt                i_nlink;
+	obj_id_t                 i_uid;
+	obj_id_t                 i_gid;
+	obj_size_t              i_size;
+	obj_size_t i_addr[FS_IADDR_NR];
+}inode;
+#define NINODE (1024)
+typedef struct _inode_cache{
+	mutex mtx;
+	inode inode[NINODE];
+} inode_cache;
+
 #endif  /*  _KERN_FS_H   */
