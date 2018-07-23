@@ -28,8 +28,15 @@
    ･割込み・例外の前後では汎用レジスタを全て退避復元する
    （カーネルが使用するレジスタを全て保証する必要がある)
 
-   
-   
+6. mkfsを以下を使用するように修正
+   void readsb(int dev, struct superblock *sb)   
+   void bzero(int dev, int bno)
+   uint balloc(uint dev)
+   void bfree(int dev, uint b)
+   struct buf *bread(uint dev, uint blockno)
+   void bwrite(struct buf *b)
+   void brelse(struct buf *b)
+
 
    
 
