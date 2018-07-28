@@ -15,7 +15,13 @@
 #define UL_C(val)    (val)         /*< unsigned long constant in asm */
 #define ULL_C(val)   (val)         /*< unsigned long long constant in asm */
 
-#define vector_base_align  .balign  0x1000 /*< The vector base must be placed in 4096 bytes align */
+#define vector_base_align  .balign  0x800 /*< The vector base must be placed in 
+					    2048 bytes aligned address because 
+					    0-10 bits in VBAR_ELx are reserved as zero.
+					    See D10.2.116 VBAR_EL1, 
+					    Vector Base Address Register (EL1)
+					    in ARM Architecture Reference Manual ARMv8,
+					    for ARMv8-A architecture profile.  */
 #define vector_entry_align .balign  0x80   /*< Each vector entry must be placed in 128 bytes align */
 #define text_align	   .balign  0x4    /*< Text alignment */
 
