@@ -21,4 +21,4 @@ clean:
 	${RM} *.o ${fsutils} ${objects} *.img
 
 distclean: clean
-	${RM} *~
+	${RM} \#* *~

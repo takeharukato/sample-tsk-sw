@@ -21,4 +21,4 @@ clean:
 	${RM} ${objects} ${lib}
 
 distclean: clean
-	${RM} *~
+	${RM} \#* *~

@@ -2,7 +2,7 @@ top=.
 include Makefile.inc
 targets=kernel.elf kernel-dbg.elf kernel.asm kernel.map
 
-subdirs=common kern dev hal user tools/fs
+subdirs=common kern dev fs hal user tools/fs
 cleandirs=include ${subdirs} tools configs
 kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a hal/hal/libhal.a
 mconf=tools/kconfig/mconf
@@ -82,7 +82,7 @@ distclean:clean
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} distclean ;\
 	done
-	${RM}  \#* *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
+	${RM} \#* *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
 
 gtags:
 	${GTAGS} -v

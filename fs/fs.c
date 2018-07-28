@@ -91,7 +91,6 @@ release_data_block(dev_id dev, blk_no blk) {
 	return 0;
 }
 
-
 void
 icache_init(void) {
 	int i;
@@ -99,7 +98,71 @@ icache_init(void) {
 	mutex_init(&icache.mtx);
 	for(i = 0; NINODE > i; ++i) {
 
-		memset(&icache.inode, 0, sizeof(inode));
+		memset(&icache.inode[i], 0, sizeof(inode));
+		wque_init_wait_queue(&(icache.inode[i].waiters));
 	}
 }
 
+/** Find the inode by an i-node number
+ */
+static inode* 
+inode_get (dev_id dev, uint32_t inum){
+	int             i;
+	inode *ip, *empty;
+
+	mutex_hold(&icache.mtx);
+
+	for (i = 0, empty = NULL; NINODE > i; ++i) {
+
+		/* Search in the inode cache */
+		ip = &icache.inode[i];
+		if ( ( ip->ref > 0 ) && ( ip->dev == dev ) && ( ip->inum == inum ) ) {
+			
+			++ip->ref;  /* Found */
+			goto out;
+		}
+
+		if ( ( empty == NULL ) && ( ip->ref == 0 ) ) 
+			empty = ip;    /*  First empty slot.  */
+	}
+	
+	kassert( empty != NULL );
+
+	ip = empty;
+	ip->dev = dev;
+	ip->inum = inum;
+	ip->ref = 1;
+	ip->flags = 0;
+out:
+	mutex_release(&icache.mtx);
+	return ip;
+}
+
+/** Decrement inode reference by an i-node number
+ */
+void
+inode_put(inode *ip){
+
+	mutex_hold(&icache.mtx);
+	if ( ( ip->ref == 1 ) && ( ip->flags & I_VALID ) && ( ip->i_nlink == 0 ) ){
+
+		kassert( !(ip->flags & I_BUSY) );
+
+		/*
+		 * i-node has no links.
+		 * Free file data blocks and then free inode.
+		 */
+		ip->flags |= I_BUSY;
+		mutex_release(&icache.mtx);
+
+		itrunc(ip);  /* Free data blocks */
+		iupdate(ip);
+
+		mutex_hold(&icache.mtx);
+		ip->flags = 0;
+		wque_wakeup(&ip->waiters, WQUE_REASON_WAKEUP);
+	}
+
+	--ip->ref;
+	mutex_release(&icache.mtx);
+}

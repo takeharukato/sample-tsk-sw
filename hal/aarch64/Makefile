@@ -54,4 +54,4 @@ clean:
 	${RM} *.o ${lib} asm-offset.s ${top}/include/hal/asm-offset.h
 
 distclean:clean
-	${RM} *~
+	${RM} \#* *~

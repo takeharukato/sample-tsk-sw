@@ -22,4 +22,4 @@ distclean:clean
 		${RM} $${dir}/*~;	\
 	done
 	cd kconfig && $(MAKE) distclean
-	${RM} *~
+	${RM} \#* *~

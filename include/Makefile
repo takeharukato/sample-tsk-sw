@@ -19,4 +19,4 @@ distclean:hal clean
 	${MAKE} -C $${dir} distclean ;\
 	done
 	${RM} hal
-	${RM} *~ autoconf.h
+	${RM} \#* *~ autoconf.h

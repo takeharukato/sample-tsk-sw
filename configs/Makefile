@@ -11,5 +11,5 @@ hal:
 clean:
 
 distclean:clean
-	${RM} *~ hal
+	${RM} \#* *~ hal
 

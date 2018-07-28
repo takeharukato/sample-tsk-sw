@@ -13,7 +13,7 @@
 #include <kern/kern_types.h>
 #include <kern/blkio.h>
 
-#define FS_MAGIC_NR              (0xdeadfeed)
+#define FS_MAGIC_NR              (0xfeedf5)
 
 #define FS_IADDR_DIRECT_MIN      (0)
 #define FS_IADDR_DIRECT_NR       (12)
@@ -81,7 +81,7 @@ typedef struct _inode {
 	uint32_t    inum;  /* Inode number    */
 	ref_cnt      ref;  /* Reference count */
 	int        flags;  /* I_BUSY, I_VALID */
-
+	wait_queue waiters;  /* Waiters on this inode */
 	/* copy of disk inode  */
 	imode_t                 i_mode;
 	ref_cnt                i_nlink;

@@ -21,4 +21,4 @@ clean:
 	${RM} *~
 
 distclean:clean
-	${RM} *~
+	${RM} \#* *~

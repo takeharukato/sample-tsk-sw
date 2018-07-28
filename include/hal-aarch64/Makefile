@@ -6,4 +6,4 @@ all:
 clean:
 
 distclean:
-	${RM} *~
+	${RM} \#* *~
