@@ -118,12 +118,22 @@ setup_pre_pgtbl:
 	        movl    %eax, pre_pdpt_low  + (PGTBL_ENTRY_SIZE * PDPT_INDEX(KERN_PHY_BASE))
 	        movl    %eax, pre_pdpt_high + (PGTBL_ENTRY_SIZE * PDPT_INDEX(KERN_VMA_BASE))
 
+		xorl	%ecx, %ecx
 	        xorl    %eax, %eax    # physical_address 0x0 ...
-	        orl     $PAGE_2MB, %eax
+fill_pre_pgtbl:
+		orl     $PAGE_2MB, %eax
 	        orl     $PAGE_WRITABLE, %eax
 	        orl     $PAGE_PRESENT, %eax
-	        movl    %eax, pre_pd + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_PHY_BASE))
-	        movl    %eax, pre_pd + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_VMA_BASE))
+		movl	$(pre_pd) + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_PHY_BASE)), %ebx
+		addl	%ecx, %ebx
+		movl    %eax, (%ebx)
+		movl	$(pre_pd) + (PGTBL_ENTRY_SIZE * PD_INDEX(KERN_VMA_BASE)), %ebx
+		addl	%ecx, %ebx
+		movl    %eax, (%ebx)
+		addl	$0x200000, %eax /* Next 2MiB page */
+		addl	$8, %ecx /* 8 means PGTBL_ENTRY_SIZE */
+		cmpl	$4096, %ecx /* 4096 means page size */
+		jne	fill_pre_pgtbl
 load_pre_pgtbl:
 		# Setup long mode page table
 	        movl $(pre_pml4), %eax
