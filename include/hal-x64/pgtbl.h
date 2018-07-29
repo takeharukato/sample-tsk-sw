@@ -24,7 +24,7 @@
 #define PDPT_INDEX(vaddr)       ( ( (vaddr) >> PDPT_INDEX_SHIFT ) & PDPT_INDEX_MASK)
 #define PML4_INDEX(vaddr)       ( ( (vaddr) >> PML4_INDEX_SHIFT ) & PML4_INDEX_MASK)
 #define PGTBL_ENTRY_SIZE        (0x8)
-#define PGTBL_ENTRY_MAX         ( PAGE_SIZE / (0x8) )
+#define PGTBL_ENTRY_MAX         ( PAGE_SIZE / (PGTBL_ENTRY_SIZE) )
 
 #define PAGE_PRESENT            (1 << 0)
 #define PAGE_WRITABLE           (1 << 1)
