@@ -92,7 +92,7 @@ fdtable_close_fd(file_descriptor  *f) {
 		goto unlock_out;
 
 	kassert( f->f_count == 0 );
-	iput(f->f_inode);
+	inode_put(f->f_inode);
 
 unlock_out:
 	mutex_release(&fdtbl.mtx);

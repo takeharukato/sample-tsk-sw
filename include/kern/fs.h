@@ -14,6 +14,7 @@
 #include <kern/blkio.h>
 
 #define FS_MAGIC_NR              (0xfeedf5)
+#define NINODE                   (1024)
 
 #define FS_IADDR_DIRECT_MIN      (0)
 #define FS_IADDR_DIRECT_NR       (12)
@@ -44,6 +45,7 @@ typedef struct _superblock {
  */
 typedef struct _d_inode{
 	imode_t                 i_mode;
+	dev_id                   i_dev;  /* Device number   */
 	ref_cnt                i_nlink;
 	obj_id_t                 i_uid;
 	obj_id_t                 i_gid;
@@ -77,23 +79,26 @@ typedef struct _d_dirent{
 
 // in-memory copy of an inode
 typedef struct _inode {
-	dev_id       dev;  /* Device number   */
 	uint32_t    inum;  /* Inode number    */
 	ref_cnt      ref;  /* Reference count */
 	int        flags;  /* I_BUSY, I_VALID */
 	wait_queue waiters;  /* Waiters on this inode */
+
 	/* copy of disk inode  */
 	imode_t                 i_mode;
+	dev_id                   i_dev;  /* Device number   */
 	ref_cnt                i_nlink;
 	obj_id_t                 i_uid;
 	obj_id_t                 i_gid;
 	obj_size_t              i_size;
 	obj_size_t i_addr[FS_IADDR_NR];
 }inode;
-#define NINODE (1024)
+
 typedef struct _inode_cache{
 	mutex mtx;
 	inode inode[NINODE];
 } inode_cache;
 
+void inode_put(inode *_ip);
+void inode_cache_init(void);
 #endif  /*  _KERN_FS_H   */

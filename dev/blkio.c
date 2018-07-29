@@ -94,8 +94,7 @@ blk_buf *
 buffer_cache_blk_write(blk_buf *b){
 
 
-	if ( (b->flags & B_BUSY) == 0 )
-		panic("buffer_cache_blk_write");
+	kassert(b->flags & B_BUSY);
 
 	b->flags |= B_DIRTY;
 	iderw(b);  /* Write buffer */

@@ -91,19 +91,56 @@ release_data_block(dev_id dev, blk_no blk) {
 	return 0;
 }
 
-void
-icache_init(void) {
-	int i;
+/** Read disk i-node and returns busy buffer
+ */
+static int
+read_disk_inode(dev_id dev, uint32_t ino, d_inode **dinodep, blk_buf  **bp) {
+	int               rc;
+	int64_t            i;
+	superblock        sb;
+	blk_no           blk;
+	blk_buf           *b;
+	int            index;
 
-	mutex_init(&icache.mtx);
-	for(i = 0; NINODE > i; ++i) {
+	read_superblock(dev, &sb);
 
-		memset(&icache.inode[i], 0, sizeof(inode));
-		wque_init_wait_queue(&(icache.inode[i].waiters));
-	}
+	blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR + sb.s_imap_blocks + sb.s_bmap_blocks) +
+		(ino / INODES_PER_BLOCK);
+	index = ino % INODES_PER_BLOCK;
+
+	b = buffer_cache_blk_read(dev, blk);
+	*dinodep = ( (d_inode *)(&b->data[0]) ) + index;
+	*bp = b;
+
+	return 0;
+}
+
+static int
+write_disk_inode(dev_id dev, uint32_t ino, d_inode *dinode) {
+	int        rc;
+	int64_t     i;
+	superblock sb;
+	blk_no    blk;
+	blk_buf    *b;
+	int     index;
+
+	read_superblock(dev, &sb);
+
+	blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR + sb.s_imap_blocks + sb.s_bmap_blocks) +
+		(ino / INODES_PER_BLOCK);
+	index = ino % INODES_PER_BLOCK;
+
+	b = buffer_cache_blk_read(dev, blk);
+	memmove( ( (d_inode *)(&b->data[0]) ) + index, dinode, sizeof(d_inode));
+
+	buffer_cache_blk_write(b);
+	buffer_cache_blk_release(b);
+
+	return 0;
 }
 
 /** Find the inode by an i-node number
+    and increase the i-node counter.
  */
 static inode* 
 inode_get (dev_id dev, uint32_t inum){
@@ -116,7 +153,7 @@ inode_get (dev_id dev, uint32_t inum){
 
 		/* Search in the inode cache */
 		ip = &icache.inode[i];
-		if ( ( ip->ref > 0 ) && ( ip->dev == dev ) && ( ip->inum == inum ) ) {
+		if ( ( ip->ref > 0 ) && ( ip->i_dev == dev ) && ( ip->inum == inum ) ) {
 			
 			++ip->ref;  /* Found */
 			goto out;
@@ -129,13 +166,35 @@ inode_get (dev_id dev, uint32_t inum){
 	kassert( empty != NULL );
 
 	ip = empty;
-	ip->dev = dev;
+	ip->i_dev = dev;
 	ip->inum = inum;
 	ip->ref = 1;
 	ip->flags = 0;
 out:
 	mutex_release(&icache.mtx);
 	return ip;
+}
+
+/** Sync i-node between a memory inode and a disk inode.
+ */
+void
+inode_update(inode *ip){
+	int        i;
+	blk_buf  *bp;
+	d_inode *dip;
+
+	read_disk_inode(ip->i_dev, ip->inum, &dip, &bp);
+
+	dip->i_mode = ip->i_mode;
+	dip->i_dev = ip->i_dev;
+	dip->i_nlink = ip->i_nlink;
+	dip->i_size = ip->i_size;
+
+	for(i = 0; FS_IADDR_NR > i; ++i) 
+		dip->i_addr[i] = ip->i_addr[i];
+
+	buffer_cache_blk_write(bp);
+	buffer_cache_blk_release(bp);
 }
 
 /** Decrement inode reference by an i-node number
@@ -156,7 +215,7 @@ inode_put(inode *ip){
 		mutex_release(&icache.mtx);
 
 		itrunc(ip);  /* Free data blocks */
-		iupdate(ip);
+		inode_update(ip);
 
 		mutex_hold(&icache.mtx);
 		ip->flags = 0;
@@ -165,4 +224,15 @@ inode_put(inode *ip){
 
 	--ip->ref;
 	mutex_release(&icache.mtx);
+}
+void
+inode_cache_init(void) {
+	int i;
+
+	mutex_init(&icache.mtx);
+	for(i = 0; NINODE > i; ++i) {
+
+		memset(&icache.inode[i], 0, sizeof(inode));
+		wque_init_wait_queue(&(icache.inode[i].waiters));
+	}
 }
