@@ -62,7 +62,8 @@ typedef struct _d_inode{
 #define BITS_PER_BLOCK       (BSIZE*8)
 
 // Inodes per block.
-#define INODES_PER_BLOCK     (BSIZE / sizeof(struct _d_inode))
+#define INODES_PER_BLOCK      (BSIZE / sizeof(struct _d_inode))
+#define IADDRS_PER_BLOCK      (BSIZE / sizeof(uint32_t))
 #define FNAME_MAX             (59)
 
 #define ROOT_DENT_INO         (2)

@@ -49,7 +49,7 @@ find_free_data_block(dev_id dev, blk_buf **bp) {
 
 			*bp = b;
 			memset(&b->data[0], 0, BSIZE);
-			buffer_cache_blk_release(b); /* TODO: Check correctness */
+			buffer_cache_blk_release(b);
 			return 0;
 		}
 
@@ -175,6 +175,76 @@ out:
 	return ip;
 }
 
+static void
+bmap(inode *ip, uint32_t i_addr, uint32_t *blkp){
+	int                rc;
+	blk_buf           *bp;	
+	uint32_t    blk, *idx;
+
+	/*
+	 * Direct blocks
+	 */
+	if ( i_addr < FS_IADDR_DIRECT_NR ) {
+
+		blk = ip->i_addr[i_addr];
+
+		if ( blk == 0 ) {
+			
+			rc = find_free_data_block(ip->i_dev, &bp);
+			kassert( rc == 0 );
+			/* Note: We do not hold the index block here */
+
+			ip->i_addr[i_addr] = bp->blockno;
+			*blkp = bp->blockno;
+		} else
+			*blkp = blk;
+		goto out;
+	} 
+
+	/*
+	 * Indirect blocks
+	 */
+	i_addr -= FS_IADDR_DIRECT_NR;
+	if ( i_addr < ( FS_IADDR_IN_DIRECT_NR * IADDRS_PER_BLOCK ) ) {
+
+		blk = ip->i_addr[(i_addr/IADDRS_PER_BLOCK) + FS_IADDR_IN_DIRECT_MIN];
+		if ( blk == 0 ) {
+
+			/*
+			 * Allocate a new index block
+			 */
+			rc = find_free_data_block(ip->i_dev, &bp);
+			kassert( rc == 0 );
+
+			/* Note: We do not hold the index block here */
+			ip->i_addr[i_addr] = bp->blockno;
+			blk = bp->blockno;
+		}
+
+		/* We do not hold the index block.
+		 * We should hold it here.
+		 */
+		bp = buffer_cache_blk_read(ip->i_dev, blk);
+		idx = (uint32_t *)(&bp->data[0]);
+		if ( idx[i_addr] == 0 ) {  
+
+			/*
+			 * Allocate new data block.
+			 */
+			rc = find_free_data_block(ip->i_dev, &bp);
+			kassert( rc == 0 );
+			idx[i_addr] = bp->blockno;
+			*blkp = bp->blockno;
+		} else 
+			*blkp = idx[i_addr];
+		buffer_cache_blk_release(bp);
+		goto out;
+	}
+	
+out:
+    return;
+}
+
 /** Sync i-node between a memory inode and a disk inode.
  */
 void
@@ -187,6 +257,8 @@ inode_update(inode *ip){
 
 	dip->i_mode = ip->i_mode;
 	dip->i_dev = ip->i_dev;
+	dip->i_uid = ip->i_uid;
+	dip->i_gid = ip->i_gid;
 	dip->i_nlink = ip->i_nlink;
 	dip->i_size = ip->i_size;
 
@@ -235,7 +307,7 @@ inode_allocate(dev_id dev, imode_t mode){
 
 	read_superblock(dev, &sb);
 
-	for(inum = 1; sb.ninodes > inum; ++inum) {
+	for(inum = 1; sb.s_ninodes > inum; ++inum) {
 
 		read_disk_inode(dev, inum, &dip, &bp);
 
@@ -249,12 +321,86 @@ inode_allocate(dev_id dev, imode_t mode){
 		}
 		buffer_cache_blk_release(bp);
 	}
+
 	return NULL;
 }
-/* struct inode* idup(struct inode *ip) */
-/* void ilock(struct inode *ip) */
-/* void iunlock(struct inode *ip) */
-/* void iunlockput(struct inode *ip) */
+/** Duplicate i-node 
+ */
+inode *
+inode_duplicate(inode *ip) {
+
+	mutex_hold(&icache.mtx);
+	++ip->ref;
+	mutex_release(&icache.mtx);
+
+	return ip;
+}
+
+/** lock inode 
+ */
+void
+inode_lock(inode *ip){
+	uint32_t         i;
+	superblock      sb;
+	blk_buf        *bp;
+	d_inode       *dip;
+	uint32_t      inum;
+	wq_reason   reason;
+
+	kassert( ip->ref > 0 );
+
+	mutex_hold(&icache.mtx);
+
+	/*
+	 * Wait on i-node and lock it
+	 */
+	while( ip->flags & I_BUSY ) {
+
+		reason = wque_wait_on_event_with_mutex(&ip->waiters, &icache.mtx);
+		kassert( reason == WQUE_REASON_WAKEUP );
+	}
+
+	ip->flags |= I_BUSY;  /* Note: We should hold icache mutex here */
+
+	/*
+	 * Re-read inode from disk
+	 */
+	if ( !( ip->flags & I_VALID ) ) {
+
+		read_superblock(ip->i_dev, &sb);	
+		read_disk_inode(ip->i_dev, inum, &dip, &bp);
+
+		ip->i_mode = dip->i_mode;
+		ip->i_dev = dip->i_dev;
+		ip->i_uid = dip->i_uid;
+		ip->i_gid = dip->i_gid;
+		ip->i_nlink = dip->i_nlink;
+		ip->i_size = dip->i_size;
+
+		for(i = 0; FS_IADDR_NR > i; ++i) 
+			ip->i_addr[i] = dip->i_addr[i];
+
+		buffer_cache_blk_release(bp);
+		ip->flags |= I_VALID;
+	}
+	
+	mutex_release(&icache.mtx);
+}
+
+/** Unlock inode
+ */ 
+void
+inode_unlock(inode *ip){
+
+	mutex_hold(&icache.mtx);
+
+	kassert( ip->flags & I_BUSY );
+
+	ip->flags &= ~I_BUSY;
+	wque_wakeup(&ip->waiters, WQUE_REASON_WAKEUP);
+	
+	mutex_release(&icache.mtx);
+}
 /* static uint bmap(struct inode *ip, uint bn) */
 /* static void itrunc(struct inode *ip) */
 /* int readi(struct inode *ip, char *dst, uint off, uint n) */
