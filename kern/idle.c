@@ -19,6 +19,12 @@ do_idle_loop(void) {
 	thread_info_t *ti;
 	psw_t psw;
 
+#if !defined(CONFIG_HAL)
+	for( ; ; ) {
+
+		sched_schedule();
+	}
+#else
 	ti = get_current_thread_info();
 
 	ti_set_delay_dispatch(ti);
@@ -32,6 +38,7 @@ do_idle_loop(void) {
 		sched_schedule();
 		psw_restore_interrupt(&psw);
 	}
+#endif  /*  CONFIG_HAL  */
 }
 
 /** Return a pointer to the data structure of the idle thread
