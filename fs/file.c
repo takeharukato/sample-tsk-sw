@@ -110,7 +110,7 @@ fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
 	if ( !( f->f_flags & FREAD ) )
 		return EPERM;
 
-	ilock(f->f_inode);
+	inode_lock(f->f_inode);
 
 	rd_count = readi(f->f_inode, addr, f->f_offset, n);
 	if ( rd_count > 0 ) {
@@ -121,7 +121,7 @@ fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
 	} else 
 		rc = (int)rd_count;
 
-	iunlock(f->f_inode);
+	inode_unlock(f->f_inode);
 
 	return rc;
 }
@@ -137,7 +137,7 @@ fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 	if ( !( f->f_flags & FWRITE ) )
 		return EPERM;
 
-	ilock(f->f_inode);
+	inode_lock(f->f_inode);
 
 	wr_count = writei(f->f_inode, addr, f->f_offset, n);
 
@@ -149,7 +149,7 @@ fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 	} else 
 		rc = (int)wr_count;
 
-	iunlock(f->f_inode);
+	inode_unlock(f->f_inode);
 
 	return rc;
 }

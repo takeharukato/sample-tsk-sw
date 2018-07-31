@@ -176,10 +176,10 @@ out:
 }
 
 static void
-bmap(inode *ip, uint32_t i_addr, uint32_t *blkp){
+bmap(inode *ip, blk_no i_addr, blk_no *blkp){
 	int                rc;
 	blk_buf           *bp;	
-	uint32_t    blk, *idx;
+	blk_no      blk, *idx;
 
 	/*
 	 * Direct blocks
@@ -225,7 +225,7 @@ bmap(inode *ip, uint32_t i_addr, uint32_t *blkp){
 		 * We should hold it here.
 		 */
 		bp = buffer_cache_blk_read(ip->i_dev, blk);
-		idx = (uint32_t *)(&bp->data[0]);
+		idx = (blk_no *)(&bp->data[0]);
 		if ( idx[i_addr] == 0 ) {  
 
 			/*
@@ -242,6 +242,58 @@ bmap(inode *ip, uint32_t i_addr, uint32_t *blkp){
 	}
 	
 out:
+    return;
+}
+
+/** Free file data blocks
+ *
+ */
+static void
+inode_truncate(inode *ip){
+	int              i, j;
+	blk_buf           *bp;
+	blk_no      blk, *idx;
+
+	/* 
+	 * Free direct blocks
+	 */
+	for (i = 0; FS_IADDR_DIRECT_NR > i; ++i) {
+
+		if ( ip->i_addr[i] != 0 ) {
+			
+			release_data_block(ip->i_dev, ip->i_addr[i]);
+			ip->i_addr[i] = 0;
+		}
+	}
+
+	/* 
+	 * Free indirect blocks
+	 */
+	for( i = 0; FS_IADDR_IN_DIRECT_NR > i; ++i) {
+		
+		blk = ip->i_addr[ FS_IADDR_IN_DIRECT_MIN + i ];
+		if ( blk != 0 ) {
+
+			bp = buffer_cache_blk_read(ip->i_dev, blk);
+			idx = (blk_no *)(&bp->data[0]);
+
+			for(j = 0; IADDRS_PER_BLOCK > j; ++j) {
+
+				if ( idx[j] != 0 ) {
+
+					release_data_block(ip->i_dev, idx[j]);
+					idx[j] = 0;
+				}
+			}
+			buffer_cache_blk_release(bp);
+		}
+		release_data_block(ip->i_dev, blk);
+		ip->i_addr[ FS_IADDR_IN_DIRECT_MIN + i ] = 0;
+	}
+
+    ip->i_size = 0;
+    inode_update(ip);
+
     return;
 }
 
@@ -286,7 +338,7 @@ inode_put(inode *ip){
 		ip->flags |= I_BUSY;
 		mutex_release(&icache.mtx);
 
-		itrunc(ip);  /* Free data blocks */
+		inode_truncate(ip);  /* Free data blocks */
 		inode_update(ip);
 
 		mutex_hold(&icache.mtx);
@@ -297,7 +349,7 @@ inode_put(inode *ip){
 	--ip->ref;
 	mutex_release(&icache.mtx);
 }
-/* struct inode *ialloc(uint dev, short type) */
+
 inode *
 inode_allocate(dev_id dev, imode_t mode){
 	uint32_t  inum;
@@ -340,7 +392,7 @@ inode_duplicate(inode *ip) {
  */
 void
 inode_lock(inode *ip){
-	uint32_t         i;
+	blk_no           i;
 	superblock      sb;
 	blk_buf        *bp;
 	d_inode       *dip;
@@ -401,9 +453,48 @@ inode_unlock(inode *ip){
 	
 	mutex_release(&icache.mtx);
 }
-/* static uint bmap(struct inode *ip, uint bn) */
-/* static void itrunc(struct inode *ip) */
-/* int readi(struct inode *ip, char *dst, uint off, uint n) */
+
+int
+inode_read(inode *ip, void *dst, off_t off, size_t counts) {
+	blk_buf           *bp;
+	size_t        remains;
+	size_t       rd_bytes;
+	blk_no            blk;
+
+	if ( ip->i_mode == FS_IMODE_DEV ) {
+
+		return -ENODEV;
+	}
+	
+	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
+		return -ENXIO;
+
+	if ( ( off + counts ) > ip->i_size ) {
+
+		counts = ip->i_size - off;
+	}
+
+	for(remains = counts; remains > 0; ) {
+
+		bmap(ip, off / BSIZE, &blk);
+		bp = buffer_cache_blk_read(ip->i_dev, blk);
+	    
+		rd_bytes = remains;
+		if ( remains > ( BSIZE - ( off % BSIZE ) ) )
+			rd_bytes = ( BSIZE - ( off % BSIZE ) );
+
+		memmove(dst, (void *)&bp->data[0] + ( off % BSIZE ), rd_bytes);
+		buffer_cache_blk_release(bp);
+		
+		kassert( remains >= rd_bytes );
+
+		remains -= rd_bytes;
+		off += rd_bytes;
+		dst += rd_bytes;
+	}
+
+	return counts;
+}
 /* int writei(struct inode *ip, char *src, uint off, uint n) */
 /* int namecmp(const char *s, const char *t) */
 /* struct inode* dirlookup(struct inode *dp, char *name, uint *poff) */

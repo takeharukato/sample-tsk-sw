@@ -50,7 +50,7 @@ typedef struct _d_inode{
 	obj_id_t                 i_uid;
 	obj_id_t                 i_gid;
 	obj_size_t              i_size;
-	obj_size_t i_addr[FS_IADDR_NR];
+	blk_no     i_addr[FS_IADDR_NR];
 }d_inode;
 
 
@@ -63,7 +63,7 @@ typedef struct _d_inode{
 
 // Inodes per block.
 #define INODES_PER_BLOCK      (BSIZE / sizeof(struct _d_inode))
-#define IADDRS_PER_BLOCK      (BSIZE / sizeof(uint32_t))
+#define IADDRS_PER_BLOCK      (BSIZE / sizeof(blk_no))
 #define FNAME_MAX             (59)
 
 #define ROOT_DENT_INO         (2)
@@ -92,7 +92,7 @@ typedef struct _inode {
 	obj_id_t                 i_uid;
 	obj_id_t                 i_gid;
 	obj_size_t              i_size;
-	obj_size_t i_addr[FS_IADDR_NR];
+	blk_no     i_addr[FS_IADDR_NR];
 }inode;
 
 typedef struct _inode_cache{
@@ -100,6 +100,12 @@ typedef struct _inode_cache{
 	inode inode[NINODE];
 } inode_cache;
 
+void inode_update(inode *_ip);
 void inode_put(inode *_ip);
+inode *inode_allocate(dev_id _dev, imode_t _mode);
+inode *inode_duplicate(inode *_ip);
+void inode_lock(inode *_ip);
+void inode_unlock(inode *_ip);
+int inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
 void inode_cache_init(void);
 #endif  /*  _KERN_FS_H   */
