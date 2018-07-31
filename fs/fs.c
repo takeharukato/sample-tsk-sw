@@ -225,6 +225,48 @@ inode_put(inode *ip){
 	--ip->ref;
 	mutex_release(&icache.mtx);
 }
+/* struct inode *ialloc(uint dev, short type) */
+inode *
+inode_allocate(dev_id dev, imode_t mode){
+	uint32_t  inum;
+	blk_buf    *bp;
+	d_inode   *dip;
+	superblock  sb;
+
+	read_superblock(dev, &sb);
+
+	for(inum = 1; sb.ninodes > inum; ++inum) {
+
+		read_disk_inode(dev, inum, &dip, &bp);
+
+		if ( dip->i_mode == 0 ){  // a free inode
+
+			memset(dip, 0, sizeof(d_inode));
+			dip->i_mode = mode;
+
+			buffer_cache_blk_release(bp);
+			return inode_get(dev, inum);
+		}
+		buffer_cache_blk_release(bp);
+	}
+	return NULL;
+}
+/* struct inode* idup(struct inode *ip) */
+/* void ilock(struct inode *ip) */
+/* void iunlock(struct inode *ip) */
+/* void iunlockput(struct inode *ip) */
+/* static uint bmap(struct inode *ip, uint bn) */
+/* static void itrunc(struct inode *ip) */
+/* int readi(struct inode *ip, char *dst, uint off, uint n) */
+/* int writei(struct inode *ip, char *src, uint off, uint n) */
+/* int namecmp(const char *s, const char *t) */
+/* struct inode* dirlookup(struct inode *dp, char *name, uint *poff) */
+/* int dirlink(struct inode *dp, char *name, uint inum) */
+/* static char*skipelem(char *path, char *name) */
+/* static struct inode*namex(char *path, int nameiparent, char *name) */
+/* struct inode*namei(char *path) */
+/* struct inode* nameiparent(char *path, char *name) */
+
 void
 inode_cache_init(void) {
 	int i;
