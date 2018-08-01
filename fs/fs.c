@@ -5,6 +5,9 @@
 /*                                                                    */
 /*  File system                                                       */
 /*                                                                    */
+/*  The following codes are derived from xv6.                         */
+/*  https://pdos.csail.mit.edu/6.828/2016/xv6.html                    */
+/*  I might replace these codes in the future.                        */
 /**********************************************************************/
 
 #include <kern/kernel.h>
@@ -461,10 +464,8 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 	size_t       rd_bytes;
 	blk_no            blk;
 
-	if ( ip->i_mode == FS_IMODE_DEV ) {
-
+	if ( ip->i_mode == FS_IMODE_DEV )
 		return -ENODEV;
-	}
 	
 	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
 		return -ENXIO;
@@ -483,11 +484,11 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 		if ( remains > ( BSIZE - ( off % BSIZE ) ) )
 			rd_bytes = ( BSIZE - ( off % BSIZE ) );
 
+		kassert( remains >= rd_bytes );
+
 		memmove(dst, (void *)&bp->data[0] + ( off % BSIZE ), rd_bytes);
 		buffer_cache_blk_release(bp);
 		
-		kassert( remains >= rd_bytes );
-
 		remains -= rd_bytes;
 		off += rd_bytes;
 		dst += rd_bytes;
@@ -495,8 +496,47 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 
 	return counts;
 }
-/* int writei(struct inode *ip, char *src, uint off, uint n) */
-/* int namecmp(const char *s, const char *t) */
+
+int
+inode_write(inode *ip, void *src, off_t off, size_t counts) {
+	blk_buf           *bp;
+	size_t        remains;
+	size_t       wr_bytes;
+	blk_no            blk;
+
+	if ( ip->i_mode == FS_IMODE_DEV ) 
+		return -ENODEV;
+	
+	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
+		return -ENXIO;
+
+	if ( ( off + counts ) > FS_MAXFILE_SIZE ) 
+		return -ENXIO;
+
+	for(remains = counts; remains > 0; ) {
+
+		bmap(ip, off / BSIZE, &blk);
+		bp = buffer_cache_blk_read(ip->i_dev, blk);
+	    
+		wr_bytes = remains;
+		if ( remains > ( BSIZE - ( off % BSIZE ) ) )
+			wr_bytes = ( BSIZE - ( off % BSIZE ) );
+
+		kassert( remains >= wr_bytes );
+
+		memmove((void *)&bp->data[0] + ( off % BSIZE ), src, wr_bytes);
+
+		buffer_cache_blk_write(bp);
+		buffer_cache_blk_release(bp);
+		
+		remains -= wr_bytes;
+		off += wr_bytes;
+		src += wr_bytes;
+	}
+
+	return counts;
+}
+
 /* struct inode* dirlookup(struct inode *dp, char *name, uint *poff) */
 /* int dirlink(struct inode *dp, char *name, uint inum) */
 /* static char*skipelem(char *path, char *name) */

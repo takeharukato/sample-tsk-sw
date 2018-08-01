@@ -24,7 +24,9 @@
 #define FS_IADDR_DOUBLE_NR       (1)
 #define FS_IADDR_NR              \
 	(FS_IADDR_DIRECT_NR + FS_IADDR_IN_DIRECT_NR + FS_IADDR_DOUBLE_NR )
-
+#define FS_MAXFILE_SIZE          (FS_IADDR_DIRECT_NR*BSIZE + \
+				  FS_IADDR_IN_DIRECT_NR*(BSIZE/sizeof(blk_no)) + \
+				  FS_IADDR_DOUBLE_NR*(BSIZE/sizeof(blk_no))*(BSIZE/sizeof(blk_no)))
 #define FS_IMODE_NONE            (0)
 #define FS_IMODE_DIR             (1)
 #define FS_IMODE_FILE            (2)
@@ -68,13 +70,6 @@ typedef struct _d_inode{
 
 #define ROOT_DENT_INO         (2)
 
-/** Directory entry in a disk
- */
-typedef struct _d_dirent{
-	uint32_t           d_ino;
-	char    name[FNAME_MAX+1];
-}d_dirent;
-
 #define I_BUSY                 (0x1)
 #define I_VALID                (0x2)
 
@@ -95,6 +90,19 @@ typedef struct _inode {
 	blk_no     i_addr[FS_IADDR_NR];
 }inode;
 
+/** Directory entry in a disk
+ */
+typedef struct _d_dirent{
+	uint32_t           d_ino;
+	char    name[FNAME_MAX+1];
+}d_dirent;
+
+typedef struct _dirent {
+	uint32_t  d_ino;   /* inode number */
+	off_t     d_off;   /* offset to this entry in i-node address space */
+	char  d_name[FNAME_MAX+1]; /* filename (null-terminated) */
+}dirent;
+
 typedef struct _inode_cache{
 	mutex mtx;
 	inode inode[NINODE];
@@ -107,5 +115,7 @@ inode *inode_duplicate(inode *_ip);
 void inode_lock(inode *_ip);
 void inode_unlock(inode *_ip);
 int inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
+int inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
 void inode_cache_init(void);
+
 #endif  /*  _KERN_FS_H   */

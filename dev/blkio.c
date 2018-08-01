@@ -5,6 +5,10 @@
 /*                                                                    */
 /*  Block I/O                                                         */
 /*                                                                    */
+/*  The following codes are derived from xv6.                         */
+/*  https://pdos.csail.mit.edu/6.828/2016/xv6.html                    */
+/*  I might replace these codes in the future.                        */
+/*                                                                    */
 /**********************************************************************/
 
 #include <kern/kernel.h>

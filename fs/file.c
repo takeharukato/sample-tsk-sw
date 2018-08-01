@@ -112,7 +112,7 @@ fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
 
 	inode_lock(f->f_inode);
 
-	rd_count = readi(f->f_inode, addr, f->f_offset, n);
+	rd_count = inode_read(f->f_inode, addr, f->f_offset, n);
 	if ( rd_count > 0 ) {
 
 		f->f_offset += rd_count;
@@ -139,7 +139,7 @@ fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 
 	inode_lock(f->f_inode);
 
-	wr_count = writei(f->f_inode, addr, f->f_offset, n);
+	wr_count = inode_write(f->f_inode, addr, f->f_offset, n);
 
 	if ( wr_count > 0 ) {
 
