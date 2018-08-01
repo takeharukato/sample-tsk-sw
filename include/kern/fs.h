@@ -98,7 +98,7 @@ typedef struct _d_dirent{
 }d_dirent;
 
 typedef struct _dirent {
-	uint32_t  d_ino;   /* inode number */
+	uint32_t  d_inum;   /* inode number */
 	off_t     d_off;   /* offset to this entry in i-node address space */
 	char  d_name[FNAME_MAX+1]; /* filename (null-terminated) */
 }dirent;
@@ -106,7 +106,7 @@ typedef struct _dirent {
 typedef struct _inode_cache{
 	mutex mtx;
 	inode inode[NINODE];
-} inode_cache;
+}inode_cache;
 
 void inode_update(inode *_ip);
 void inode_put(inode *_ip);
@@ -114,8 +114,9 @@ inode *inode_allocate(dev_id _dev, imode_t _mode);
 inode *inode_duplicate(inode *_ip);
 void inode_lock(inode *_ip);
 void inode_unlock(inode *_ip);
-int inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
-int inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
+off_t inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
+off_t inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
+struct inode* inode_dirlookup(inode *_dp, char *_name, dirent *_ent);
 void inode_cache_init(void);
 
 #endif  /*  _KERN_FS_H   */

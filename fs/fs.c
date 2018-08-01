@@ -457,7 +457,7 @@ inode_unlock(inode *ip){
 	mutex_release(&icache.mtx);
 }
 
-int
+off_t
 inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 	blk_buf           *bp;
 	size_t        remains;
@@ -497,7 +497,7 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 	return counts;
 }
 
-int
+off_t
 inode_write(inode *ip, void *src, off_t off, size_t counts) {
 	blk_buf           *bp;
 	size_t        remains;
@@ -537,7 +537,37 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 	return counts;
 }
 
-/* struct inode* dirlookup(struct inode *dp, char *name, uint *poff) */
+/** Look up directory entry
+ */
+struct inode*
+inode_dirlookup(inode *dp, char *name, dirent *ent){
+	off_t     off;
+	d_dirent   de;
+	off_t  rd_bytes;
+
+	kassert( dp->i_mode == FS_IMODE_DIR );
+
+	for(off = 0; dp->i_size > off; off += sizeof(d_dirent)){
+
+		rd_bytes = inode_read(dp, (void *)&de, off, sizeof(de));
+		kassert( rd_bytes == sizeof(de) );
+
+		if( de.d_inum == 0 )
+			continue;
+		if ( strncmp(name, de.name, FNAME_MAX) == 0 ) {
+
+			/* Found the name element */
+			if ( ent != NULL )
+				ent->d_off = off;
+
+			return inode_get(dp->i_dev, de.d_inum);
+		}
+	}
+
+	return NULL;
+ }
+
+
 /* int dirlink(struct inode *dp, char *name, uint inum) */
 /* static char*skipelem(char *path, char *name) */
 /* static struct inode*namex(char *path, int nameiparent, char *name) */
