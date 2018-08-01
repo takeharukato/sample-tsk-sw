@@ -94,13 +94,13 @@ typedef struct _inode {
  */
 typedef struct _d_dirent{
 	uint32_t           d_ino;
-	char    name[FNAME_MAX+1];
+	char    d_name[FNAME_MAX+1];
 }d_dirent;
 
 typedef struct _dirent {
-	uint32_t  d_inum;   /* inode number */
+	uint32_t  d_ino;   /* inode number */
 	off_t     d_off;   /* offset to this entry in i-node address space */
-	char  d_name[FNAME_MAX+1]; /* filename (null-terminated) */
+	char     d_name[FNAME_MAX+1]; /* filename (null-terminated) */
 }dirent;
 
 typedef struct _inode_cache{
@@ -116,7 +116,7 @@ void inode_lock(inode *_ip);
 void inode_unlock(inode *_ip);
 off_t inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
 off_t inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
-struct inode* inode_dirlookup(inode *_dp, char *_name, dirent *_ent);
+inode *inode_dirlookup(inode *_dp, char *_name, dirent *_ent);
 void inode_cache_init(void);
 
 #endif  /*  _KERN_FS_H   */

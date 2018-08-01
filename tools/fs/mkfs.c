@@ -334,11 +334,11 @@ write_root_dirent(void){
 
 	dentp = (d_dirent *)&buf[0];
 	dentp->d_ino = ROOT_DENT_INO;
-	memmove(&dentp->name[0], ".", 2);
+	memmove(&dentp->d_name[0], ".", 2);
 	++dentp;
 
 	dentp->d_ino = ROOT_DENT_INO;
-	memmove(&dentp->name[0], "..", 3);
+	memmove(&dentp->d_name[0], "..", 3);
 	
 	write_disk_data_block(blk, &buf[0]);
 	write_disk_inode(ROOT_DENT_INO, &root_inode);

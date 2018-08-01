@@ -539,10 +539,10 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 
 /** Look up directory entry
  */
-struct inode*
+inode *
 inode_dirlookup(inode *dp, char *name, dirent *ent){
-	off_t     off;
-	d_dirent   de;
+	off_t       off;
+	d_dirent     de;
 	off_t  rd_bytes;
 
 	kassert( dp->i_mode == FS_IMODE_DIR );
@@ -552,23 +552,62 @@ inode_dirlookup(inode *dp, char *name, dirent *ent){
 		rd_bytes = inode_read(dp, (void *)&de, off, sizeof(de));
 		kassert( rd_bytes == sizeof(de) );
 
-		if( de.d_inum == 0 )
+		if( de.d_ino == 0 )
 			continue;
-		if ( strncmp(name, de.name, FNAME_MAX) == 0 ) {
+		if ( strncmp(name, de.d_name, FNAME_MAX) == 0 ) {
 
 			/* Found the name element */
 			if ( ent != NULL )
 				ent->d_off = off;
 
-			return inode_get(dp->i_dev, de.d_inum);
+			return inode_get(dp->i_dev, de.d_ino);
 		}
 	}
 
 	return NULL;
- }
+}
 
+int
+inode_add_directory_entry(inode *dp, char *name, uint32_t inum){
+	d_dirent     de;
+	inode       *ip;
+	off_t       off;
+	off_t  rd_bytes;
 
-/* int dirlink(struct inode *dp, char *name, uint inum) */
+	/*
+	 *  Check that name is not present.
+	 */
+	ip = inode_dirlookup(dp, name, NULL);
+	if ( ip != NULL ) {
+
+		inode_put(ip);
+		return -EEXIST;
+	}
+	
+	/*
+	 *  Look up an empty dirent.
+	 */
+	for (off = 0; dp->i_size > off; off += sizeof(d_dirent) ) {
+
+		rd_bytes = inode_read(dp, (void *)&de, off, sizeof(d_dirent));
+		kassert( rd_bytes != sizeof(d_dirent ) );
+
+		if ( de.d_ino == 0 ) 
+			break;
+	}
+
+	de.d_ino = inum;
+	strncpy(de.d_name, name, FNAME_MAX);
+
+	/*
+	 * Write back this directory entry
+	 */
+	rd_bytes = inode_write(dp, (void *) &de, off, sizeof(d_dirent));
+	kassert( rd_bytes != sizeof(d_dirent) );
+
+	return 0;
+}
+
 /* static char*skipelem(char *path, char *name) */
 /* static struct inode*namex(char *path, int nameiparent, char *name) */
 /* struct inode*namei(char *path) */
