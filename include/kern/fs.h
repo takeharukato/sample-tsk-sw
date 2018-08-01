@@ -68,6 +68,7 @@ typedef struct _d_inode{
 #define IADDRS_PER_BLOCK      (BSIZE / sizeof(blk_no))
 #define FNAME_MAX             (59)
 
+#define ROOT_DEV              (0)
 #define ROOT_DENT_INO         (2)
 
 #define I_BUSY                 (0x1)
@@ -117,6 +118,8 @@ void inode_unlock(inode *_ip);
 off_t inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
 off_t inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
 inode *inode_dirlookup(inode *_dp, char *_name, dirent *_ent);
+inode *inode_namei(char *_path);
+inode *inode_nameiparent(char *_path, char *_name);
 void inode_cache_init(void);
 
 #endif  /*  _KERN_FS_H   */

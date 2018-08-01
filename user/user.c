@@ -40,7 +40,7 @@ threadC(void *arg) {
 
 	kprintf("threadC\n");
 
-	b = buffer_cache_blk_read(0, SUPER_BLOCK_BLK_NO );
+	b = buffer_cache_blk_read(ROOT_DEV, SUPER_BLOCK_BLK_NO );
 	sb = (superblock *)&b->data[0];
 	kprintf("FS magic:0x%x\n", sb->s_magic);
 }

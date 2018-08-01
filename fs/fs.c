@@ -300,6 +300,95 @@ inode_truncate(inode *ip){
     return;
 }
 
+static char *
+skip_element(char *path, char *name){
+    char *s;
+    int len;
+
+    /*
+     * Skip delimiters
+     */
+    while ( *path == '/' ) 
+	    ++path;
+
+    if ( *path == '\0' ) 
+        return NULL;
+
+    s = path;  /* s indicates the start of an element of path */
+
+    while ( ( *path != '/' ) && ( *path != '\0' ) ) 
+	    ++path;
+    
+    len = path - s; /* path indicates the end ('/' or '\0') of an element of path */
+
+    if (len >= FNAME_MAX) 
+	    len = FNAME_MAX;
+    memmove(name, s, len);
+    name[len] = '\0';
+
+    while ( *path == '/' ) 
+	    ++path;
+
+    return path;
+}
+
+static inode *
+inode_path2inode(char *path, int nameiparent, char *name) {
+	inode *ip, *next;
+
+	kassert( *path == '/' );
+
+	if ( *path == '/' ) {
+		ip = inode_get(ROOT_DEV, ROOT_DENT_INO);
+	} else {
+	
+		//ip = inode_duplicate(proc->cwd);
+		panic("cwd not supported.");
+	}
+
+	path = skip_element(path, name);
+	while ( path != NULL ) {
+		
+		inode_lock(ip);
+		
+		if ( ip->i_mode != FS_IMODE_DIR ) {
+			
+			inode_unlock(ip);
+			inode_put(ip);
+			return NULL;
+		}
+
+		if ( (nameiparent != 0) && (*path == '\0') ) {
+
+			// Stop one level early.
+			inode_unlock(ip);
+			return ip;
+		}
+
+		next = inode_dirlookup(ip, name, 0);
+		if ( next == NULL ) {
+			
+			inode_unlock(ip);
+			inode_put(ip);
+			return NULL;
+		}
+		
+		inode_unlock(ip);
+		inode_put(ip);
+		
+		ip = next;
+		path = skip_element(path, name);
+	}
+	
+	if ( nameiparent != 0 ) {
+		
+		inode_put(ip);
+		return NULL;
+	}
+
+	return ip;
+}
+
 /** Sync i-node between a memory inode and a disk inode.
  */
 void
@@ -608,10 +697,18 @@ inode_add_directory_entry(inode *dp, char *name, uint32_t inum){
 	return 0;
 }
 
-/* static char*skipelem(char *path, char *name) */
-/* static struct inode*namex(char *path, int nameiparent, char *name) */
-/* struct inode*namei(char *path) */
-/* struct inode* nameiparent(char *path, char *name) */
+inode *
+inode_namei(char *path) {
+	char name[FNAME_MAX+1];
+
+	return inode_path2inode(path, 0, name);
+}
+
+inode *
+inode_nameiparent(char *path, char *name) {
+
+	return inode_path2inode(path, 1, name);
+}
 
 void
 inode_cache_init(void) {
