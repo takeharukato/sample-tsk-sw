@@ -18,7 +18,7 @@
 #define B_VALID           (0x2)  /*< buffer has been read from disk     */
 #define B_DIRTY           (0x4)  /*< buffer needs to be written to disk */
 #define BSIZE             (512)  /*< Sector                             */
-#define NBUF             (1024)  /*< buffers                            */
+#define NBUF                (8)  /*< buffers                            */
 
 typedef struct _blk_buf {
 	blk_state     flags;

@@ -24,11 +24,51 @@ read_superblock(dev_id dev, superblock *sb){
 }
 
 static int 
+get_free_inode(dev_id dev, uint32_t *inop) {
+	int     rc;
+	int64_t  i;
+	blk_no blk;
+	blk_buf *b;
+	int64_t offset;
+	int64_t chunk_index;
+	int64_t chunk_offset;
+	uint64_t val;
+	superblock  sb;
+
+	read_superblock(dev, &sb);
+
+	for(i = 0; sb.s_ninodes > i; ++i ) {
+
+		blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR) + (i / BITS_PER_BLOCK);
+
+		b = buffer_cache_blk_read(dev, blk);
+
+		offset = i % BITS_PER_BLOCK;
+		chunk_index = offset / sizeof(uint64_t);
+		chunk_offset = offset % sizeof(uint64_t);
+		val = *(( (uint64_t *)(&b->data[0]) ) + chunk_index);
+
+		if ( !( val & ( 1ULL << chunk_offset ) ) ) {
+
+			*(( (uint64_t *)(&b->data[0]) ) + chunk_index) |=
+				( 1ULL << chunk_offset );
+			*inop = (uint32_t)i;
+			buffer_cache_blk_write(b);
+			buffer_cache_blk_release(b);
+			return 0;
+		}
+		buffer_cache_blk_release(b);
+	}
+
+	return ENOENT;
+}
+
+static int 
 find_free_data_block(dev_id dev, blk_buf **bp) {
 	int64_t            i;
 	superblock        sb;
 	blk_buf           *b;
-	blk_no           blk;
+	blk_buf          *db;
 	blk_no    bitmap_blk;
 	int64_t       offset;
 	int64_t  chunk_index;
@@ -50,9 +90,14 @@ find_free_data_block(dev_id dev, blk_buf **bp) {
 		val = *(( (uint64_t *)(&b->data[0]) ) + chunk_index);
 		if ( !( val & ( 1ULL << chunk_offset ) ) ) {
 
-			*bp = b;
-			memset(&b->data[0], 0, BSIZE);
+			*(( (uint64_t *)(&b->data[0]) ) + chunk_index) |= 
+				( 1ULL << chunk_offset );
+			buffer_cache_blk_write(b);
 			buffer_cache_blk_release(b);
+
+			db = buffer_cache_blk_read(dev, sb.s_firstdata_block+i);
+			memset(&db->data[0], 0, BSIZE);
+			*bp = db;
 			return 0;
 		}
 
@@ -88,7 +133,7 @@ release_data_block(dev_id dev, blk_no blk) {
 	kassert( ( val & ( 1ULL << chunk_offset ) ) );
 
 	*(( (uint64_t *)(&b->data[0]) ) + chunk_index) &= ~( 1ULL << chunk_offset );
-
+	buffer_cache_blk_write(b);
 	buffer_cache_blk_release(b);
 
 	return 0;
@@ -182,6 +227,7 @@ static void
 bmap(inode *ip, blk_no i_addr, blk_no *blkp){
 	int                rc;
 	blk_buf           *bp;	
+	blk_buf          *nbp;	
 	blk_no      blk, *idx;
 
 	/*
@@ -195,10 +241,9 @@ bmap(inode *ip, blk_no i_addr, blk_no *blkp){
 			
 			rc = find_free_data_block(ip->i_dev, &bp);
 			kassert( rc == 0 );
-			/* Note: We do not hold the index block here */
-
 			ip->i_addr[i_addr] = bp->blockno;
 			*blkp = bp->blockno;
+			buffer_cache_blk_release(bp);
 		} else
 			*blkp = blk;
 		goto out;
@@ -216,12 +261,11 @@ bmap(inode *ip, blk_no i_addr, blk_no *blkp){
 			/*
 			 * Allocate a new index block
 			 */
-			rc = find_free_data_block(ip->i_dev, &bp);
+			rc = find_free_data_block(ip->i_dev, &nbp);
 			kassert( rc == 0 );
-
-			/* Note: We do not hold the index block here */
-			ip->i_addr[i_addr] = bp->blockno;
-			blk = bp->blockno;
+			ip->i_addr[i_addr] = nbp->blockno;
+			blk = nbp->blockno;
+			buffer_cache_blk_release(nbp);
 		}
 
 		/* We do not hold the index block.
@@ -234,10 +278,11 @@ bmap(inode *ip, blk_no i_addr, blk_no *blkp){
 			/*
 			 * Allocate new data block.
 			 */
-			rc = find_free_data_block(ip->i_dev, &bp);
+			rc = find_free_data_block(ip->i_dev, &nbp);
 			kassert( rc == 0 );
-			idx[i_addr] = bp->blockno;
-			*blkp = bp->blockno;
+			idx[i_addr] = nbp->blockno;
+			*blkp = nbp->blockno;
+			buffer_cache_blk_release(nbp);
 		} else 
 			*blkp = idx[i_addr];
 		buffer_cache_blk_release(bp);
@@ -447,26 +492,22 @@ inode_allocate(dev_id dev, imode_t mode){
 	uint32_t  inum;
 	blk_buf    *bp;
 	d_inode   *dip;
+	int         rc;
 	superblock  sb;
 
 	read_superblock(dev, &sb);
 
-	for(inum = 1; sb.s_ninodes > inum; ++inum) {
+	rc = get_free_inode(dev, &inum);
+	if ( rc != 0 )
+		return NULL;
+	
+	read_disk_inode(dev, inum, &dip, &bp);
+	memset(dip, 0, sizeof(d_inode));
+	dip->i_mode = mode;
+	buffer_cache_blk_write(bp);
+	buffer_cache_blk_release(bp);
 
-		read_disk_inode(dev, inum, &dip, &bp);
-
-		if ( dip->i_mode == 0 ){  // a free inode
-
-			memset(dip, 0, sizeof(d_inode));
-			dip->i_mode = mode;
-
-			buffer_cache_blk_release(bp);
-			return inode_get(dev, inum);
-		}
-		buffer_cache_blk_release(bp);
-	}
-
-	return NULL;
+	return inode_get(dev, inum);
 }
 /** Duplicate i-node 
  */
@@ -488,7 +529,6 @@ inode_lock(inode *ip){
 	superblock      sb;
 	blk_buf        *bp;
 	d_inode       *dip;
-	uint32_t      inum;
 	wq_reason   reason;
 
 	kassert( ip->ref > 0 );
@@ -512,7 +552,7 @@ inode_lock(inode *ip){
 	if ( !( ip->flags & I_VALID ) ) {
 
 		read_superblock(ip->i_dev, &sb);	
-		read_disk_inode(ip->i_dev, inum, &dip, &bp);
+		read_disk_inode(ip->i_dev, ip->inum, &dip, &bp);
 
 		ip->i_mode = dip->i_mode;
 		ip->i_dev = dip->i_dev;
@@ -679,7 +719,7 @@ inode_add_directory_entry(inode *dp, char *name, uint32_t inum){
 	for (off = 0; dp->i_size > off; off += sizeof(d_dirent) ) {
 
 		rd_bytes = inode_read(dp, (void *)&de, off, sizeof(d_dirent));
-		kassert( rd_bytes != sizeof(d_dirent ) );
+		kassert( rd_bytes == sizeof(d_dirent ) );
 
 		if ( de.d_ino == 0 ) 
 			break;
@@ -692,7 +732,7 @@ inode_add_directory_entry(inode *dp, char *name, uint32_t inum){
 	 * Write back this directory entry
 	 */
 	rd_bytes = inode_write(dp, (void *) &de, off, sizeof(d_dirent));
-	kassert( rd_bytes != sizeof(d_dirent) );
+	kassert( rd_bytes == sizeof(d_dirent) );
 
 	return 0;
 }

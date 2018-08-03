@@ -81,7 +81,7 @@ create(char *path, imode_t type, dev_id dev){
 	}
 
 	ip = inode_allocate(dp->i_dev, type);
-	kassert( ip  == NULL );
+	kassert( ip != NULL );
 
 	inode_lock(ip);
 	ip->i_dev = dev;
@@ -132,6 +132,7 @@ sys_dup(int fd){
 
 int
 sys_read(int fd, char *dst, size_t count){
+	int             rc;
 	file_descriptor *f;
 	size_t counts;
 	io_cnt_t rdcnt;
@@ -144,11 +145,13 @@ sys_read(int fd, char *dst, size_t count){
 	if ( f == NULL )
 		return -EBADF;
 
-	return fd_file_read(f, dst, counts, &rdcnt);
+	rc = fd_file_read(f, dst, counts, &rdcnt);
+	return (rc == 0) ?  (rdcnt) : (rc);
 }
 
 int
 sys_write(int fd, char *src, size_t count){
+	int             rc;
 	file_descriptor *f;
 	size_t counts;
 	io_cnt_t wrcnt;
@@ -161,7 +164,8 @@ sys_write(int fd, char *src, size_t count){
 	if ( f == NULL )
 		return -EBADF;
 
-	return fd_file_write(f, src, counts, &wrcnt);;
+	rc = fd_file_write(f, src, counts, &wrcnt);
+	return (rc == 0) ?  (wrcnt) : (rc);
 }
 
 int

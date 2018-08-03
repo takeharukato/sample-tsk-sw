@@ -4,7 +4,7 @@ targets=kernel.elf kernel-dbg.elf kernel.asm kernel.map
 
 subdirs=common kern dev fs hal user tools/fs
 cleandirs=include ${subdirs} tools configs
-kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a hal/hal/libhal.a
+kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a fs/libfs.a hal/hal/libhal.a
 mconf=tools/kconfig/mconf
 
 all:${targets}

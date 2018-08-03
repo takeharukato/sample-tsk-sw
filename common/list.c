@@ -36,7 +36,7 @@ void
 list_add_top(struct _list_head *head, list_t *node) {
 
 	node->next = head->next;
-	node->prev = head->prev;
+	node->prev = (list_t *)head;
 	head->next->prev = node;
 	head->next = node;
 }

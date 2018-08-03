@@ -37,12 +37,27 @@ void
 threadC(void *arg) {
 	blk_buf *b;
 	superblock *sb;
+	int fd;
+	char data[64];
 
 	kprintf("threadC\n");
 
 	b = buffer_cache_blk_read(ROOT_DEV, SUPER_BLOCK_BLK_NO );
 	sb = (superblock *)&b->data[0];
 	kprintf("FS magic:0x%x\n", sb->s_magic);
+	buffer_cache_blk_release(b);
+	fd = sys_open("/test.txt", O_RDWR|O_CREATE);
+	if ( fd >= 0 ) {
+		sys_write(fd, "hello world\n", strlen("hello world\n"));
+		sys_close(fd);
+	}
+	fd = sys_open("/test.txt", O_RDONLY);
+	if ( fd >= 0 ) {
+		sys_read(fd, data, strlen("hello world\n"));
+		sys_close(fd);
+		kprintf("FS: %s\n", data);
+	}
+
 }
 
 void

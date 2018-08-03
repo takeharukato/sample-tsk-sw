@@ -30,7 +30,7 @@ buffer_cache_blk_get(dev_id dev, blk_no blockno){
 loop:
 	//spinlock_lock(&global_buffer_cache.lock);
 	mutex_hold(&global_buffer_cache.mtx);
-	list_for_each(lp, &global_buffer_cache, head){  // Is the block already cached?
+	reverse_for_each(lp, &global_buffer_cache, head){  // Is the block already cached?
 		
 		b = CONTAINER_OF(lp, blk_buf, mru);
 		if ( ( b->dev == dev ) && ( b->blockno == blockno) ) {
@@ -71,6 +71,7 @@ loop:
 		}
 	}
 
+	mutex_release(&global_buffer_cache.mtx);
 	panic("buffer_cache_blk_get: no buffers");
 found:
 	psw_restore_interrupt(&psw);
@@ -149,8 +150,10 @@ buffer_cache_init(void){
 	 */
 	init_list_head(&global_buffer_cache.head);
 
-	for(b = &global_buffer_cache.buf[0]; b < &global_buffer_cache.buf[NBUF]; ++b){
-
+	for(b = &global_buffer_cache.buf[0]; &global_buffer_cache.buf[NBUF] > b; ++b){
+		
+		init_list_node(&b->mru);
+		init_list_node(&b->link);
 		list_add_top(&global_buffer_cache.head, &b->mru);
 		b->dev = BLK_DEV_NODEV;  /* no device own this block */
 		wque_init_wait_queue(&b->waiters);

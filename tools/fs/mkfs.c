@@ -328,7 +328,7 @@ write_root_dirent(void){
 	root_inode.i_mode = FS_IMODE_DIR;
 	root_inode.i_nlink = 1;
 	root_inode.i_size = BSIZE;
-	root_inode.i_addr[0]=blk;
+	root_inode.i_addr[0]=blk+sb->s_firstdata_block;
 
 	memset(&buf[0], 0, BSIZE);
 
@@ -339,7 +339,7 @@ write_root_dirent(void){
 
 	dentp->d_ino = ROOT_DENT_INO;
 	memmove(&dentp->d_name[0], "..", 3);
-	
+	printf("root block:%ld\n", blk);
 	write_disk_data_block(blk, &buf[0]);
 	write_disk_inode(ROOT_DENT_INO, &root_inode);
 }
