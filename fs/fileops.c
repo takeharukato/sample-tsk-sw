@@ -67,16 +67,18 @@ create(char *path, imode_t type, dev_id dev){
 	ip = inode_dirlookup(dp, name, &ent);
 	if ( ip != NULL ) {
 
-		inode_unlock(ip);
-		inode_put(ip);
+		inode_unlock(dp);
+		inode_put(dp);
 
 		inode_lock(ip);
+
 		if ( (type == FS_IMODE_FILE) && (ip->i_mode == FS_IMODE_FILE) )
-			return ip;
+			return ip;  /* Return locked inode */
+
 		inode_unlock(ip);
 		inode_put(ip);
 
-		return 0;
+		return NULL;
 	}
 
 	ip = inode_allocate(dp->i_dev, type);
@@ -230,4 +232,100 @@ inode_put_out:
 	inode_put(ip);
 
 	return -1;    
+}
+
+int
+sys_unlink(char *path){
+	inode       *ip, *dp;
+	d_dirent          de;
+	char name[FNAME_MAX];
+	dirent           ent;
+	off_t         wr_len;
+
+	dp = inode_nameiparent(path, name);
+	if ( dp == NULL ) 
+		return -1;
+
+	inode_lock(dp);
+
+	if ( ( strncmp(".", name, FNAME_MAX) == 0 ) ||
+	    ( strncmp("..", name, FNAME_MAX) == 0 ) )
+		goto error_out;
+
+	ip = inode_dirlookup(dp, name, &ent);
+
+	if ( ip == NULL )
+		goto error_out;
+
+	inode_lock(ip);
+
+	kassert( ip->i_nlink > 0 );
+
+	if ( ( ip->i_mode == FS_IMODE_DIR ) && ( !isdirempty(ip) ) ) {
+
+		inode_unlock(ip);
+		inode_put(ip);
+		goto error_out;
+	}
+
+	memset(&de, 0, sizeof(de));
+
+	wr_len = inode_write(dp, (char*)&de, ent.d_off, sizeof(de));
+	kassert( wr_len == sizeof(d_dirent) );
+
+	if ( ip->i_mode == FS_IMODE_DIR ) {
+
+		--dp->i_nlink;  /* for ".." */
+		inode_update(dp);
+	}
+
+	inode_unlock(dp);
+	inode_put(dp);
+
+	ip->i_nlink--;
+	inode_update(ip);
+
+	inode_unlock(ip);
+	inode_put(ip);
+
+	return 0;
+
+error_out:
+	inode_unlock(dp);
+	inode_put(dp);
+
+	return -1;
+}
+
+off_t
+sys_seek(int fd, off_t off, int where) {
+	file_descriptor *f;
+	off_t          new;
+
+	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
+		return -EINVAL;
+	
+	f = current->fds[fd];
+	if ( f == NULL )
+		return -EBADF;
+
+	if ( where == SEEK_SET )
+		new = off;
+	if ( where == SEEK_CUR )
+		new = f->f_offset + off;
+
+	kassert(f->f_inode != NULL );
+
+	inode_lock(f->f_inode);
+
+	if ( where == SEEK_END )
+		new = f->f_inode->i_size + off;
+
+	if ( new < 0 )
+		new = 0;
+
+	inode_unlock(f->f_inode);
+	f->f_offset = new;
+
+	return new;
 }

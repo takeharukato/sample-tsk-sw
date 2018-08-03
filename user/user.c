@@ -41,13 +41,8 @@ threadC(void *arg) {
 
 	fd = sys_open("/test.txt", O_RDWR|O_CREATE);
 	if ( fd >= 0 ) {
-
 		sys_write(fd, "hello world", strlen("hello world"));
-		sys_close(fd);
-	}
-	fd = sys_open("/test.txt", O_RDONLY);
-	if ( fd >= 0 ) {
-
+		sys_seek(fd, 0, SEEK_SET);
 		sys_read(fd, data, strlen("hello world"));
 		sys_close(fd);
 		kprintf("FS: %s\n", data);

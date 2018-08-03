@@ -43,6 +43,15 @@
 #if !defined(O_RDWR)
 #define O_RDWR                   (0x3)
 #endif
+#if !defined(SEEK_SET)
+#define        SEEK_SET          (0x0)
+#endif
+#if !defined(SEEK_CUR)
+#define        SEEK_CUR          (0x1)
+#endif
+#if !defined(SEEK_END)
+#define        SEEK_END          (0x2)
+#endif
 
 typedef struct _superblock {
 	uint32_t s_max_size;    /*< Size of file system image in blocks */
@@ -140,4 +149,6 @@ int sys_read(int _fd, char *_dst, size_t _count);
 int sys_write(int _fd, char *_src, size_t _count);
 int sys_close(int _fd);
 int sys_open(char *_path, omode_t _omode);
+int sys_unlink(char *_path);
+off_t sys_seek(int _fd, off_t _off, int _where);
 #endif  /*  _KERN_FS_H   */
