@@ -663,6 +663,12 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 		src += wr_bytes;
 	}
 
+	if ( (counts > remains ) && ( off > ip->i_size) ) {
+
+		ip->i_size = off;
+		inode_update(ip);
+	}
+
 	return counts;
 }
 

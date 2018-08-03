@@ -246,6 +246,7 @@ find_free_data_block(blk_no *blkp) {
 		val = *(( (uint64_t *)(&buf[0]) ) + chunk_index);
 		if ( !( val & ( 1ULL << chunk_offset ) ) ) {
 
+			mark_data_block_used(i);
 			*blkp = (blk_no)i;
 			return 0;
 		}
