@@ -60,7 +60,7 @@ refer_sector(blk_no blk){
 	return fsimage_area + BSIZE*blk;
 }
 
-static void*
+static void
 read_sector(blk_no blk, void *dest, size_t size){
 	void *mb;
 
@@ -68,7 +68,7 @@ read_sector(blk_no blk, void *dest, size_t size){
 	memmove(dest, mb, size);
 }
 
-static void*
+static void
 write_sector(blk_no blk, void *src, size_t size){
 	void *mb;
 
@@ -99,32 +99,9 @@ mark_inode_used(uint32_t ino){
 	write_sector(blk, &buf[0], BSIZE);
 }
 
-static void
-mark_inode_free(uint32_t ino){
-	blk_no  blk;
-	uint8_t buf[BSIZE];
-	int64_t offset;
-	int64_t chunk_index;
-	int64_t chunk_offset;
-	uint64_t *valp;
-	
-	blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR) + (ino / BITS_PER_BLOCK);
-
-	offset = ino % BITS_PER_BLOCK;
-	chunk_index = offset / sizeof(uint64_t);
-	chunk_offset = offset % sizeof(uint64_t);
-
-	read_sector(blk, &buf[0], BSIZE);
-
-	valp = ( (uint64_t *)(&buf[0]) ) + chunk_index;
-	*valp &= ~( 1ULL << chunk_offset );
-
-	write_sector(blk, &buf[0], BSIZE);
-}
 
 static int 
 find_free_inode(uint32_t *inop) {
-	int     rc;
 	int64_t  i;
 	blk_no blk;
 	uint8_t buf[BSIZE];
@@ -177,40 +154,6 @@ mark_data_block_used(blk_no blk){
 	write_sector(bitmap_blk, &buf[0], BSIZE);
 }
 
-static void
-mark_data_block_free(blk_no blk){
-	blk_no  bitmap_blk;
-	uint8_t buf[BSIZE];
-	int64_t offset;
-	int64_t chunk_index;
-	int64_t chunk_offset;
-	uint64_t *valp;
-	
-	bitmap_blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR + sb->s_imap_blocks) +
-		(blk / BITS_PER_BLOCK);
-
-	offset = blk % BITS_PER_BLOCK;
-	chunk_index = offset / sizeof(uint64_t);
-	chunk_offset = offset % sizeof(uint64_t);
-
-	read_sector(bitmap_blk, &buf[0], BSIZE);
-
-	valp = ( (uint64_t *)(&buf[0]) ) + chunk_index;
-	*valp &= ~( 1ULL << chunk_offset );
-
-	write_sector(bitmap_blk, &buf[0], BSIZE);
-}
-
-static int
-read_disk_data_block(blk_no dblk, uint8_t *buf) {
-	blk_no blk;
-
-	blk = sb->s_firstdata_block + dblk;
-	read_sector(blk, &buf[0], BSIZE);
-
-	return 0;
-}
-
 static int
 write_disk_data_block(blk_no dblk, uint8_t *buf) {
 	blk_no blk;
@@ -223,9 +166,7 @@ write_disk_data_block(blk_no dblk, uint8_t *buf) {
 
 static int 
 find_free_data_block(blk_no *blkp) {
-	int     rc;
 	int64_t  i;
-	blk_no blk;
 	blk_no  bitmap_blk;
 	uint8_t buf[BSIZE];
 	int64_t offset;
@@ -255,30 +196,9 @@ find_free_data_block(blk_no *blkp) {
 	return ENOENT;
 }
 
-static int
-read_disk_inode(uint32_t ino, d_inode *dinodep) {
-	int     rc;
-	int64_t  i;
-	blk_no blk;
-	uint8_t buf[BSIZE];
-	int index;
-
-	blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR + sb->s_imap_blocks + sb->s_bmap_blocks) +
-		(ino / INODES_PER_BLOCK);
-
-	index = ino % INODES_PER_BLOCK;
-
-	read_sector(blk, &buf[0], BSIZE);
-
-	memmove(dinodep, ( (d_inode *)&buf[0] ) + index , sizeof(d_inode));
-
-	return 0;
-}
 
 static int
 write_disk_inode(uint32_t ino, d_inode *dinodep) {
-	int     rc;
-	int64_t  i;
 	blk_no blk;
 	uint8_t buf[BSIZE];
 	int index;
@@ -295,23 +215,6 @@ write_disk_inode(uint32_t ino, d_inode *dinodep) {
 	write_sector(blk, &buf[0], BSIZE);
 
 	return 0;
-}
-
-static int
-get_free_inode(uint32_t *inop){
-	int       rc;
-	uint32_t ino;
-
-	rc = find_free_inode(&ino);
-	if ( rc != 0 )
-		goto error_out;
-
-	mark_inode_used(ino);
-
-	*inop = ino;
-	rc = 0;
-error_out:
-	return rc;
 }
 
 static void
@@ -385,13 +288,13 @@ init_super_block(size_t size, obj_size_t nr_files) {
 	mark_inode_used(0);
 	mark_inode_used(1);
 
-	printf("File system size(unit:KiB): %u\n", size / 1024);
-	printf("The number of files: %u\n", nr_files);
+	printf("File system size(unit:KiB): %zu\n", size / 1024);
+	printf("The number of files: %llu\n", nr_files);
 	printf("File system size(unit:blk): %u\n", sb->s_max_size);
 	printf("The number of inodes: %u\n", sb->s_ninodes);
 	printf("Inode bitmap blocks(unit:blk): %u\n", sb->s_imap_blocks);
 	printf("Block bitmap blocks(unit:blk): %u\n", sb->s_bmap_blocks);
-	printf("Inode blocks(unit:blk): %u\n", inode_blocks);
+	printf("Inode blocks(unit:blk): %lld\n", inode_blocks);
 	printf("First blocks(unit:blk): %u\n", sb->s_firstdata_block);
 	printf("Number of data blocks(unit:blk): %u\n", sb->s_nblocks);
 
@@ -415,7 +318,7 @@ write_fs_image(size_t size, obj_size_t nr_files) {
 
 int
 main(int argc, char *argv[]) {
-           int flags, opt;
+           int                       opt;
 	   char *imgfile=DEFAULT_FS_NAME;
 	   size_t size=DEFAULT_FS_SIZE;
 	   obj_size_t nr_files=DEFAULT_INODE_NR;
@@ -440,7 +343,7 @@ main(int argc, char *argv[]) {
 		   imgfile=argv[optind];
 
            printf("output file = %s\n", imgfile);
-           printf("output size = %d\n", size);
+           printf("output size = %zu\n", size);
 
 	   map_file(imgfile, size);
 
