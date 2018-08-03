@@ -160,28 +160,6 @@ read_disk_inode(dev_id dev, uint32_t ino, d_inode **dinodep, blk_buf  **bp) {
 	return 0;
 }
 
-static int
-write_disk_inode(dev_id dev, uint32_t ino, d_inode *dinode) {
-	superblock sb;
-	blk_no    blk;
-	blk_buf    *b;
-	int     index;
-
-	read_superblock(dev, &sb);
-
-	blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR + sb.s_imap_blocks + sb.s_bmap_blocks) +
-		(ino / INODES_PER_BLOCK);
-	index = ino % INODES_PER_BLOCK;
-
-	b = buffer_cache_blk_read(dev, blk);
-	memmove( ( (d_inode *)(&b->data[0]) ) + index, dinode, sizeof(d_inode));
-
-	buffer_cache_blk_write(b);
-	buffer_cache_blk_release(b);
-
-	return 0;
-}
-
 /** Find the inode by an i-node number
     and increase the i-node counter.
  */
