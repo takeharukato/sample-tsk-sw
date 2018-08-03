@@ -167,6 +167,8 @@ init_gicd(void) {
 	 *  Enable distributor
 	 */
 	*REG_GIC_GICD_CTLR = GIC_GICD_CTLR_ENABLE;
+	
+	return 0;
 }
 
 /** Finalize GICD
@@ -355,6 +357,8 @@ gic_pl390_initialize(struct _irq_ctrlr *ctrlr){
 	init_gicd();
 	init_gicc();
 	ctrlr->private = NULL;
+	
+	return 0;
 }
 
 /** Finalize GIC IRQ controller

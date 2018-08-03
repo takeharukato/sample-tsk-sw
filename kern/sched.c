@@ -24,7 +24,7 @@ select_next_thread(void) {
 	/* 実行可能なスレッドがなければ, アイドルスレッドを選択  */	
 	if (next == NULL)
 		next = idle_refer_idle_thread(); 
-out:
+
 	psw_restore_interrupt(&psw);
 
 	return next;

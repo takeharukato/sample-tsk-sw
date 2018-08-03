@@ -72,15 +72,13 @@ out:
 }
 void
 mutex_release(mutex *mtx){
-	int           rc;
 	psw_t        psw;	
-	wq_reason reason;
 
 	psw_disable_and_save_interrupt(&psw);
 	--mtx->count;
 	wque_wakeup(&mtx->wq, WQUE_REASON_WAKEUP );
 	mtx->owner = NULL;
-out:
+
 	psw_restore_interrupt(&psw);
 	return;
 }

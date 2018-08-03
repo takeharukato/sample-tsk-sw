@@ -15,7 +15,7 @@ CP=cp
 RM=rm -f
 LN=ln
 ARFLAGS=rvc
-OPT_FLAGS=-O0 -g
+OPT_FLAGS=-O0 -g -Wall
 CFLAGS=${OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
 LDFLAGS=
 

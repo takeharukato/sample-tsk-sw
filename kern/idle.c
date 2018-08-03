@@ -53,7 +53,6 @@ idle_refer_idle_thread(void) {
  */
 void
 idle_init_idle(void){
-	thread_t *thr = &idle_thread;
 
 	idle_thread.tid = 0;
 	idle_thread.slice = 0;

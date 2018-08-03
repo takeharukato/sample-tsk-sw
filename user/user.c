@@ -11,7 +11,6 @@
 
 void
 threadA(void *arg) {
-	int i = 0;
 
 	while(1) {
 
