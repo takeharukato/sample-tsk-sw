@@ -31,6 +31,18 @@
 #define FS_IMODE_DIR             (1)
 #define FS_IMODE_FILE            (2)
 #define FS_IMODE_DEV             (3)
+#if !defined(O_CREATE)
+#define O_CREATE                 (0x10)
+#endif 
+#if !defined(O_RDONLY)
+#define O_RDONLY                 (0x1)
+#endif
+#if !defined(O_WRONLY)
+#define O_WRONLY                 (0x2)
+#endif
+#if !defined(O_RDWR)
+#define O_RDWR                   (0x3)
+#endif
 
 typedef struct _superblock {
 	uint32_t s_max_size;    /*< Size of file system image in blocks */
@@ -117,6 +129,7 @@ void inode_lock(inode *_ip);
 void inode_unlock(inode *_ip);
 off_t inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
 off_t inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
+int inode_add_directory_entry(inode *_dp, char *_name, uint32_t _inum);
 inode *inode_dirlookup(inode *_dp, char *_name, dirent *_ent);
 inode *inode_namei(char *_path);
 inode *inode_nameiparent(char *_path, char *_name);

@@ -19,9 +19,9 @@ static int
 alloc_new_fd(file_descriptor *f){
 	int fd;
 
-	for(fd = 0; NOFILE > fd; ++fd){
+	for(fd = 0; THR_FDS_NR > fd; ++fd){
 
-		if (current->fds[fd] == NULL ) {
+		if ( current->fds[fd] == NULL ) {
 
 			current->fds[fd] = f;
 			return fd;
@@ -32,12 +32,12 @@ alloc_new_fd(file_descriptor *f){
 /** Is the directory dp empty except for "." and ".." ?
  */
 static int
-isdirempty(struct inode *dp){
+isdirempty(inode *dp){
 	off_t   off;
 	d_dirent de;
 	off_t   rd_bytes;
 
-	for(off=0; off<dp->size; off+=sizeof(de)){
+	for (off=0; dp->i_size > off; off+=sizeof(de) ) {
 
 		rd_bytes = inode_read(dp, (void *)&de, off, sizeof(d_dirent));
 		kassert ( rd_bytes != sizeof(de));
@@ -60,7 +60,7 @@ create(char *path, imode_t type, dev_id dev){
 	char name[FNAME_MAX];
 	dirent ent;
 
-	dp = nameiparent(path, name);
+	dp = inode_nameiparent(path, name);
 	if ( dp == NULL )
 		return NULL;
 
@@ -85,14 +85,14 @@ create(char *path, imode_t type, dev_id dev){
 
 	inode_lock(ip);
 	ip->i_dev = dev;
-	ip->nlink = 1;
+	ip->i_nlink = 1;
 	inode_update(ip);
 
 	if (type == FS_IMODE_DIR){  // Create . and .. entries.
-		++dp->nlink;  // for ".."
+		++dp->i_nlink;  // for ".."
 		inode_update(dp);
 
-		// No ip->nlink++ for ".": avoid cyclic ref count.
+		// No ip->i_nlink++ for ".": avoid cyclic ref count.
 		if ( (inode_add_directory_entry(ip, ".", ip->inum) < 0 ) || 
 		     (inode_add_directory_entry(ip, "..", dp->inum) < 0 ) )
 			panic("create dots");
@@ -134,6 +134,7 @@ int
 sys_read(int fd, char *dst, size_t count){
 	file_descriptor *f;
 	size_t counts;
+	io_cnt_t rdcnt;
 	char *p;
 
 	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
@@ -143,13 +144,14 @@ sys_read(int fd, char *dst, size_t count){
 	if ( f == NULL )
 		return -EBADF;
 
-	return fd_file_read(f, dst, counts);
+	return fd_file_read(f, dst, counts, &rdcnt);
 }
 
 int
 sys_write(int fd, char *src, size_t count){
 	file_descriptor *f;
 	size_t counts;
+	io_cnt_t wrcnt;
 	char *p;
 
 	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
@@ -159,7 +161,7 @@ sys_write(int fd, char *src, size_t count){
 	if ( f == NULL )
 		return -EBADF;
 
-	return fd_file_write(f, src, counts);;
+	return fd_file_write(f, src, counts, &wrcnt);;
 }
 
 int
@@ -180,3 +182,54 @@ sys_close(int fd){
 	return 0;
 }
 
+int
+sys_open(char *path, omode_t omode){
+	int fd, rc;
+	file_descriptor *f;
+	inode *ip;
+
+	if (omode & O_CREATE) {
+
+		/* Note: create locks this inode */
+		ip = create(path, FS_IMODE_FILE, ROOT_DEV);
+
+		if ( ip == NULL ) 
+			return -1;
+	} else {
+
+		ip = inode_namei(path);
+		if( ip == NULL ) 
+			return -1;
+
+		inode_lock(ip);
+
+		if ( ( ip->i_mode == FS_IMODE_DIR ) && ( omode != O_RDONLY ) ) 
+			goto inode_put_out;
+	}	
+	
+	rc = fdtable_alloc_new_fd(&f);
+	if ( rc != 0 ) 
+		goto inode_put_out;
+	
+	fd = alloc_new_fd(f);
+	
+	if ( (fd < 0) ) {
+		
+		fdtable_close_fd(f);
+		goto inode_put_out;
+	}
+		
+	inode_unlock(ip);
+	
+	f->f_inode = ip;
+	f->f_offset = 0;
+	f->f_flags = omode;
+
+	return fd;
+	
+inode_put_out:
+	inode_unlock(ip);
+	inode_put(ip);
+
+	return -1;    
+}

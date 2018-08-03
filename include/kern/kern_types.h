@@ -31,6 +31,7 @@ typedef int64_t             off_t;  /*< In kernel reference count    */
 typedef int64_t          io_cnt_t;  /*< In kernel I/O count(Note: minus means errors)    */
 typedef int32_t           imode_t;  /*< mode in inode    */
 typedef uint64_t       obj_size_t;  /*< object size                  */
+typedef int32_t           omode_t;  /*< open mode */
 struct _thread;
 extern struct _thread *current;  /*< The pointer for the current thread  */
 #endif  /*  _KERN_KERN_TYPES_H  */
