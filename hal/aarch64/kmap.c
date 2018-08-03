@@ -21,7 +21,6 @@ static pgtbl_t  *kpgtbl;
  */
 void
 map_kernel_page(uintptr_t paddr, uintptr_t vaddr, uint64_t page_attr, void *kpgtbl) {
-	int             rc;
 	lvl1_ent       ent1;
 	lvl1_ent       ent2;
 	level2_tbl *lvl2tbl;

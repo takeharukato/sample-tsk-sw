@@ -25,4 +25,6 @@ main(int  __attribute__ ((unused)) argc, char  __attribute__ ((unused)) *argv[])
 	OFFSET(EXC_EXC_SP_OFFSET, _exception_frame, exc_sp);
 	OFFSET(EXC_EXC_ELR_OFFSET, _exception_frame, exc_elr);
 	OFFSET(EXC_EXC_SPSR_OFFSET, _exception_frame, exc_spsr);
+
+	return 0;
 }

@@ -43,7 +43,6 @@ irq_initialize_manager(void) {
  */
 int
 irq_register_ctrlr(irq_no irq, irq_ctrlr *ctrlrp){
-	irq_line             *linep;
 	psw_t                   psw;
 	irq_manage *mgr = (&irqMgr);
 
@@ -64,7 +63,6 @@ irq_register_ctrlr(irq_no irq, irq_ctrlr *ctrlrp){
  */
 int
 irq_unregister_ctrlr(irq_no irq){
-	irq_line             *linep;
 	psw_t                   psw;
 	irq_manage *mgr = (&irqMgr);
 
@@ -99,7 +97,7 @@ irq_register_handler(irq_no irq, irq_attr attr, irq_prio prio, void *private, in
 	if ( ( irq < 0 ) || ( irq >= NR_IRQS ) )
 		return EINVAL;
 
-	handler_attr &= IRQ_ATTR_HANDLER_MASK;
+	handler_attr = attr & IRQ_ATTR_HANDLER_MASK;
 
 	psw_disable_and_save_interrupt(&psw);
 

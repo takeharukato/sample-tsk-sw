@@ -55,7 +55,6 @@ isdirempty(inode *dp){
 
 static inode*
 create(char *path, imode_t type, dev_id dev){
-	off_t off;
 	inode *ip, *dp;
 	char name[FNAME_MAX];
 	dirent ent;
@@ -110,7 +109,6 @@ create(char *path, imode_t type, dev_id dev){
 
 int
 sys_dup(int fd){
-	int                newfd;
 	file_descriptor *f, *new;
 
 	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
@@ -131,12 +129,10 @@ sys_dup(int fd){
 }
 
 int
-sys_read(int fd, char *dst, size_t count){
+sys_read(int fd, char *dst, size_t counts){
 	int             rc;
 	file_descriptor *f;
-	size_t counts;
 	io_cnt_t rdcnt;
-	char *p;
 
 	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
 		return -EINVAL;
@@ -150,12 +146,10 @@ sys_read(int fd, char *dst, size_t count){
 }
 
 int
-sys_write(int fd, char *src, size_t count){
+sys_write(int fd, char *src, size_t counts){
 	int             rc;
 	file_descriptor *f;
-	size_t counts;
 	io_cnt_t wrcnt;
-	char *p;
 
 	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
 		return -EINVAL;

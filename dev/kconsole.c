@@ -99,9 +99,7 @@ out:
  */
 void
 unregister_kconsole(kconsole_t *conp) {
-	int    rc;
 	psw_t psw;	
-	kconsole_list_t *kcp = &kcons;
 	
 	psw_disable_and_save_interrupt(&psw);
 	list_del(&conp->link);

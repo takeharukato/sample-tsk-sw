@@ -25,7 +25,6 @@ read_superblock(dev_id dev, superblock *sb){
 
 static int 
 get_free_inode(dev_id dev, uint32_t *inop) {
-	int     rc;
 	int64_t  i;
 	blk_no blk;
 	blk_buf *b;
@@ -143,8 +142,6 @@ release_data_block(dev_id dev, blk_no blk) {
  */
 static int
 read_disk_inode(dev_id dev, uint32_t ino, d_inode **dinodep, blk_buf  **bp) {
-	int               rc;
-	int64_t            i;
 	superblock        sb;
 	blk_no           blk;
 	blk_buf           *b;
@@ -165,8 +162,6 @@ read_disk_inode(dev_id dev, uint32_t ino, d_inode **dinodep, blk_buf  **bp) {
 
 static int
 write_disk_inode(dev_id dev, uint32_t ino, d_inode *dinode) {
-	int        rc;
-	int64_t     i;
 	superblock sb;
 	blk_no    blk;
 	blk_buf    *b;

@@ -99,37 +99,6 @@ mark_inode_used(uint32_t ino){
 	write_sector(blk, &buf[0], BSIZE);
 }
 
-
-static int 
-find_free_inode(uint32_t *inop) {
-	int64_t  i;
-	blk_no blk;
-	uint8_t buf[BSIZE];
-	int64_t offset;
-	int64_t chunk_index;
-	int64_t chunk_offset;
-	uint64_t val;
-
-	for(i = 0; sb->s_ninodes > i; ++i ) {
-
-		blk = (RESV_BLOCK_NR + SUPER_BLOCK_BLK_NR) + (i / BITS_PER_BLOCK);
-
-		read_sector(blk, &buf[0], BSIZE);
-
-		offset = i % BITS_PER_BLOCK;
-		chunk_index = offset / sizeof(uint64_t);
-		chunk_offset = offset % sizeof(uint64_t);
-		val = *(( (uint64_t *)(&buf[0]) ) + chunk_index);
-		if ( !( val & ( 1ULL << chunk_offset ) ) ) {
-
-			*inop = (uint32_t)i;
-			return 0;
-		}
-	}
-
-	return ENOENT;
-}
-
 static void
 mark_data_block_used(blk_no blk){
 	blk_no  bitmap_blk;

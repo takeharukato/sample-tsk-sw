@@ -78,7 +78,6 @@ memide_write_sector(size_t offset, void *src, size_t size) {
  */
 int 
 iderw(blk_buf *b){
-	blk_no no;
 	size_t addr;
 
 	kassert(b->flags & B_BUSY);

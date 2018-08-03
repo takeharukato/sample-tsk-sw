@@ -21,10 +21,10 @@ static buffer_cache global_buffer_cache;
 /* equivalent to bget */
 static blk_buf *
 buffer_cache_blk_get(dev_id dev, blk_no blockno){
-	blk_buf *b;
+	int      rc;
+	blk_buf  *b;
 	list_t  *lp;
-	wq_reason rc;
-	psw_t psw;
+	psw_t   psw;
 
 	psw_disable_and_save_interrupt(&psw);
 loop:

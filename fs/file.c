@@ -130,7 +130,6 @@ fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
  */
 int
 fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
-	int              i;
 	int             rc;
 	io_cnt_t  wr_count;
 

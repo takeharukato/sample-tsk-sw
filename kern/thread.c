@@ -184,7 +184,6 @@ thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp,
 out:
 	return rc;
 
-free_thread_out:
 	kfree(thr);
 
 free_stack_out:
@@ -210,7 +209,6 @@ thr_exit_thread(int code){
 					   *  release remaining resources 
 					   *  (e.g., thread stack )
 					   */
-out:	
 	psw_restore_interrupt(&psw);
 
 	sched_schedule();  /*  This thread release its cpu, 
