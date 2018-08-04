@@ -9,6 +9,7 @@
 
 #include <kern/freestanding.h>
 #include <kern/printf.h>
+#include <kern/string.h>
 #include <kern/heap.h>
 
 #include <hal/pgtbl.h>
@@ -22,7 +23,6 @@ static kmap_info kmap_pgtbl={&kmap_pml4, (void *)PHY_TO_KERN_STRAIGHT(&kmap_pml4
 void
 map_kernel_page(uintptr_t paddr, uintptr_t vaddr, 
     uint64_t page_attr, void *kpgtbl) {
-	int             rc;
 	pml4e          ent1;
 	pdpe           ent2;
 	pdire          ent3;

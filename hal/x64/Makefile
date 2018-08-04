@@ -6,6 +6,7 @@ QEMU_KERNEL ?= ${top}/kernel.elf
 QEMU_OPT ?= -m ${CONFIG_HAL_MEMORY_SIZE_MB} -nographic -serial mon:stdio
 QEMU_DBG_OPT := -S -gdb tcp::1234
 GRUB2_RESCUE=grub2-mkrescue
+GRUB2_RESCUE_OPT=-d /usr/lib/grub/i386-pc
 
 CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
@@ -57,7 +58,7 @@ ${top}/kernel.iso: ${QEMU_KERNEL}
 	mkdir -p ${top}/rfs/boot/modules
 	cp ${top}/hal/${CPU}/grub.cfg ${top}/rfs/boot/grub
 	cp ${top}/kernel.elf ${top}/rfs/boot
-	${GRUB2_RESCUE} -o ${top}/kernel.iso ${top}/rfs
+	${GRUB2_RESCUE} ${GRUB2_RESCUE_OPT} -o ${top}/kernel.iso ${top}/rfs
 	if [ -d ${top}/rfs ]; then     					\
 	  	rm -fr ${top}/rfs;					\
 	fi;

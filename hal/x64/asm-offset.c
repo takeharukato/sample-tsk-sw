@@ -20,4 +20,6 @@ main(int  __attribute__ ((unused)) argc, char  __attribute__ ((unused)) *argv[])
 	OFFSET(TI_MAGIC_OFFSET, _thread_info, magic);
 
 	DEFINE_SIZE(EXC_FRAME_SIZE, sizeof(struct _exception_frame));
+
+	return 0;
 }

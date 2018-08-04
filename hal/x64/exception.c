@@ -42,8 +42,6 @@ static const char *trapnames[] = {
 
 void
 hal_handle_exception(exception_frame *exc) {
-	int       i;
-	uint64_t rf;
 	
 	kprintf("An exception occur:\n");
 	if ( exc->trapno < X86_NR_EXCEPTIONS )
