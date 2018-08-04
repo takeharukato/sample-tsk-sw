@@ -6,7 +6,7 @@
 top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
-objects=file.o fs.o fileops.o
+objects=file.o inode.o fs.o
 lib=libfs.a
 
 all:${lib}

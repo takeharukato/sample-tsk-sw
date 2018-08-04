@@ -39,12 +39,13 @@ threadC(void *arg) {
 
 	kprintf("threadC\n");
 
-	fd = sys_open("/test.txt", O_RDWR|O_CREATE);
+	fd = fs_open("/test.txt", O_RDWR|O_CREATE);
 	if ( fd >= 0 ) {
-		sys_write(fd, "hello world", strlen("hello world"));
-		sys_seek(fd, 0, SEEK_SET);
-		sys_read(fd, data, strlen("hello world"));
-		sys_close(fd);
+
+		fs_write(fd, "hello world", strlen("hello world"));
+		fs_seek(fd, 0, SEEK_SET);
+		fs_read(fd, data, strlen("hello world"));
+		fs_close(fd);
 		kprintf("FS: %s\n", data);
 	}
 

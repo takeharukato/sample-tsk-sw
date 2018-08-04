@@ -144,11 +144,11 @@ inode *inode_namei(char *_path);
 inode *inode_nameiparent(char *_path, char *_name);
 void inode_cache_init(void);
 
-int sys_dup(int _fd);
-int sys_read(int _fd, char *_dst, size_t _count);
-int sys_write(int _fd, char *_src, size_t _count);
-int sys_close(int _fd);
-int sys_open(char *_path, omode_t _omode);
-int sys_unlink(char *_path);
-off_t sys_seek(int _fd, off_t _off, int _where);
+int fs_dup(int _fd);
+int fs_read(int _fd, char *_dst, size_t _count);
+int fs_write(int _fd, char *_src, size_t _count);
+int fs_close(int _fd);
+int fs_open(char *_path, omode_t _omode);
+int fs_unlink(char *_path);
+off_t fs_seek(int _fd, off_t _off, int _where);
 #endif  /*  _KERN_FS_H   */
