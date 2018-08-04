@@ -173,7 +173,7 @@ i8259_update_irq_mask(intr_mask_state msk) {
  */
 static int
 init_i8259_pic(struct _irq_ctrlr *ctrlr){
-	int i, rc;
+	int i;
 
 	/* PIC 1*/
 	out_port_byte(I8259_PIC1_BASE_ADDR1, I8259_PIC1_ICW1_CODE);
@@ -237,6 +237,7 @@ i8259_find_pending_irq(struct _exception_frame *exc, irq_no *irqp){
 
 	return IRQ_FOUND;
 }
+
 void
 x64_init_pic(void){
 	int i;
