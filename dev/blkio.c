@@ -18,50 +18,55 @@ static buffer_cache global_buffer_cache;
 /* equivalent to bget */
 static blk_buf *
 buffer_cache_blk_get(dev_id dev, blk_no blockno){
-	int      rc;
-	blk_buf  *b;
-	list_t  *lp;
-	psw_t   psw;
+	wq_reason rc;
+	blk_buf   *b;
+	list_t   *lp;
+	psw_t    psw;
 
 	psw_disable_and_save_interrupt(&psw);
-loop:
-	mutex_hold(&global_buffer_cache.mtx);
-	reverse_for_each(lp, &global_buffer_cache, head){  
+	do{
+		mutex_hold(&global_buffer_cache.mtx);
+		reverse_for_each(lp, &global_buffer_cache, head){  
 
-		/*
-		 * Search the block in chached buffers.
-		 */
-		b = CONTAINER_OF(lp, blk_buf, mru);
-		if ( ( b->dev == dev ) && ( b->blockno == blockno) ) {
+			/*
+			 * Search the block in chached buffers.
+			 */
+			b = CONTAINER_OF(lp, blk_buf, mru);
+			if ( ( b->dev == dev ) && ( b->blockno == blockno) ) {
 
-			if ( !(b->flags & B_BUSY) ) {
+				if ( !(b->flags & B_BUSY) ) {
 
-				b->flags |= B_BUSY;
-				mutex_release(&global_buffer_cache.mtx);
-				goto found;
-			} else {
+					b->flags |= B_BUSY;
+					mutex_release(&global_buffer_cache.mtx);
+					goto found;
+				} else {
 
-				rc = wque_wait_on_event_with_mutex(&b->waiters, 
-				    &global_buffer_cache.mtx);
-				goto loop;
+					rc = wque_wait_on_event_with_mutex(&b->waiters, 
+					    &global_buffer_cache.mtx);
+					mutex_release(&global_buffer_cache.mtx);
+					continue;
+				}
 			}
 		}
-	}
 
-	reverse_for_each(lp, &global_buffer_cache, head) {
+		/*
+		 * Re-use buffer
+		 */
+		reverse_for_each(lp, &global_buffer_cache, head) {
 	
-		b = CONTAINER_OF(lp, blk_buf, mru);
-		if ( ( (b->flags & B_BUSY) == 0 ) && ( (b->flags & B_DIRTY) == 0) ) {
+			b = CONTAINER_OF(lp, blk_buf, mru);
+			if ( ( !(b->flags & B_BUSY) ) && ( !(b->flags & B_DIRTY) ) ) {
 			
-			b->dev = dev;
-			b->blockno = blockno;
-			b->flags = B_BUSY;
-			mutex_release(&global_buffer_cache.mtx);
-			goto found;
+				b->dev = dev;
+				b->blockno = blockno;
+				b->flags = B_BUSY;
+				mutex_release(&global_buffer_cache.mtx);
+				goto found;
+			}
 		}
-	}
 
-	mutex_release(&global_buffer_cache.mtx);
+		mutex_release(&global_buffer_cache.mtx);
+	} while(rc != WQUE_REASON_DESTROY );
 	panic("buffer_cache_blk_get: no buffers");
 found:
 	psw_restore_interrupt(&psw);
