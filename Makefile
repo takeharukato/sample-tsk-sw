@@ -41,7 +41,7 @@ kernel.elf: kernel-dbg.elf
 
 kernel-dbg.elf: include/kern/autoconf.h subsystem
 ifeq ($(CONFIG_HAL),y)
-	${CC} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
+	${CC} -static ${PIC_OPT_FLAGS} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\
 		-o $@ ${start_obj} 				\
 		-Wl,--start-group ${kernlibs} ${hallibs} -Wl,--end-group

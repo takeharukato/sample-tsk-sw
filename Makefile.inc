@@ -15,8 +15,9 @@ CP=cp
 RM=rm -f
 LN=ln
 ARFLAGS=rvc
-OPT_FLAGS=-O0 -g -Wall -fno-pie
-CFLAGS=${OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
+OPT_FLAGS=-O0 -g -Wall
+PIC_OPT_FLAGS=-fno-pie -fno-pic -fno-PIC
+CFLAGS=${OPT_FLAGS} ${PIC_OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
 LDFLAGS=
 
 .PHONY: clean distclean hal tools menuconfig gtags
