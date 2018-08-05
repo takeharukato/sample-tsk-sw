@@ -26,7 +26,7 @@ buffer_cache_blk_get(dev_id dev, blk_no blockno){
 	psw_disable_and_save_interrupt(&psw);
 	do{
 		mutex_hold(&global_buffer_cache.mtx);
-		reverse_for_each(lp, &global_buffer_cache, head){  
+		list_for_each(lp, &global_buffer_cache, head){  
 
 			/*
 			 * Search the block in chached buffers.
@@ -37,6 +37,7 @@ buffer_cache_blk_get(dev_id dev, blk_no blockno){
 				if ( !(b->flags & B_BUSY) ) {
 
 					b->flags |= B_BUSY;
+
 					mutex_release(&global_buffer_cache.mtx);
 					goto found;
 				} else {
@@ -105,14 +106,16 @@ void
 buffer_cache_blk_release(blk_buf *b){
 	psw_t psw;
 
-	if ( (b->flags & B_BUSY) == 0 )
+	if ( !(b->flags & B_BUSY) )
 		panic("buffer_cache_blk_release");
 
-	mutex_hold(&global_buffer_cache.mtx);
 	psw_disable_and_save_interrupt(&psw);
+	mutex_hold(&global_buffer_cache.mtx);
 
+	/*
+	 * Update MRU cache
+	 */
 	list_del(&b->mru);
-
 	list_add_top(&global_buffer_cache.head, &b->mru);
 
 	b->flags &= ~B_BUSY;
