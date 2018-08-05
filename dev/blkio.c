@@ -18,6 +18,7 @@ static buffer_cache global_buffer_cache;
 /* equivalent to bget */
 static blk_buf *
 buffer_cache_blk_get(dev_id dev, blk_no blockno){
+	int      rc;
 	blk_buf  *b;
 	list_t  *lp;
 	psw_t   psw;
