@@ -10,4 +10,4 @@ all: distclean
 
 clean:
 distclean: 
-	${RM} *~
+	${RM} \#* *~

@@ -1,6 +1,6 @@
 CPU ?= `uname -m|sed -e "s/x86-64/x64/" -e "s/amd64/x64/" -e "s/x86_64/x64/" -e "s/i?86/ia32/"`
-
-CC=${CROSS_COMPILE}gcc
+HOST_CC=gcc
+CC=${CROSS_COMPILE}${HOST_CC}
 AR=${CROSS_COMPILE}ar
 LD=${CROSS_COMPILE}ld
 RANLIB=${CROSS_COMPILE}ranlib
@@ -19,6 +19,8 @@ OPT_FLAGS=-O0 -g -Wall
 PIC_OPT_FLAGS=-fno-pie -fno-pic -fno-PIC
 CFLAGS=${OPT_FLAGS} ${PIC_OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
 LDFLAGS=
+
+FSIMG_FILE=${top}/fsimg.img
 
 .PHONY: clean distclean hal tools menuconfig gtags
 

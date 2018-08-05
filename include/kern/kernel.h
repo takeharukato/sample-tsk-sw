@@ -32,6 +32,9 @@
 #include <kern/mutex.h>
 #include <kern/heap.h>
 #include <kern/timer.h>
+#include <kern/blkio.h>
+#include <kern/fdtable.h>
+#include <kern/fs.h>
 
 #include <hal/hal.h>
 

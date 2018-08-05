@@ -25,6 +25,8 @@
 #define THR_TSTATE_EXIT   (2)  /*< Exiting   */
 #define THR_TSTATE_DEAD   (3)  /*< Wait for termination   */
 
+#define THR_FDS_NR        (32) /*< Open files */
+
 /** Thread attributes
  */
 typedef struct _thread_attr{
@@ -45,6 +47,7 @@ typedef struct _thread_attr{
 
 /** Thread definiion
  */
+struct _file_descriptor;
 typedef struct _thread{
 	thr_state_t        status;  /*< Status of the thread       */
 	tid_t                 tid;  /*< Thread ID                  */
@@ -53,6 +56,7 @@ typedef struct _thread{
 	exit_code_t     exit_code;  /*< Exit code                  */
 	thread_attr_t        attr;  /*< Thread attribute           */
 	uptime_cnt          slice;  /*< Remaining time slices      */
+	struct _file_descriptor *fds[THR_FDS_NR]; /*< File descriptors  */
 }thread_t;
 
 /** Thread queue

@@ -28,8 +28,15 @@
    ･割込み・例外の前後では汎用レジスタを全て退避復元する
    （カーネルが使用するレジスタを全て保証する必要がある)
 
-   
-   
-
+6. mkfsをblkio IFを使用するように修正
+7. blkのロック順序/多重ロックがないことをシーケンス図を表記して確認
+8. kassertをfs.c(オブジェクト破壊など)入れる
+10. file.cとfs.cでoffsetの型が異なる
+11. 2重間接ブロックの処理を追加(bmap/itrunc)
+12. blkioに可変長ブロックを扱えるようにする
+13. fs.h/fs.c/mkfs.cのBSIZE使用箇所をsuperblockから取得したブロック長に置き換える
+14. fs.cのbuffer_cache_blk_write(bp);使用箇所をバッファをダーティにして遅延書き込みするように修正する
+15. inode番号の型をuint32_tからinum_t(int64_t)に変える
+16. fs.h, fs.c引数のchar *のうちconstが必要なものにconstをつける
    
 

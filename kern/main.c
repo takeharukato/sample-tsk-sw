@@ -22,6 +22,9 @@ kern_init(void) {
 
 	irq_initialize_manager();
 
+	buffer_cache_init();
+	inode_cache_init();
+	fdtable_init();
 #if defined(CONFIG_HAL)
 	hal_kernel_init();
 #endif /*  CONFIG_HAL  */

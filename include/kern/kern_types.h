@@ -22,7 +22,16 @@ typedef int32_t          irq_prio;  /*< IRQ priority                 */
 typedef uint32_t         irq_attr;  /*< IRQ Attribute                */
 typedef uint8_t          precnt_t;  /*< Preemption counters          */
 typedef uint64_t       uptime_cnt;  /*< Jiffies                      */
-
+typedef obj_id_t           dev_id;  /*< Device ID                    */
+typedef int64_t            blk_no;  /*< Disk block number            */
+typedef int             blk_state;  /*< Disk block status            */
+typedef int              rw_flags;  /*< File access flags            */
+typedef int64_t           ref_cnt;  /*< In kernel reference count    */
+typedef int64_t             off_t;  /*< In kernel reference count    */
+typedef int64_t          io_cnt_t;  /*< In kernel I/O count(Note: minus means errors)    */
+typedef int32_t           imode_t;  /*< mode in inode    */
+typedef uint64_t       obj_size_t;  /*< object size                  */
+typedef int32_t           omode_t;  /*< open mode */
 struct _thread;
 extern struct _thread *current;  /*< The pointer for the current thread  */
 #endif  /*  _KERN_KERN_TYPES_H  */

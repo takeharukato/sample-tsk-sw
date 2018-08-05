@@ -13,5 +13,5 @@ clean:hal
 
 distclean:hal clean
 	${MAKE} -C hal distclean
-	${RM} *~
+	${RM} \#* *~
 	${RM} hal

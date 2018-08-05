@@ -8,4 +8,4 @@ headers= asm-offset-helper.h bitops.h errno.h freestanding.h heap.h id_bitmap.h 
 all:
 
 distclean:
-	${RM} *~
+	${RM} \#* *~

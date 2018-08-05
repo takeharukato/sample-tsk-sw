@@ -3,11 +3,17 @@
 #  OS kernel sample
 #  Copyright 2018 Takeharu KATO
 #
-top=../..
+top=..
 include ${top}/Makefile.inc
+CFLAGS += -I${top}/include
+objects=
+lib=libXXXX.a
 
-all: distclean
+all: ${lib}
 
 clean:
-distclean: 
+	${RM} ${objects} ${lib}
+
+distclean: clean
 	${RM} \#* *~
+

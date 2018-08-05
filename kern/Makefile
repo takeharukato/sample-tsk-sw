@@ -16,4 +16,4 @@ clean:
 	${RM} *.o ${lib}
 
 distclean:clean
-	${RM} *~
+	${RM} \#* *~

@@ -110,6 +110,7 @@ thr_thread_switch(thread_t *prev, thread_t *next) {
 int
 thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp, 
     void (*start)(void *), void *arg){
+	int                i;
 	int               rc;
 	void   *thread_stack;
 	thread_t        *thr;
@@ -171,6 +172,9 @@ thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp,
 	thr->slice = CONFIG_TIMER_TIME_SLICE;
 
 	thr->status = THR_TSTATE_RUN;
+
+	for(i = 0; THR_FDS_NR > i; ++i)
+		thr->fds[i] = NULL;
 
 	sched_set_ready(thr);  /* Enqueue this thread into the ready queue  */
 

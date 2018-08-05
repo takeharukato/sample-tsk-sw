@@ -34,8 +34,21 @@ threadB(void *arg) {
 }
 void
 threadC(void *arg) {
+	int fd;
+	char data[64];
 
 	kprintf("threadC\n");
+
+	fd = fs_open("/test.txt", O_RDWR|O_CREATE);
+	if ( fd >= 0 ) {
+
+		fs_write(fd, "hello world", strlen("hello world"));
+		fs_seek(fd, 0, SEEK_SET);
+		fs_read(fd, data, strlen("hello world"));
+		fs_close(fd);
+		kprintf("FS: %s\n", data);
+	}
+
 }
 
 void

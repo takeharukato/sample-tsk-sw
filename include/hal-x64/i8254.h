@@ -18,6 +18,6 @@
 #define I8254_PORT_MODECNTL  (0x43)  /*< I/O port for controling mode */
 #define I8254_CMD_INTERVAL_TIMER (0x36) /*< Mode3(0x6 Square Wave Generator, 0x30 16 bit counter */
 #if !defined(ASM_FILE)
-void x64_timer_init(void);
+void x64_init_timer(void);
 #endif  /* !ASM_FILE  */
 #endif  /*  _HAL_I8254_H   */

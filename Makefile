@@ -2,9 +2,9 @@ top=.
 include Makefile.inc
 targets=kernel.elf kernel-dbg.elf kernel.asm kernel.map
 
-subdirs=common kern dev hal user
+subdirs=common kern dev fs hal user tools/fs
 cleandirs=include ${subdirs} tools configs
-kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a hal/hal/libhal.a
+kernlibs = user/libuser.a kern/libkern.a common/libcommon.a dev/libdev.a fs/libfs.a hal/hal/libhal.a
 mconf=tools/kconfig/mconf
 
 all:${targets}
@@ -22,6 +22,11 @@ menuconfig:hal configs/Config.in ${mconf}
 	${RM} include/kern/autoconf.h
 	${mconf} configs/Config.in || :
 
+tools/fs/mkfs: 
+	${MAKE} -C tools/fs mkfs
+
+${FSIMG_FILE}: tools/fs/mkfs
+	tools/fs/mkfs $@
 
 include/kern/autoconf.h: .config
 	${RM} -f $@
@@ -39,7 +44,7 @@ kernel.elf: kernel-dbg.elf
 	${CP}	$< $@
 	${STRIP} -g $@
 
-kernel-dbg.elf: include/kern/autoconf.h subsystem
+kernel-dbg.elf: include/kern/autoconf.h ${FSIMG_FILE} subsystem
 ifeq ($(CONFIG_HAL),y)
 	${CC} -static ${PIC_OPT_FLAGS} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
 		-nostdlib -T hal/hal/kernel.lds			\
@@ -71,13 +76,13 @@ clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\
 	done
-	${RM} *.o ${targets} *.tmp *.elf *.asm *.map *.iso
+	${RM} *.o ${FSIMG_FILE} ${targets} *.tmp *.elf *.asm *.map *.iso
 
 distclean:clean
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} distclean ;\
 	done
-	${RM}  \#* *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
+	${RM} \#* *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
 
 gtags:
 	${GTAGS} -v

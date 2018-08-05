@@ -39,7 +39,9 @@ hal_kernel_init(void){
 	idle->tinfo->thr = idle;
 
 	x64_init_pic();
-	x64_timer_init();
+	x64_init_timer();
+
+	memide_init();
 }
 
 /** 64bit モードでのブートアップ
