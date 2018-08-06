@@ -1,0 +1,157 @@
+#define	B_WRITE	 (0x0)	  /* non-read pseudo-flag */
+#define	B_READ	 (0x1)	  /* read when I/O occurs */
+#define	B_DONE	 (0x2)	  /* transaction finished */
+#define	B_ERROR	 (0x4)	  /* transaction aborted */
+#define	B_BUSY	 (0x8)	  /* not on av_forw/back list */
+#define	B_PHYS	 (0x10)	  /* physical I/O */
+#define	B_WANTED (0x40)	  /* issue wakeup when BUSY goes off */
+#define	B_AGE	 (0x80)	  /* delayed write for correct aging */
+#define	B_ASYNC	 (0x100)  /* don't wait for I/O completion */
+#define	B_DELWRI (0x200)  /* don't write till block leaves available list */
+#define	B_TAPE   (0x400)  /* this is a magtape (no bdwrite) */
+#define	B_LOCKED (0x1000) /* locked buffer */
+#define NBUF       (32)   /*< 4 pages */
+
+typedef struct _blk_buf {
+	blk_state     b_flags; /*< buffer status             */
+	list_t         b_link; /*< disk queue                */
+	list_t          b_mru; /*< Most recently used        */
+	dev_id          b_dev; /*< device id                 */
+	blk_no      b_blockno; /*< block no                  */
+	uint32_t     b_bcount; /* transfer count             */
+	uint16_t      b_error; /*< returned after I/O        */
+	uint16_t        b_pad; /*< reserved                  */
+	wait_queue    waiters; /*< Wait queue                */
+	void          *b_data; /*< block data                */
+	void            *next; /*< next block data in contiguous pages */
+}blk_buf;
+
+
+typedef struct _buffer_cache{
+	mutex                      mtx;
+	uint32_t            b_bsiz_sft; /*< block size 512^bsiz_sft   */
+	wait_queue             waiters; /*< Wait queue                */
+	list_head_t         locked_buf; /*< Locked buffer */
+	list_head_t          dirty_buf;  /*< Dirty buffer */
+	list_head_t          clean_buf;  /*< Clean buffer */
+	list_head_t          empty_buf;  /*< Empty buffer */
+	struct _blk_buf lock_buf[NBUF]; /*< Block Buffers */
+} buffer_cache;
+
+
+blk_buf *getblk(dev_id dev, blk_no blkno);
+/** 
+    @note 基本的な考え方は, 完全に未使用なバッファか, 非同期書き込み
+    (一定時間経ったか空きバッファがない場合に非同期で書き込みを待てばバッファが空きバッファにできる)バッファ
+    ができるのを待ち合わせて新規にバッファを割当てる
+ */
+blk_buf *
+getblk(dev_id dev, blk_no blkno){
+	register struct buf *bp;
+	register struct buf *dp;
+
+    	spl0(); //割込みを許可する(不要というより許可状態でなければならない)
+loop:
+	dp = bdevsw[major(dev)].d_tab; //指定されたブロックデバイスのバッファキャッシュヘッドを取り出す
+	if(dp == NULL) //指定されたブロックデバイスのバッファキャッシュヘッドがなければpanicする
+		panic("devtab");
+	//ブロックバッファキャッシュのmutexを取得
+	for (bp=dp->b_forw; bp != dp; bp = bp->b_forw) {
+
+                //指定されたデバイス上のパーティション内で検索対象ブロックが見つかるまでキャッシュを検索		
+		if (bp->b_blkno!=blkno || bp->b_dev!=dev) {
+			continue; 
+		}
+
+		/* ブロックがキャッシュ内で見つかった場合は, 対象ブロックの読み書きが終わるのを待ち合わせる
+		 * =>B_BUSYでなくなることを待ち合わせて休眠
+		 */
+		spl6();  //割込みを禁止(というよりブロックバッファのmutexで排他)
+		
+		if (bp->b_flags&B_BUSY) {
+
+			bp->b_flags |= B_WANTED;
+			sleep((caddr_t)bp, PRIBIO+1); //ブロックバッファキャッシュのmutexをとってevent待ち
+			//割込みを許可する
+			goto loop;
+		}
+		spl0();  //割込みを許可する(不要)
+		notavail(bp);  //空きリストから除去
+		//ブロックバッファキャッシュのmutexを解放
+		return(bp);
+	}
+	spl6();   //割込みを禁止(というよりブロックバッファのmutexで排他)
+	if (bfreelist.av_forw == &bfreelist) { //利用可能なバッファがない（空きリストが空)なら
+
+		bfreelist.b_flags |= B_WANTED;  //空きバッファができるのを待って休眠
+		sleep((caddr_t)&bfreelist, PRIBIO+1);
+		//割込みを許可する
+		goto loop; //空きリストを再探索
+	}
+	/*
+	 * 空きリスト中にバッファがあった
+	 */
+	spl0();  //割込みを許可する(不要)
+	bp = bfreelist.av_forw;
+	notavail(bp); //空きリストの先頭をリストから外して獲得
+	if (bp->b_flags & B_DELWRI) {  /* 空きリストにいるのが非同期書き込みバッファだった場合 */
+
+		bp->b_flags |= B_ASYNC;  //非同期転送フラグを立てる
+		bwrite(bp);              //バッファの書き込み要求を発行する(brelase後に書き込むようB_AGEを立てる)
+		goto loop;               //continue;
+	}
+	/*
+	 * ビジーバッファを先頭にキューイングする
+	 */
+	bp->b_flags = B_BUSY;
+	bp->b_back->b_forw = bp->b_forw;
+	bp->b_forw->b_back = bp->b_back;
+	bp->b_forw = dp->b_forw;
+	bp->b_back = dp;
+	dp->b_forw->b_back = bp;
+	dp->b_forw = bp;
+	bp->b_dev = dev;
+	bp->b_blkno = blkno;
+	return(bp);
+}
+
+blk_buf *bread(dev_id dev, blk_no blkno);
+blk_buf *
+bread(dev_id dev, blk_no blkno){
+	blk_buf *bp;
+	
+	bp = getblk(dev, blkno); //ブロックバッファを取り出す
+	if ( bp->b_flags & B_DONE )  //ブロックとバッファの同期がとれている場合は, そのバッファを返却する
+		return(bp);
+
+	bp->b_flags |= B_READ;  /*  ブロック読み取り中フラグを立てる  */
+	bp->b_bcount = BSIZE;   /*  ブロック長を設定                  */
+	(*bdevsw[major(dev)].d_strategy)(bp);  /*  ドライバに読み取り要求をキューイングする  */
+
+	iowait(bp);  /*  バッファに対するI/O待ちをかける  */
+
+	return(bp);   /*  バッファを返却する  */
+}
+blk_buf *breada(dev_id dev, blk_no blkno, blk_no rablkno);
+void bwrite(blk_buf *bp);
+void bawrite(blk_buf *bp);
+//bdwrite(bawriteで代用)
+void brelse(blk_buf *bp);
+int incore(dev_id dev, blk_no blkno);
+void iowait(blk_buf *bp);
+void iodone(blk_buf *bp);
+int geterror(blk_buf *bp);
+void bflush(dev_id dev);
+
+---
+struct buf *getblk(dev_t dev, daddr_t blkno);
+struct buf *bread(dev_t dev, daddr_t blkno);
+struct buf *breada(dev_t dev, daddr_t blkno, daddr_t rablkno);
+void bwrite(struct buf *bp);
+void bawrite(struct buf *bp);
+//bdwrite(bawriteで代用)
+void brelse(struct buf *bp);
+int incore(dev_t dev, daddr_t blkno);
+void iowait(struct buf *bp);
+int geterror(struct buf *bp);
+void bflush(dev_t dev);
