@@ -157,6 +157,7 @@ int fs_read(int _fd, char *_dst, size_t _count);
 int fs_write(int _fd, char *_src, size_t _count);
 int fs_close(int _fd);
 int fs_open(char *_path, omode_t _omode);
+int fs_link(char *_old, char *_new);
 int fs_unlink(char *_path);
 off_t fs_lseek(int _fd, off_t _off, int _where);
 int fs_fstat(int fd, struct _stat *st);
