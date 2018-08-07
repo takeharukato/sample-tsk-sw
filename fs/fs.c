@@ -298,7 +298,7 @@ error_out:
 }
 
 off_t
-fs_seek(int fd, off_t off, int where) {
+fs_lseek(int fd, off_t off, int where) {
 	file_descriptor *f;
 	off_t          new;
 
@@ -328,4 +328,24 @@ fs_seek(int fd, off_t off, int where) {
 	f->f_offset = new;
 
 	return new;
+}
+
+/** Get file status
+ */
+int
+fs_fstat(int fd, struct _stat *st){
+	file_descriptor *f;
+
+	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
+		return -EINVAL;
+	
+	f = current->fds[fd];
+	if ( f == NULL )
+		return -EBADF;
+
+	kassert(f->f_inode != NULL );
+	
+	fd_file_stat(f, st);
+
+	return 0;
 }

@@ -645,6 +645,16 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 	return counts;
 }
 
+void
+inode_get_stat(struct _inode *ip, struct _stat *st){
+
+	st->dev = ip->i_dev;
+	st->ino = ip->inum;
+	st->mode = ip->i_mode;
+	st->nlink = ip->i_nlink;
+	st->size = ip->i_size;
+}
+
 /** Look up directory entry
  */
 inode *

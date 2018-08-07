@@ -152,3 +152,17 @@ fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 
 	return rc;
 }
+
+/** Get file status
+ */
+void
+fd_file_stat(file_descriptor  *f, struct _stat *st){
+
+	kassert( f->f_inode != NULL );
+
+	inode_lock(f->f_inode);
+	inode_get_stat(f->f_inode, st);
+	inode_unlock(f->f_inode);
+
+	return ;
+}

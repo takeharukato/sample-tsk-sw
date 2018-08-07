@@ -36,17 +36,22 @@ void
 threadC(void *arg) {
 	int fd;
 	char data[64];
+	struct _stat s1, s2;
 
 	kprintf("threadC\n");
 
 	fd = fs_open("/test.txt", O_RDWR|O_CREATE);
 	if ( fd >= 0 ) {
-
+		
+		fs_fstat(fd, &s1);
 		fs_write(fd, "hello world", strlen("hello world"));
-		fs_seek(fd, 0, SEEK_SET);
+		fs_fstat(fd, &s2);
+
+		fs_lseek(fd, 0, SEEK_SET);
 		fs_read(fd, data, strlen("hello world"));
+
 		fs_close(fd);
-		kprintf("FS: %s\n", data);
+		kprintf("FS: size1:%u size2:%u %s\n", s1.size, s2.size, data);
 	}
 
 }
