@@ -37,6 +37,7 @@ threadC(void *arg) {
 	int fd;
 	char data[64];
 	struct _stat s1, s2;
+	struct _stat con_stat;
 
 	kprintf("threadC\n");
 
@@ -54,6 +55,13 @@ threadC(void *arg) {
 		kprintf("FS: size1:%u size2:%u %s\n", s1.size, s2.size, data);
 	}
 
+	fd = fs_open("/CON", O_RDWR);
+	if ( fd >= 0 ) {
+
+		fs_fstat(fd, &con_stat);
+		fs_close(fd);
+		kprintf("stat for CON: mode:%u size:%u\n", con_stat.mode, con_stat.size);
+	}
 }
 
 void

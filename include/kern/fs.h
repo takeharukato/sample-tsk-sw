@@ -91,6 +91,10 @@ typedef struct _d_inode{
 #define ROOT_DEV              (0)
 #define ROOT_DENT_INO         (2)
 
+#define CONS_INO              (3)
+#define CONS_DEV              (1)
+#define CONS_NAME             "CON"
+
 #define I_BUSY                 (0x1)
 #define I_VALID                (0x2)
 
