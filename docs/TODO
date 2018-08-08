@@ -35,8 +35,9 @@
 11. 2重間接ブロックの処理を追加(bmap/itrunc)
 12. blkioに可変長ブロックを扱えるようにする
 13. fs.h/fs.c/mkfs.cのBSIZE使用箇所をsuperblockから取得したブロック長に置き換える
-14. fs.cのbuffer_cache_blk_write(bp);使用箇所をバッファをダーティにして遅延書き込みするように修正する
-15. inode番号の型をuint32_tからinum_t(int64_t)に変える
-16. fs.h, fs.c引数のchar *のうちconstが必要なものにconstをつける
-   
+14. inode番号の型をuint32_tからinum(uint32_t)に変える
+15. fs.h, fs.c引数のchar *のうちconstが必要なものにconstをつける
+16. _KERNELを使用して名前空間の汚染を避ける, _tを使用しない
+    egrep -r ".+_t\W" **/*.c|egrep -v '.int\d*'|grep -v kconfig|grep -v size_t
+
 
