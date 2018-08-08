@@ -60,7 +60,8 @@ threadC(void *arg) {
 
 		fs_fstat(fd, &con_stat);
 		fs_close(fd);
-		kprintf("stat for CON: mode:%u size:%u\n", con_stat.mode, con_stat.size);
+		kprintf("stat for CON: ino:%u mode:%u size:%u\n", 
+		    con_stat.ino, con_stat.mode, con_stat.size);
 	}
 }
 

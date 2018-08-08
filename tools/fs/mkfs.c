@@ -209,6 +209,7 @@ write_root_dirent(void){
 
 	cons_inode.i_mode = FS_IMODE_DEV;
 	cons_inode.i_nlink = 1;
+	cons_inode.i_rdev = CONS_DEV;
 	cons_inode.i_size = 0;
 	
 	memset(&buf[0], 0, BSIZE);

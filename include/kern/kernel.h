@@ -35,6 +35,7 @@
 #include <kern/blkio.h>
 #include <kern/fdtable.h>
 #include <kern/fs.h>
+#include <kern/dev.h>
 
 #include <hal/hal.h>
 
