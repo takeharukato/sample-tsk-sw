@@ -30,7 +30,7 @@ register_device_driver(dev_id dev, device_driver *drv, void *private){
 		goto error_out;
 	}
 	
-	drvp->dev = drv->dev;
+	drvp->dev = dev;
 	drvp->private = drv->private;
 
 	drvp->open = drv->open;
@@ -82,6 +82,23 @@ error_out:
 	return rc;
 }
 
+device_driver *
+devsw_get_handle(dev_id dev){
+
+	devsw          *dsp = &devices;
+	device_driver            *drvp;
+
+	if ( dev >= DEVSW_DEVICES_NR )
+		return NULL;
+
+
+	mutex_hold(&dsp->mtx);
+	drvp = &dsp->drv[dev];
+	mutex_release(&dsp->mtx);
+
+	return drvp;
+}
+
 void
 devsw_init(void) {
 	int                          i;
@@ -94,6 +111,7 @@ devsw_init(void) {
 
 		drvp = &dsp->drv[i];
 
+		mutex_init(&drvp->mtx);
 		drvp->dev = 0;
 		drvp->private = NULL;
 		drvp->open = NULL;

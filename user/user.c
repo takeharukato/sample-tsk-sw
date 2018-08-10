@@ -36,6 +36,7 @@ void
 threadC(void *arg) {
 	int fd;
 	char data[64];
+	char c[1];
 	struct _stat s1, s2;
 	struct _stat con_stat;
 
@@ -59,9 +60,12 @@ threadC(void *arg) {
 	if ( fd >= 0 ) {
 
 		fs_fstat(fd, &con_stat);
-		fs_close(fd);
 		kprintf("stat for CON: ino:%u mode:%u size:%u\n", 
 		    con_stat.ino, con_stat.mode, con_stat.size);
+		fs_write(fd, "hello console", strlen("hello console"));
+		while( fs_read( fd, &c[0], 1) == 1 )
+			fs_write( fd, &c[0], 1);
+		fs_close(fd);
 	}
 }
 

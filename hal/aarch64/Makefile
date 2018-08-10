@@ -10,7 +10,7 @@ CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
 objects = early_console.o thr_context.o ctxsw.o fsimg.o
 ifeq ($(CONFIG_HAL),y)
-objects += boot.o boot64.o kmap.o data.o exception.o vector.o gic-pl390.o timer.o
+objects += boot.o boot64.o kmap.o data.o exception.o vector.o gic-pl390.o timer.o console.o
 endif
 
 lib=libhal.a

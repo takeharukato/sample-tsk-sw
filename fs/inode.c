@@ -567,8 +567,7 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 	size_t       rd_bytes;
 	blk_no            blk;
 
-	if ( ip->i_mode == FS_IMODE_DEV )
-		return -ENODEV;
+	kassert( ip->i_mode != FS_IMODE_DEV );
 	
 	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
 		return -ENXIO;
@@ -607,9 +606,8 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 	size_t       wr_bytes;
 	blk_no            blk;
 
-	if ( ip->i_mode == FS_IMODE_DEV ) 
-		return -ENODEV;
-	
+	kassert( ip->i_mode != FS_IMODE_DEV );
+
 	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
 		return -ENXIO;
 

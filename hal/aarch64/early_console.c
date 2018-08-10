@@ -3,7 +3,7 @@
 /*  OS kernel sample                                                  */
 /*  Copyright 2014 Takeharu KATO                                      */
 /*                                                                    */
-/*  kernel console                                                    */
+/*  kernel console for PL011                                          */
 /*                                                                    */
 /**********************************************************************/
 

@@ -104,14 +104,28 @@ unlock_out:
  */
 int
 fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
+	device_driver *drv;
 	io_cnt_t  rd_count;
 	int             rc;
 
 	if ( !( f->f_flags & FREAD ) )
 		return EPERM;
 
+	kassert( f->f_inode != NULL );
+
 	inode_lock(f->f_inode);
 
+	if ( f->f_inode->i_mode == FS_IMODE_DEV ) {
+		drv = devsw_get_handle( f->f_inode->i_rdev );
+
+		if ( drv == NULL )
+			goto unlock_out;
+
+		*rd_cnt = drv->read( f->f_inode, f, addr, f->f_offset, n);
+		rc = 0;
+		goto unlock_out;
+	}
+	
 	rd_count = inode_read(f->f_inode, addr, f->f_offset, n);
 	if ( rd_count > 0 ) {
 
@@ -121,6 +135,7 @@ fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
 	} else 
 		rc = (int)rd_count;
 
+unlock_out:
 	inode_unlock(f->f_inode);
 
 	return rc;
@@ -132,12 +147,24 @@ int
 fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 	int             rc;
 	io_cnt_t  wr_count;
+	device_driver *drv;
 
 	if ( !( f->f_flags & FWRITE ) )
 		return EPERM;
 
 	inode_lock(f->f_inode);
 
+	if ( f->f_inode->i_mode == FS_IMODE_DEV ) {
+		drv = devsw_get_handle( f->f_inode->i_rdev );
+
+		if ( drv == NULL )
+			goto unlock_out;
+
+		*wr_cnt = drv->write( f->f_inode, f, addr, f->f_offset, n);
+		rc = 0;
+		goto unlock_out;
+	}
+	
 	wr_count = inode_write(f->f_inode, addr, f->f_offset, n);
 
 	if ( wr_count > 0 ) {
@@ -148,6 +175,7 @@ fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 	} else 
 		rc = (int)wr_count;
 
+unlock_out:
 	inode_unlock(f->f_inode);
 
 	return rc;
