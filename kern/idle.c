@@ -33,8 +33,9 @@ do_idle_loop(void) {
 	for(;;) {
 
 		psw_disable_and_save_interrupt(&psw);
-		if ( !ti_check_need_dispatch(ti) )
+		if ( !ti_check_need_dispatch(ti) ) 
 			hal_suspend_cpu();
+
 		sched_schedule();
 		psw_restore_interrupt(&psw);
 	}

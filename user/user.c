@@ -13,9 +13,8 @@ void
 threadA(void *arg) {
 
 	while(1) {
-
+		
 		kprintf("threadA\n");
-
 		sched_rotate_queue();
 		sched_schedule();
 	}
@@ -27,7 +26,6 @@ threadB(void *arg) {
 	while(1) {
 
 		kprintf("threadB\n");
-
 		sched_rotate_queue();
 		sched_schedule();
 	}
@@ -63,8 +61,10 @@ threadC(void *arg) {
 		kprintf("stat for CON: ino:%u mode:%u size:%u\n", 
 		    con_stat.ino, con_stat.mode, con_stat.size);
 		fs_write(fd, "hello console", strlen("hello console"));
-		while( fs_read( fd, &c[0], 1) == 1 )
+		while( fs_read( fd, &c[0], 1) == 1 ) {
+
 			fs_write( fd, &c[0], 1);
+		}
 		fs_close(fd);
 	}
 }

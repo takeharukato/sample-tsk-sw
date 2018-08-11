@@ -11,8 +11,6 @@
 
 #include <hal/board.h>
 
-volatile uint32_t * const UART0DR = (uint32_t *)UART_BASE;
-
 static kconsole_t uart_console = KCONSOLE_INITILIZER(uart_console);
  
 /** 一文字出力関数
@@ -23,7 +21,7 @@ aarch64_kputchar(int ch){
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	*UART0DR = (unsigned int)(ch); /* Transmit char */
+	*UART_DR = (unsigned int)(ch); /* Transmit char */
 	psw_restore_interrupt(&psw);
 }
 
