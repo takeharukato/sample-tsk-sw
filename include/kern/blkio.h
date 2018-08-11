@@ -38,7 +38,6 @@ typedef struct _buffer_cache{
 
 
 void memide_init(void);
-int iderw(blk_buf *_b);
 
 void buffer_cache_init(void);
 void buffer_cache_blk_release(blk_buf *_b);

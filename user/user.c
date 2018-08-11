@@ -60,7 +60,7 @@ threadC(void *arg) {
 		fs_fstat(fd, &con_stat);
 		kprintf("stat for CON: ino:%u mode:%u size:%u\n", 
 		    con_stat.ino, con_stat.mode, con_stat.size);
-		fs_write(fd, "hello console", strlen("hello console"));
+		fs_write(fd, "hello console\n", strlen("hello console\n"));
 		while( fs_read( fd, &c[0], 1) == 1 ) {
 
 			fs_write( fd, &c[0], 1);

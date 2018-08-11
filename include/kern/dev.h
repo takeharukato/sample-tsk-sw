@@ -20,7 +20,7 @@ typedef struct _device_driver{
 	int (*open)(file_descriptor *_f);
 	off_t (*read)(inode *_ip, file_descriptor *_f, void *_dst, off_t _off, size_t _counts);
 	off_t (*write)(inode *_ip, file_descriptor *_f, void *_src, off_t _off, size_t _counts);
-	int (*blkrw)(inode *_ip, struct _blk_buf *_b);
+	int (*blkrw)(struct _device_driver *drv, struct _blk_buf *_b);
 	void (*close)(inode *_ip, file_descriptor *_f);
 }device_driver;
 
