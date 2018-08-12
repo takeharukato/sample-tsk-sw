@@ -52,8 +52,8 @@ dvipdf:
 	${DVIPDF} ${DVI}
 
 clean:
-	${RM} -f *.aux *~ \#* *.log *.toc *.lof *.lot *.bbl *.blg *.ilg *.ind *.idx *.out ${DVI} \
-		${PDF} tmp.txt	
+	${RM} -f *.aux *~ \#* *.log *.toc *.lof *.lot *.bbl *.blg *.ilg *.ind *.idx \
+	 *.out *.dvi tmp.txt *.fdb_latexmk *.fls
 
 show: ${PDF}
 	${PDFVIEW} ${PDF}
@@ -62,7 +62,7 @@ cleanarc:
 	${RM} -f ${MASTERNAME}.tgz
 
 distclean: cleanarc clean
-	${RM} ${PDF}
+	${RM} *.pdf
 
 dist: distclean
 	${TAR} cvf ${MASTERNAME}.tar ${SOURCE} ${FIGS} ${EXTRAFILES} Makefile

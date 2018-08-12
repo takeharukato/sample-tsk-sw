@@ -1,5 +1,8 @@
 % -*- mode: bibtex; coding:utf-8 -*-
 
+%
+%Manuals --- Arm processor
+%
 @Manual{loo14:_bcm28_arm_qa7_arm_quad_a7,
   title = 	 {{BCM2836} ARM-local peripherals QA7 ARM Quad A7 core},
   author = 	 {Gert van Loo},
@@ -84,23 +87,27 @@
 @Manual{15:_armtex_cortex_series_progr_guide_armv8,
   title = 	 {{ARM}\textsuperscript{\textregistered} Cortex\textsuperscript{\textregistered}-A Series Programmer’s Guide for ARMv8-A},
   organization = {Arm Limited},
-  edition = 	 {Version: 1.0},
+  edition = 	 {1.0},
   month = 	 mar,
   year = 	 2015}
 
 @Manual{armv8_addres_trans,
   title = 	 {{ARM}v8-A Address Translation},
   organization = {Arm Limited},
-  edition = 	 {Version 1.0},
+  edition = 	 {1.0},
   month = 	 feb,
   year = 	 2017}
 
 @Manual{17:_bare_boot_code_armv8_proces,
   title = 	 {Bare-metal Boot Code for {ARM}v8-A Processors},
   organization = {Arm Limited},
-  edition = 	 {Version: 1.0},
+  edition = 	 {1.0},
   month = 	 mar,
   year = 	 2017}
+
+%
+%Manuals --- x64 processor
+%
 
 @Manual{intelsys,
 	organization  = {{Intel Corporation}},
@@ -110,6 +117,10 @@
 	number        = {253669-033US},
 }
 
+%
+%Manuals --- ELF specification
+%
+
 @Manual{01:_execut_linkab_format_elf,
     organization = {The Santa Cruz Operation, Inc. },
     title = {System {V} Application Binary Interface},
@@ -117,6 +128,13 @@
     year = 1997,
     month = mar,
 }
+
+@Manual{,
+  title = 	 {{ELF-64} Object File Format},
+  organization = {The Santa Cruz Operation, Inc.},
+  edition = 	 {1.5 Draft 2},
+  month = 	 may,
+  year = 	 1998}
 
 @Manual{13:_system_v_applic_binar_inter,
     organization = {Xinuos, Inc.},
@@ -133,12 +151,9 @@
   month = 	 nov,
   year = 	 2015}
 
-@Manual{,
-  title = 	 {{ELF-64} Object File Format},
-  organization = {The Santa Cruz Operation, Inc.},
-  edition = 	 {1.5 Draft 2},
-  month = 	 may,
-  year = 	 1998}
+%
+%General operating system text books
+%
 
 @BOOK{SilberschatzGagneGalvin201801, 
 title={Operating System Concepts},
@@ -196,16 +211,9 @@ isbn=9780131429383,
   number = 	 6,
   series = 	 {岩波講座 ソフトウェア科学}}
 
-@book{Giampaolo:1998:PFS:552604,
- author = {Giampaolo, Dominic},
- title = {Practical File System Design with the Be File System},
- year = {1998},
- isbn = {1558604979},
- edition = {1st},
- publisher = {Morgan Kaufmann Publishers Inc.},
- address = {San Francisco, CA, USA},
-} 
-
+%
+% Design and implelentation of UNIX operating system
+%
 @BOOK{Vahalia199510, 
 title={{UNIX} Internals: The New Frontiers},
 author={Uresh Vahalia},
@@ -254,15 +262,6 @@ isbn=9780201633382,
   publisher={Addison-Wesley}
 }
 
-@book{pate2003unix,
-  title={{UNIX} Filesystems: Evolution, Design, and Implementation},
-  author={Steve D. Pate},
-  isbn=9780471456759,
-  series={Veritas},
-  year=2003,
-  publisher={Wiley}
-}
-
 @BOOK{Lions1996, 
 title={Lions' Commentary on Unix},
 author={John Lions},
@@ -287,6 +286,10 @@ timestamp={2018.06.21},
  jpublisher = {アスキー},
 } 
 
+%
+% Windows internal
+%
+
 @BOOK{Inside_Windows_201210, 
 title={インサイドWindows 第6版 上 (Microsoft Press)},
 author={Mark E. Russinovich and David A. Solomon and Alex Ionescu},
@@ -305,10 +308,14 @@ month=may,
 isbn=9784822294717,
 }
 
+%
+% Educational Operating System
+%
 @Book{george00:_topsy_teach_system,
   author = 	 {George Fankhauser and Christian Conrad and Eckart Zitzler and Bernhard Plattner},
   title = 	 {Topsy - A TeachableOperating System},
   publisher = 	 {Computer Engineering and Networks Laboratory, ETH Zurich},
+  howpublished = {\url{https://www.tik.ee.ethz.ch/education/lectures/TI2/old/old/SS02/topsy.ps}},
   year = 	 2000}
 
 @Misc{douglas13:_embed_xinu,
@@ -320,12 +327,14 @@ isbn=9784822294717,
 @book{Comer:1984:OSD:2426,
  author = {Douglas Comer},
  title = {Operating System Design: The {XINU} Approach},
- year = {1984},
+ year = 1984,
  isbn = {0-13-637539-1},
  publisher = {Prentice-Hall, Inc.},
  address = {Upper Saddle River, NJ, USA},
 } 
-
+%
+% Memory management, heap management
+%
 @misc{lea:_memor_dlmalloc,
   title = {A Memory Allocator},
   author = {Doug Lea},
@@ -333,6 +342,97 @@ isbn=9784822294717,
   note = {Accessed: 2018-06-20}
 }
 
+
+%
+%File Systems
+%
+@book{Giampaolo:1998:PFS:552604,
+ author = {Giampaolo, Dominic},
+ title = {Practical File System Design with the Be File System},
+ year = 1998,
+ isbn = 1558604979,
+ edition = {1st},
+ publisher = {Morgan Kaufmann Publishers Inc.},
+ address = {San Francisco, CA, USA},
+} 
+
+@book{pate2003unix,
+  title={{UNIX} Filesystems: Evolution, Design, and Implementation},
+  author={Steve D. Pate},
+  isbn=9780471456759,
+  series={Veritas},
+  year=2003,
+  publisher={Wiley}
+}
+
+%
+% Real time operating system, Embedded Systems
+%
+@book{cooling2003software,
+  title={Software Engineering for Real-time Systems},
+  author={Cooling, J.E.},
+  isbn=9780201596205,
+  lccn=2002025422,
+  url={https://books.google.co.jp/books?id=r6BQAAAAMAAJ},
+  year=2003,
+  publisher={Addison-Wesley}
+}
+
+@book{cooling2017real,
+  title={Real-Time Operating Systems: Book 1 - the Theory},
+  author={Cooling, J.E.},
+  number=1,
+  isbn=9781549608940,
+  series={The Engineering of Real-Time Embedded Systems Series},
+  url={https://books.google.co.jp/books?id=o4WSswEACAAJ},
+  year=2017,
+  publisher={Independently Published}
+}
+
+@BOOK{トロン協会199707, 
+title={$\mu$ITRON3.0標準ハンドブック改訂新版},
+author={トロン協会},
+publisher={パーソナルメディア},
+year=1997,
+month=jul,
+edition={改訂新},
+isbn=9784893621542,
+}
+
+@BOOK{トロン協会_坂村200111, 
+title={$\mu$ITRON4.0標準ガイドブック},
+editor={トロン協会 and 坂村 健},
+publisher={パーソナルメディア},
+year=2001,
+month=nov,
+isbn=9784893621917,
+}
+
+@BOOK{永井200111, 
+title={実用 組込みOS構築技法 - 情報通信を支える基礎技術RTOS入門},
+author={沢田 勉 and 権藤 正樹 and 永井 正武},
+publisher={共立出版},
+year=2001,
+month=nov,
+isbn=9784320120259,
+}
+
+%
+% Devices
+%
+@BOOK{kuwano200107, 
+title={パソコンのレガシィI/O活用大全 - 割り込みとDMAからシリアル/パラレル・ポート、FDD/IDEインターフェースまで (ハードウェアデザインシリーズ)},
+author={桑野 雅彦},
+publisher={CQ出版},
+year=2001,
+month=jul,
+isbn=9784789834339,
+}
+
+
+%
+% Processor
+%
 @book{Patterson:2013:COD:2568134,
  author = {Patterson, David A. and Hennessy, John L.},
  title = {Computer Organization and Design, Fifth Edition: The Hardware/Software Interface},
@@ -343,7 +443,9 @@ isbn=9784822294717,
  address = {San Francisco, CA, USA},
 } 
 
-
+%
+% Fundamental Algorithms
+%
 @book{DBLP:books/daglib/0004943,
   author    = {Robert Sedgewick},
   title     = {Algorithms in {C} - parts 1-4: fundamentals, data structures, sorting,
@@ -370,74 +472,4 @@ isbn=9784822294717,
  publisher = {Addison Wesley Longman Publishing Co., Inc.},
  address = {Redwood City, CA, USA},
 } 
-
-@book{cooling2003software,
-  title={Software Engineering for Real-time Systems},
-  author={Cooling, J.E.},
-  isbn={9780201596205},
-  lccn={2002025422},
-  url={https://books.google.co.jp/books?id=r6BQAAAAMAAJ},
-  year={2003},
-  publisher={Addison-Wesley}
-}
-
-@book{cooling2017real,
-  title={Real-Time Operating Systems: Book 1 - the Theory},
-  author={Cooling, J.E.},
-  number={1},
-  isbn={9781549608940},
-  series={The Engineering of Real-Time Embedded Systems Series},
-  url={https://books.google.co.jp/books?id=o4WSswEACAAJ},
-  year={2017},
-  publisher={Independently Published}
-}
-
-@BOOK{トロン協会199707, 
-title={$\mu$ITRON3.0標準ハンドブック改訂新版},
-author={トロン協会},
-publisher={パーソナルメディア},
-year={1997},
-month=jul,
-edition={改訂新},
-isbn={9784893621542},
-url={http://amazon.co.jp/o/ASIN/4893621548/},
-totalpages={427},
-timestamp={2018.06.22},
-}
-
-@BOOK{トロン協会_坂村200111, 
-title={$\mu$ITRON4.0標準ガイドブック},
-editor={トロン協会 and 坂村 健},
-publisher={パーソナルメディア},
-year={2001},
-month=nov,
-isbn={9784893621917},
-url={http://amazon.co.jp/o/ASIN/4893621912/},
-totalpages={396},
-timestamp={2018.06.21},
-}
-
-@BOOK{永井200111, 
-title={実用 組込みOS構築技法 - 情報通信を支える基礎技術RTOS入門},
-author={沢田 勉 and 権藤 正樹 and 永井 正武},
-publisher={共立出版},
-year={2001},
-month=nov,
-isbn={9784320120259},
-url={http://amazon.co.jp/o/ASIN/4320120256/},
-totalpages={310},
-timestamp={2018.06.21},
-}
-
-@BOOK{kuwano200107, 
-title={パソコンのレガシィI/O活用大全 - 割り込みとDMAからシリアル/パラレル・ポート、FDD/IDEインターフェースまで (ハードウェアデザインシリーズ)},
-author={桑野 雅彦},
-publisher={CQ出版},
-year={2001},
-month=jul,
-isbn={9784789834339},
-url={http://amazon.co.jp/o/ASIN/4789834336/},
-totalpages={151},
-timestamp={2018.06.21},
-}
 
