@@ -1,3 +1,4 @@
+BIBLIONAME=bibliography
 MASTERNAME=task-monitor
 DISTNAME=task-monitor
 SOURCE=${MASTERNAME}.tex os-references.bib
@@ -15,7 +16,16 @@ MAKEINDEX=mendex
 DVIPDF=dvipdfmx
 PDFVIEW=evince
 
-all: ${PDF}
+all: ${PDF} bibliography.pdf
+
+${BIBLIONAME}.pdf:${BIBLIONAME}.dvi
+	${DVIPDF} $<
+
+${BIBLIONAME}.dvi: ${BIBLIONAME}.tex  os-references.bib
+	${LATEX} ${BIBLIONAME}
+	${BIBTEX} ${BIBLIONAME}
+	${LATEX} ${BIBLIONAME}
+	${LATEX} ${BIBLIONAME}
 
 ${PDF}: ${DVI}
 	${MAKE} dvipdf

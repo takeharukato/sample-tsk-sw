@@ -1,0 +1,31 @@
+\documentclass[a4j,10pt,oneside,openany]{jsbook}
+%
+\usepackage{amsmath,amssymb}  %数式
+\usepackage{graphicx,xcolor}  %グラフィックと色
+\usepackage{ascmac}           %pLaTeXマクロ
+\usepackage{makeidx}          %索引
+\usepackage{url}              %文献参照用にURLを記載可能にする
+
+%
+\makeindex                    %索引用にidxファイルを出力する
+%
+%
+\setlength{\textwidth}{\fullwidth}
+\setlength{\textheight}{44\baselineskip}
+\addtolength{\textheight}{\topskip}
+\setlength{\voffset}{-0.6in}
+%
+\title{OS参考文献一覧}
+\author{加藤丈治}
+\date{2018年6月}
+\begin{document}
+%
+%
+\maketitle
+\frontmatter           %ページ番号はローマ数字, 章番号を付けない
+\tableofcontents       %目次
+\mainmatter
+\nocite{*}
+\bibliography{os-references} 
+\bibliographystyle{junsrt} 
+\end{document}
