@@ -20,14 +20,27 @@ static device_driver console={
 	.close = NULL,	
 };
 
-off_t aarch64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off, 
+static struct _aarch64_console{
+	wait_queue waiters;
+}aarch64_console;
+
+off_t 
+aarch64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off, 
     size_t counts){
-	size_t remains;
-	char    r, *cp;
+	size_t   remains;
+	char      r, *cp;
+	wq_reason reason;
+	psw_t        psw;
 
 	for( cp = (char *)dst, remains = counts;remains > 0; --remains, ++cp ) {
 
-		while( *UART_FR & 0x10 );
+		while( *UART_FR & UART_FR_RXFE ){
+
+			psw_disable_and_save_interrupt(&psw);
+			reason = wque_wait_on_queue(&aarch64_console.waiters);
+			psw_restore_interrupt(&psw);
+			kassert( reason == WQUE_REASON_WAKEUP);
+		}
 		r = (char)( *UART_DR );
 
 		/* convert carrige return to newline */		
@@ -37,30 +50,65 @@ off_t aarch64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off,
 	return (off_t)counts;
 }
 
-off_t aarch64_console_write(inode *ip, file_descriptor *f, void *src, off_t off, 
+off_t
+aarch64_console_write(inode *ip, file_descriptor *f, void *src, off_t off, 
     size_t counts){
 	size_t remains;
 	char       *cp;
+	wq_reason reason;
+	psw_t        psw;
+
 
 	for( cp = (char *)src, remains = counts;remains > 0; --remains, ++cp ) {
 
-		while( *UART_FR & 0x20 );
+		while( *UART_FR & UART_FR_TXFF ){
+			
+			psw_disable_and_save_interrupt(&psw);
+			reason = wque_wait_on_queue(&aarch64_console.waiters);
+			psw_restore_interrupt(&psw);
+			kassert( reason == WQUE_REASON_WAKEUP);
+		}
 		*UART_DR = *cp;
 	}
 
 	return (off_t)counts;
 }
 
+static int 
+aarch64_uart_handler(irq_no irq, struct _exception_frame *exc, void *private){
+	struct _aarch64_timer_config *cfg = (struct _aarch64_timer_config *)private;
+	psw_t psw;
+
+	psw_disable_and_save_interrupt(&psw);
+	wque_wakeup(&aarch64_console.waiters, WQUE_REASON_WAKEUP);
+	psw_restore_interrupt(&psw);
+	
+	return IRQ_HANDLED;
+}
+
 void 
 aarch64_console_init(void){
 
-	*UART_ICR = 0x7FF;    // clear interrupts
-	*UART_IBRD = 2;       // 115200 baud
-	*UART_FBRD = 0xB;
-	*UART_LCRH = 0b11<<5; // 8n1
+	wque_init_wait_queue(&aarch64_console.waiters);
 
-	// enable Tx(0x100), Rx(0x200), and UART(0x001)
-	*UART_CR = (0x1 << 8) | (0x1 << 9) | (0x1 << 0) ; 
+	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
+
+	/*
+	 * 115200 baud
+	 */
+	*UART_IBRD = 2;
+	*UART_FBRD = 0xb;
+
+	*UART_LCRH = UART_LCRH_WLEN8; /* 8bit non parity 1 stop bit */
+
+	/* enable Tx(0x100), Rx(0x200), and UART(0x001) */
+	*UART_CR = (UART_CR_TXE | UART_CR_RXE | UART_CR_UARTEN);
+
+	irq_register_handler(AARCH64_UART_IRQ , 
+	    IRQ_ATTR_NESTABLE | IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_EDGE, 
+	    2, NULL, aarch64_uart_handler);
+
+	*UART_IMSC |= ( UART_IMSC_RXIM );
 
 	register_device_driver(CONS_DEV, &console, NULL);
 }

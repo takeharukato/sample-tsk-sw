@@ -118,4 +118,36 @@
 #define AARCH64_UART_IRQ            (GIC_INTNO_SPI0+1)  /*< UART IRQ ( SPI no. 1) */
 #define AARCH64_TIMER_IRQ           (27) /*< Timer IRQ  */
 
+/*
+ *  UART IMSC (Interrupt Mask Set)
+ */
+#define UART_IMSC_RXIM	(0x0010)		/*< RX mask */
+#define UART_IMSC_TXIM	(0x0020)		/*< TX mask */
+
+/*
+ * UART FR(Flag Register)
+ */
+#define UART_FR_RXFE	  (0x10)                /*< RX FIFO Empty */
+#define UART_FR_TXFF	  (0x20)                /*< TX FIFO Full */
+
+/*
+ *  UART_LCRH
+ */
+#define UART_LCRH_PEN		(0x02)	/*< Parity Enable */
+#define UART_LCRH_EPS		(0x04)	/*< Even Parity */
+#define UART_LCRH_STP2		(0x08)	/*< 2 Stop bit */
+#define UART_LCRH_FEN		(0x10)	/*< FIFO Enable */
+#define UART_LCRH_WLEN8	        (0x60)	/*< 8bit length */
+
+/*
+ *  UART_CR
+ */
+#define UART_CR_UARTEN	        (0x0001)  /*< UART Enable */
+#define UART_CR_TXE		(0x0100)  /*< TX Enable  */
+#define UART_CR_RXE		(0x0200)  /*< RX Enable  */
+
+
+
+#define UART_CLR_ALL_INTR ( (1<<11) - 1 )  /*< All interrupts mask  */
+
 #endif  /*  _HAL_BOARD_H   */

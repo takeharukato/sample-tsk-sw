@@ -11,7 +11,7 @@
 
 void
 threadA(void *arg) {
-
+	
 	while(1) {
 		
 		kprintf("threadA\n");
@@ -72,8 +72,12 @@ threadC(void *arg) {
 void
 user_init(void) {
 	thread_t *thrA, *thrB, *thrC;
+	thread_attr_t attr;
+
+	memset(&attr, 0, sizeof(thread_attr_t));
+	attr.prio = 1;
 
 	thr_create_thread(1, &thrA, NULL, threadA, NULL);
 	thr_create_thread(2, &thrB, NULL, threadB, NULL);
-	thr_create_thread(3, &thrC, NULL, threadC, (void *)0x5a5a5a5a5a);
+	thr_create_thread(3, &thrC, &attr, threadC, (void *)0x5a5a5a5a5a);
 }
