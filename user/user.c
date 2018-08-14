@@ -30,6 +30,7 @@ threadB(void *arg) {
 		sched_schedule();
 	}
 }
+
 void
 threadC(void *arg) {
 	int fd;

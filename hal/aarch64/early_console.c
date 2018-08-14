@@ -29,19 +29,19 @@ aarch64_kputchar(int ch){
 void
 aarch64_uart_init(void) {
 
+
 	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
 
 	/*
-	 * 115200 baud
+	 * 115200 bits per seconds
 	 */
-	*UART_IBRD = 2;
-	*UART_FBRD = 0xb;
+	*UART_IBRD = UART_IBRD_VAL;
+	*UART_FBRD = UART_FBRD_VAL;
 
 	*UART_LCRH = UART_LCRH_WLEN8; /* 8bit non parity 1 stop bit */
 
-	/* enable Tx(0x100), Rx(0x200), and UART(0x001) */
+	/* enable Tx(0x100), and UART(0x001) */
 	*UART_CR = (UART_CR_TXE | UART_CR_UARTEN);
-
 
 	uart_console.putchar = aarch64_kputchar;
 	register_kconsole(&uart_console);

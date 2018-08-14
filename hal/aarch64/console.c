@@ -96,10 +96,10 @@ aarch64_console_init(void){
 	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
 
 	/*
-	 * 115200 baud
+	 * 115200 bits per seconds
 	 */
-	*UART_IBRD = 2;
-	*UART_FBRD = 0xb;
+	*UART_IBRD = UART_IBRD_VAL;
+	*UART_FBRD = UART_FBRD_VAL;
 
 	*UART_LCRH = UART_LCRH_WLEN8; /* 8bit non parity 1 stop bit */
 

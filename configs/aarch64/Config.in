@@ -25,7 +25,7 @@ config CONFIG_HAL_PAGE_SHIFT
 
 config CONFIG_HAL_STRAIGHT_PAGE_SIZE
        int
-       default 0x200000
+       default 2097152
 
 config CONFIG_HAL_MEMORY_SIZE_MB
        prompt "Max memory size(UNIT:MB)"
@@ -33,3 +33,31 @@ config CONFIG_HAL_MEMORY_SIZE_MB
        default 128
        range 16 1024
        depends on CONFIG_HAL
+
+choice
+       prompt "Console serial port Bits Per Seconds(BPS)"
+       default CONFIG_CON_SERIAL_BPS_115200 
+       depends on CONFIG_HAL
+
+config CONFIG_CON_SERIAL_BPS_230400
+       bool "230400"
+
+config CONFIG_CON_SERIAL_BPS_115200
+       bool "115200"
+
+config CONFIG_CON_SERIAL_BPS_76800
+       bool "76800"
+
+config CONFIG_CON_SERIAL_BPS_38400
+       bool "38400"
+
+config CONFIG_CON_SERIAL_BPS_14400
+       bool "14400"
+
+config CONFIG_CON_SERIAL_BPS_2400
+       bool "2400"
+
+config CONFIG_CON_SERIAL_BPS_110
+       bool "110"
+
+endchoice

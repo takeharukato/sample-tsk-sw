@@ -146,8 +146,38 @@
 #define UART_CR_TXE		(0x0100)  /*< TX Enable  */
 #define UART_CR_RXE		(0x0200)  /*< RX Enable  */
 
-
-
 #define UART_CLR_ALL_INTR ( (1<<11) - 1 )  /*< All interrupts mask  */
+
+/*
+ * BPS on UART 
+ * See 3.3.6 Fractional baud rate register, UARTFBRD and 
+ * Table 3-9 Typical baud rates and integer and fractional divisors
+ * in PrimeCell UART (PL011) Technical Reference Manual.
+ */
+#if defined(CONFIG_CON_SERIAL_BPS_230400)
+#define UART_IBRD_VAL  (0x1)
+#define UART_FBRD_VAL  (0x5)
+#elif defined(CONFIG_CON_SERIAL_BPS_115200)
+#define UART_IBRD_VAL  (0x2)
+#define UART_FBRD_VAL  (0x8)
+#elif defined(CONFIG_CON_SERIAL_BPS_76800)
+#define UART_IBRD_VAL  (0x3)
+#define UART_FBRD_VAL  (0x10)
+#elif defined(CONFIG_CON_SERIAL_BPS_38400)
+#define UART_IBRD_VAL  (0x6)
+#define UART_FBRD_VAL  (0x21)
+#elif defined(CONFIG_CON_SERIAL_BPS_14400)
+#define UART_IBRD_VAL  (0x11)
+#define UART_FBRD_VAL  (0x17)
+#elif defined(CONFIG_CON_SERIAL_BPS_2400)
+#define UART_IBRD_VAL  (0x68)
+#define UART_FBRD_VAL  (0x8)
+#elif defined(CONFIG_CON_SERIAL_BPS_110)
+#define UART_IBRD_VAL  (0x8e0)
+#define UART_FBRD_VAL  (0x2f)
+#else  /*  Default 115200  */
+#define UART_IBRD_VAL  (0x2)
+#define UART_FBRD_VAL  (0x8)
+#endif  /*  CONFIG_CON_SERIAL_BPS_230400  */
 
 #endif  /*  _HAL_BOARD_H   */
