@@ -83,6 +83,8 @@ aarch64_uart_handler(irq_no irq, struct _exception_frame *exc, void *private){
 	wque_wakeup(&aarch64_console.waiters, WQUE_REASON_WAKEUP);
 	psw_restore_interrupt(&psw);
 	
+	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
+
 	return IRQ_HANDLED;
 }
 
