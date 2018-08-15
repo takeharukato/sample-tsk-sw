@@ -22,12 +22,16 @@ static struct _aarch64_timer_config{
 	uint64_t interval_us;
 }aarch64_timer_config;
 
+static uint64_t aarch64_get_vctcnt(void) __attribute__((__unused__));
+static uint64_t clock_read_counter(void) __attribute__((__unused__));
+static uint64_t clock_read_tval(void) __attribute__((__unused__));
+
 /* Generic Timer (Virtual Timer) register operations
  * See D10.6 Generic Timer registers in
  * ARM Architecture Reference Manual ARMv8, for ARMv8-A architecture profile
  */
 static uint64_t
-aarch64_get_vctcnt(void) {
+aarch64_get_vctcnt(void){
 	uint64_t val;
 
 	__asm__ __volatile__("mrs %0, cntvct_el0\n\t" : "=r"(val));
@@ -36,7 +40,7 @@ aarch64_get_vctcnt(void) {
 }
 
 static uint64_t
-clock_read_ctrl(void) {
+clock_read_ctrl(void){
 	uint64_t cntv_ctrl;
 
 	asm volatile ("isb; mrs %0, cntv_ctl_el0; isb;" 
@@ -46,7 +50,7 @@ clock_read_ctrl(void) {
 }
 
 static void
-clock_write_ctrl(uint64_t cntv_ctrl) {
+clock_write_ctrl(uint64_t cntv_ctrl){
 
 	asm volatile ("isb; msr cntv_ctl_el0, %0; isb;" 
 	    :: "r"(cntv_ctrl) : "memory");
@@ -79,7 +83,7 @@ clock_write_tval(uint64_t cntv_tval){
 }
 
 static void
-stop_timer(void) {
+stop_timer(void){
 	uint64_t cntv_ctl;
 
 	cntv_ctl = clock_read_ctrl();
@@ -89,7 +93,7 @@ stop_timer(void) {
 }
 
 static void
-start_timer(void) {
+start_timer(void){
 	uint64_t cntv_ctl;
 
 	cntv_ctl = clock_read_ctrl();
