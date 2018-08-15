@@ -6,7 +6,7 @@
 top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
-objects=kconsole.o blkio.o memide.o
+objects=kconsole.o blkio.o memide.o devsw.o
 lib=libdev.a
 
 all:${lib}

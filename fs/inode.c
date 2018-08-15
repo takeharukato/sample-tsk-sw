@@ -360,7 +360,7 @@ inode_path2inode(char *path, int nameiparent, char *name) {
 		ip = inode_get(ROOT_DEV, ROOT_DENT_INO);
 	} else {
 	
-		//ip = inode_duplicate(proc->cwd);
+		//ip = inode_duplicate(current->cwd);
 		panic("cwd not supported.");
 	}
 
@@ -419,8 +419,7 @@ inode_update(inode *ip){
 
 	dip->i_mode = ip->i_mode;
 	dip->i_dev = ip->i_dev;
-	dip->i_uid = ip->i_uid;
-	dip->i_gid = ip->i_gid;
+	dip->i_rdev = ip->i_rdev;
 	dip->i_nlink = ip->i_nlink;
 	dip->i_size = ip->i_size;
 
@@ -527,10 +526,12 @@ inode_lock(inode *ip){
 		read_superblock(ip->i_dev, &sb);	
 		read_disk_inode(ip->i_dev, ip->inum, &dip, &bp);
 
+		/*
+		 * Note: Do not read i_dev from disk inode.
+		 * i_dev is updated by inode_get.
+		 */
 		ip->i_mode = dip->i_mode;
-		ip->i_dev = dip->i_dev;
-		ip->i_uid = dip->i_uid;
-		ip->i_gid = dip->i_gid;
+		ip->i_rdev = dip->i_rdev;
 		ip->i_nlink = dip->i_nlink;
 		ip->i_size = dip->i_size;
 
@@ -566,8 +567,7 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 	size_t       rd_bytes;
 	blk_no            blk;
 
-	if ( ip->i_mode == FS_IMODE_DEV )
-		return -ENODEV;
+	kassert( ip->i_mode != FS_IMODE_DEV );
 	
 	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
 		return -ENXIO;
@@ -606,9 +606,8 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 	size_t       wr_bytes;
 	blk_no            blk;
 
-	if ( ip->i_mode == FS_IMODE_DEV ) 
-		return -ENODEV;
-	
+	kassert( ip->i_mode != FS_IMODE_DEV );
+
 	if ( ( off > ip->i_size ) || ( off + counts < off) ) 
 		return -ENXIO;
 
@@ -645,6 +644,17 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 	return counts;
 }
 
+void
+inode_get_stat(struct _inode *ip, struct _stat *st){
+
+	st->mode = ip->i_mode;
+	st->dev = ip->i_dev;
+	st->rdev = ip->i_rdev;
+	st->ino = ip->inum;
+	st->nlink = ip->i_nlink;
+	st->size = ip->i_size;
+}
+
 /** Look up directory entry
  */
 inode *
@@ -662,6 +672,7 @@ inode_dirlookup(inode *dp, char *name, dirent *ent){
 
 		if( de.d_ino == 0 )
 			continue;
+
 		if ( strncmp(name, de.d_name, FNAME_MAX) == 0 ) {
 
 			/* Found the name element */

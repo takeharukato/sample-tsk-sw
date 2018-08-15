@@ -65,23 +65,6 @@ typedef struct _thread_queue{
 	list_head_t head;    /*< Thread queue head  */
 }thread_queue_t;
 
-void thr_thread_switch(thread_t *, thread_t *);
-void thr_unlink_thread(thread_t *);
-int thr_create_thread(tid_t ,thread_t **, thread_attr_t *, void (*start)(void *), void *);
-void thr_exit_thread(int );
-int thr_destroy_thread(thread_t *);
-void thr_thread_start(void (*)(void *), void   *);
-tid_t thr_get_tid(thread_t *);
-tid_t thr_get_current_tid(void);
-
-void thr_init_thread_queue(thread_queue_t *);
-void thr_add_thread_queue(thread_queue_t *, thread_t *);
-void thr_remove_thread_queue(thread_queue_t *, thread_t *);
-int thr_thread_queue_empty(thread_queue_t *);
-thread_t *thr_thread_queue_get_top(thread_queue_t *);
-
-thread_info_t *thr_refer_thread_info(thread_t *);
-
 static inline void
 ti_update_preempt_count(thread_info_t *ti, uint64_t shift, int64_t diff) {
 	psw_t psw;
@@ -138,5 +121,25 @@ static inline thread_info_t *
 get_current_thread_info(void) {
 	return current->tinfo;
 }
+
+void thr_thread_switch(thread_t *, thread_t *);
+void thr_unlink_thread(thread_t *);
+int thr_is_round_robin_thread(thread_t *);
+int thr_destroy_thread(thread_t *);
+void thr_thread_start(void (*)(void *), void   *);
+tid_t thr_get_tid(thread_t *);
+
+int thr_create_thread(tid_t ,thread_t **, thread_attr_t *, void (*start)(void *), void *);
+void thr_exit_thread(int );
+tid_t thr_get_current_tid(void);
+void thr_delay(uint32_t _expire_ms);
+
+void thr_init_thread_queue(thread_queue_t *);
+void thr_add_thread_queue(thread_queue_t *, thread_t *);
+void thr_remove_thread_queue(thread_queue_t *, thread_t *);
+int thr_thread_queue_empty(thread_queue_t *);
+thread_t *thr_thread_queue_get_top(thread_queue_t *);
+
+thread_info_t *thr_refer_thread_info(thread_t *);
 
 #endif  /*  _KERN_THREAD_H */

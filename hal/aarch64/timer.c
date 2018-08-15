@@ -127,7 +127,7 @@ aarch64_init_timer(uint64_t timer_interval_ms){
 	stop_timer();
 	reload_timer(aarch64_timer_config.interval_us);
 	start_timer();
-	
+
 	irq_register_handler(AARCH64_TIMER_IRQ, 
 	    IRQ_ATTR_NON_NESTABLE | IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_EDGE, 
 	    1, &aarch64_timer_config, aarch64_timer_handler);

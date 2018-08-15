@@ -190,19 +190,28 @@ static void
 write_root_dirent(void){
 	blk_no blk;
 	d_inode root_inode;
+	d_inode cons_inode;
 	uint8_t buf[BSIZE];
 	d_dirent *dentp;
 
 	mark_inode_used(ROOT_DENT_INO);
+	mark_inode_used(CONS_INO);
+
 	find_free_data_block(&blk);
 
 	memset(&root_inode, 0, sizeof(d_inode));
+	memset(&cons_inode, 0, sizeof(d_inode));
 
 	root_inode.i_mode = FS_IMODE_DIR;
 	root_inode.i_nlink = 1;
 	root_inode.i_size = BSIZE;
 	root_inode.i_addr[0]=blk+sb->s_firstdata_block;
 
+	cons_inode.i_mode = FS_IMODE_DEV;
+	cons_inode.i_nlink = 1;
+	cons_inode.i_rdev = CONS_DEV;
+	cons_inode.i_size = 0;
+	
 	memset(&buf[0], 0, BSIZE);
 
 	dentp = (d_dirent *)&buf[0];
@@ -212,9 +221,16 @@ write_root_dirent(void){
 
 	dentp->d_ino = ROOT_DENT_INO;
 	memmove(&dentp->d_name[0], "..", 3);
+	++dentp;
+
+	dentp->d_ino = CONS_INO;
+	memmove(&dentp->d_name[0], CONS_NAME, strlen(CONS_NAME)+1);
+
 	printf("root block:%ld\n", blk);
-	write_disk_data_block(blk, &buf[0]);
+
 	write_disk_inode(ROOT_DENT_INO, &root_inode);
+	write_disk_inode(CONS_INO, &cons_inode);
+	write_disk_data_block(blk, &buf[0]);
 }
 
 static void

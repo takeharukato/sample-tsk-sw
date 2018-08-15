@@ -235,6 +235,71 @@ inode_put_out:
 }
 
 int
+fs_link(char *old, char *new){
+	int               rc;
+	char name[FNAME_MAX];
+	inode       *dp, *ip;
+
+	ip = inode_namei(old);
+	if ( ip == NULL ) 
+		return -1;
+
+	inode_lock(ip);
+    
+	if( ip->i_mode == FS_IMODE_DIR ){
+
+		inode_unlock(ip);
+		inode_put(ip);
+		return -1;
+	}
+
+	++ip->i_nlink;
+
+	inode_unlock(ip);
+	inode_put(ip);
+
+	dp = inode_nameiparent(new, name);
+	if( dp == NULL ) 
+		goto error_out;
+
+
+	inode_lock(dp);
+
+	if ( dp->i_dev != ip->i_dev ) {
+
+		inode_unlock(dp);
+		inode_put(dp);
+		goto error_out;
+	}
+
+	rc = inode_add_directory_entry(dp, name, ip->inum);
+	if ( rc < 0 ) {
+
+		inode_unlock(dp);
+		inode_put(dp);
+		goto error_out;
+	}
+
+	inode_unlock(dp);
+	inode_put(dp);
+    
+	inode_put(ip);
+
+	return 0;
+
+error_out:
+	inode_lock(ip);
+
+	--ip->i_nlink;
+	inode_update(ip);
+
+	inode_unlock(ip);
+	inode_put(ip);
+	
+	return -1;
+}
+
+int
 fs_unlink(char *path){
 	inode       *ip, *dp;
 	d_dirent          de;
@@ -298,7 +363,7 @@ error_out:
 }
 
 off_t
-fs_seek(int fd, off_t off, int where) {
+fs_lseek(int fd, off_t off, int where) {
 	file_descriptor *f;
 	off_t          new;
 
@@ -328,4 +393,24 @@ fs_seek(int fd, off_t off, int where) {
 	f->f_offset = new;
 
 	return new;
+}
+
+/** Get file status
+ */
+int
+fs_fstat(int fd, struct _stat *st){
+	file_descriptor *f;
+
+	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
+		return -EINVAL;
+	
+	f = current->fds[fd];
+	if ( f == NULL )
+		return -EBADF;
+
+	kassert(f->f_inode != NULL );
+	
+	fd_file_stat(f, st);
+
+	return 0;
 }

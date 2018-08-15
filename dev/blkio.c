@@ -78,11 +78,14 @@ found:
 blk_buf *
 buffer_cache_blk_read(dev_id dev, blk_no blockno){
 	blk_buf *b;
+	device_driver *drv;
 
 	b = buffer_cache_blk_get(dev, blockno);
 	if ( !(b->flags & B_VALID) ) {
 
-		iderw(b); /* Read buffer */
+		drv = devsw_get_handle( b->dev );
+		if ( drv->blkrw != NULL )
+			drv->blkrw(drv, b); /* Read buffer */
 	}
 
 	return b;
@@ -91,12 +94,14 @@ buffer_cache_blk_read(dev_id dev, blk_no blockno){
 /* equivalent to bwrite */
 blk_buf *
 buffer_cache_blk_write(blk_buf *b){
-
+	device_driver *drv;
 
 	kassert(b->flags & B_BUSY);
 
 	b->flags |= B_DIRTY;
-	iderw(b);  /* Write buffer */
+	drv = devsw_get_handle( b->dev );
+	if ( drv->blkrw != NULL )
+		drv->blkrw(drv, b);  /* Write buffer */
 
 	return b;
 }

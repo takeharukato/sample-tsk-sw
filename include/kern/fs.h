@@ -68,14 +68,12 @@ typedef struct _superblock {
  */
 typedef struct _d_inode{
 	imode_t                 i_mode;
-	dev_id                   i_dev;  /* Device number   */
+	dev_id                   i_dev;
+	dev_id                  i_rdev;   /* Device number for driver  */
 	ref_cnt                i_nlink;
-	obj_id_t                 i_uid;
-	obj_id_t                 i_gid;
 	obj_size_t              i_size;
 	blk_no     i_addr[FS_IADDR_NR];
 }d_inode;
-
 
 #define RESV_BLOCK_NR        (1)  /*  First block is reserved */
 
@@ -89,8 +87,12 @@ typedef struct _d_inode{
 #define IADDRS_PER_BLOCK      (BSIZE / sizeof(blk_no))
 #define FNAME_MAX             (59)
 
-#define ROOT_DEV              (0)
+#define ROOT_DEV              (1)
 #define ROOT_DENT_INO         (2)
+
+#define CONS_INO              (3)
+#define CONS_DEV              (2)
+#define CONS_NAME             "CON"
 
 #define I_BUSY                 (0x1)
 #define I_VALID                (0x2)
@@ -104,18 +106,26 @@ typedef struct _inode {
 
 	/* copy of disk inode  */
 	imode_t                 i_mode;
-	dev_id                   i_dev;  /* Device number   */
+	dev_id                   i_dev;
+	dev_id                  i_rdev;
 	ref_cnt                i_nlink;
-	obj_id_t                 i_uid;
-	obj_id_t                 i_gid;
 	obj_size_t              i_size;
 	blk_no     i_addr[FS_IADDR_NR];
 }inode;
 
+struct _stat {
+	imode_t     mode;  /* Type of file */
+	dev_id       dev;  /* File system's disk device */
+	dev_id      rdev;  /* device no for device node */
+	uint32_t     ino;  /* Inode number */
+	ref_cnt    nlink;  /* Number of links to file */
+	obj_size_t  size;  /* Size of file in bytes */
+};
+
 /** Directory entry in a disk
  */
 typedef struct _d_dirent{
-	uint32_t           d_ino;
+	uint32_t              d_ino;
 	char    d_name[FNAME_MAX+1];
 }d_dirent;
 
@@ -138,6 +148,7 @@ void inode_lock(inode *_ip);
 void inode_unlock(inode *_ip);
 off_t inode_read(inode *_ip, void *_dst, off_t _off, size_t _counts);
 off_t inode_write(inode *_ip, void *_src, off_t _off, size_t _counts);
+void inode_get_stat(struct _inode *_ip, struct _stat *_st);
 int inode_add_directory_entry(inode *_dp, char *_name, uint32_t _inum);
 inode *inode_dirlookup(inode *_dp, char *_name, dirent *_ent);
 inode *inode_namei(char *_path);
@@ -149,6 +160,8 @@ int fs_read(int _fd, char *_dst, size_t _count);
 int fs_write(int _fd, char *_src, size_t _count);
 int fs_close(int _fd);
 int fs_open(char *_path, omode_t _omode);
+int fs_link(char *_old, char *_new);
 int fs_unlink(char *_path);
-off_t fs_seek(int _fd, off_t _off, int _where);
+off_t fs_lseek(int _fd, off_t _off, int _where);
+int fs_fstat(int fd, struct _stat *st);
 #endif  /*  _KERN_FS_H   */

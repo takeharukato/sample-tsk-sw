@@ -51,6 +51,8 @@
 
 #include <hal/gic-pl390.h>
 
+//#define INSTALL_TEST_HANDLER
+
 static irq_ctrlr arm_gic_ctrlr = {
 	.config_irq = gic_pl390_config_irq,
 	.enable_irq = gic_pl390_enable_irq,
@@ -395,13 +397,23 @@ found:
 	return rc;
 }
 
+/** Raise Interrupt(Debugging use)
+    @param[in] irq     IRQ number
+ */
+void
+gic_raise_irq(irq_no irq){
 
+	gicd_set_pending(irq);	
+}
+
+#if defined(INSTALL_TEST_HANDLER)
 int 
 test_handler(irq_no irq, struct _exception_frame *exc, void *private __attribute__((unused))){
 
 	kprintf("Handler\n");
 	return IRQ_HANDLED;
 }
+#endif  /*  INSTALL_TEST_HANDLER  */
 
 /** Initialize interrupt facilities 
  */
@@ -417,16 +429,8 @@ aarch64_init_interrupt(void){
 		irq_register_ctrlr(i, &arm_gic_ctrlr);
 
 	gic_pl390_initialize(&arm_gic_ctrlr);
+#if defined(INSTALL_TEST_HANDLER)
 	irq_register_handler(35, IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_NESTABLE | IRQ_ATTR_EDGE, 
 	    1, NULL, test_handler);
-
-}
-
-/** Raise Interrupt(Debugging use)
-    @param[in] irq     IRQ number
- */
-void
-gic_raise_irq(irq_no irq){
-
-	gicd_set_pending(irq);	
+#endif  /*  INSTALL_TEST_HANDLER  */
 }

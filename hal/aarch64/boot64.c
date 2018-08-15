@@ -34,6 +34,8 @@ hal_kernel_init(void) {
 	aarch64_init_interrupt();
 	aarch64_init_timer(CONFIG_TIMER_INTERVAL_MS);
 
+	aarch64_console_init();
+
 	memide_init();
 }
 

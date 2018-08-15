@@ -49,6 +49,16 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 						  the bottom of the stack */
 }
 
+static void
+thr_delay_callout(void *private){
+	wait_queue *que = (wait_queue *)private;
+
+	if ( !is_wque_empty(que) ) {
+
+		wque_wakeup(que, WQUE_REASON_WAKEUP);
+	}
+}
+
 /** Start a thread
     @param[in] fn start function of the thread
     @param[in] arg first argument of the thread
@@ -98,6 +108,113 @@ thr_thread_switch(thread_t *prev, thread_t *next) {
 	    &(((thread_attr_t *)(&next->attr))->stack));
 	return;
 }
+
+
+
+/** Add a thread to a thread queue
+    @param[in] que Thread queue
+    @param[in] thr Thread structure
+ */
+void 
+thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
+	psw_t psw;
+
+	psw_disable_and_save_interrupt(&psw);
+	list_add(&que->head, &thr->link);
+	psw_restore_interrupt(&psw);
+}
+
+/** Remove a thread from a thread queue
+    @param[in] que Thread queue
+    @param[in] thr Thread structure
+ */
+void 
+thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
+	psw_t psw;
+
+	psw_disable_and_save_interrupt(&psw);
+	list_del(&thr->link);
+	psw_restore_interrupt(&psw);
+}
+
+/** Confirm the thread queue is empty
+    @param[in] que Thread queue
+    @retval True   Thread queue is empty
+    @retval False  Thread queue is NOT empty
+ */
+int 
+thr_thread_queue_empty(thread_queue_t *que) {
+	int rc;
+	psw_t psw;
+
+	psw_disable_and_save_interrupt(&psw);
+	rc = list_is_empty(&que->head);
+	psw_restore_interrupt(&psw);
+
+	return rc;
+}
+
+/** Get the first thread in the thread queue
+    @param[in] que Thread queue
+    @return    Thread structure if thread queue is not empty
+    @return    NULL if thread queue is empty
+ */
+thread_t *
+thr_thread_queue_get_top(thread_queue_t *que) {
+	thread_t *thr;
+	psw_t psw;
+	
+	psw_disable_and_save_interrupt(&psw);
+
+	if ( list_is_empty(&que->head) ) 
+		thr =  NULL;
+	else 
+		thr = CONTAINER_OF(list_get_top(&que->head), thread_t, link);
+	
+	psw_restore_interrupt(&psw);
+
+	return thr;
+}
+
+/** Destroy thread
+   @param[in] thr Thread to be destroyed
+   @retval EBUSY Specified thread has not terminated yet.
+ */
+int
+thr_destroy_thread(thread_t *thr){
+	int rc;
+	psw_t psw;
+	thread_attr_t *attr = &thr->attr;
+
+	psw_disable_and_save_interrupt(&psw);
+
+	if ( thr->status != THR_TSTATE_DEAD ) {
+
+		rc = EBUSY;
+		goto out;
+	}
+
+	kfree(attr->stack_top);  /* Free its stack          */
+	kfree(thr);              /* Free thread structure   */
+
+out:	
+	psw_restore_interrupt(&psw);
+
+	return rc;
+}
+
+/** Initialize thread queue
+    @param[in] que Thread queue to be initialized
+ */
+void
+thr_init_thread_queue(thread_queue_t *que) {
+	psw_t psw;
+
+	psw_disable_and_save_interrupt(&psw);
+	init_list_head(&que->head);
+	psw_restore_interrupt(&psw);
+}
+
 /** Create thread
     @param[in] thrp   Address of the pointer variable which points the thread structure 
     @param[in] attrp  Thread attributes
@@ -218,33 +335,6 @@ thr_exit_thread(int code){
 	return;
 }
 
-/** Destroy thread
-   @param[in] thr Thread to be destroyed
-   @retval EBUSY Specified thread has not terminated yet.
- */
-int
-thr_destroy_thread(thread_t *thr){
-	int rc;
-	psw_t psw;
-	thread_attr_t *attr = &thr->attr;
-
-	psw_disable_and_save_interrupt(&psw);
-
-	if ( thr->status != THR_TSTATE_DEAD ) {
-
-		rc = EBUSY;
-		goto out;
-	}
-
-	kfree(attr->stack_top);  /* Free its stack          */
-	kfree(thr);              /* Free thread structure   */
-
-out:	
-	psw_restore_interrupt(&psw);
-
-	return rc;
-}
-
 /** Get thread ID
     @param[in] thr Thread structure
     @retval    Thread ID
@@ -265,80 +355,40 @@ thr_get_current_tid(void) {
 	return current->tid;
 }
 
-/** Initialize thread queue
-    @param[in] que Thread queue to be initialized
- */
-void
-thr_init_thread_queue(thread_queue_t *que) {
-	psw_t psw;
-
-	psw_disable_and_save_interrupt(&psw);
-	init_list_head(&que->head);
-	psw_restore_interrupt(&psw);
-}
-
-
-/** Add a thread to a thread queue
-    @param[in] que Thread queue
-    @param[in] thr Thread structure
- */
-void 
-thr_add_thread_queue(thread_queue_t *que, thread_t *thr){
-	psw_t psw;
-
-	psw_disable_and_save_interrupt(&psw);
-	list_add(&que->head, &thr->link);
-	psw_restore_interrupt(&psw);
-}
-
-/** Remove a thread from a thread queue
-    @param[in] que Thread queue
-    @param[in] thr Thread structure
- */
-void 
-thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
-	psw_t psw;
-
-	psw_disable_and_save_interrupt(&psw);
-	list_del(&thr->link);
-	psw_restore_interrupt(&psw);
-}
-
-/** Confirm the thread queue is empty
-    @param[in] que Thread queue
-    @retval True   Thread queue is empty
-    @retval False  Thread queue is NOT empty
- */
-int 
-thr_thread_queue_empty(thread_queue_t *que) {
+int
+thr_is_round_robin_thread(thread_t *thr) {
 	int rc;
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	rc = list_is_empty(&que->head);
+	rc = ( (&thr->attr)->prio == 0 );
 	psw_restore_interrupt(&psw);
 
 	return rc;
 }
 
-/** Get the first thread in the thread queue
-    @param[in] que Thread queue
-    @return    Thread structure if thread queue is not empty
-    @return    NULL if thread queue is empty
- */
-thread_t *
-thr_thread_queue_get_top(thread_queue_t *que) {
-	thread_t *thr;
+void
+thr_delay(uint32_t expire_ms){
+	uptime_cnt rel_expire;
+	call_out_ent      ent;
+	wait_queue    dly_que;
+	wq_reason      reason;
 	psw_t psw;
-	
-	psw_disable_and_save_interrupt(&psw);
 
-	if ( list_is_empty(&que->head) ) 
-		thr =  NULL;
-	else 
-		thr = CONTAINER_OF(list_get_top(&que->head), thread_t, link);
-	
+	wque_init_wait_queue(&dly_que);
+	rel_expire = expire_ms / CONFIG_TIMER_INTERVAL_MS;
+	if ( rel_expire == 0 )
+		return;
+
+	callout_ent_init(&ent, thr_delay_callout, &dly_que);
+
+	psw_disable_and_save_interrupt(&psw);
+	callout_add(&ent, rel_expire);
+	reason = wque_wait_on_queue(&dly_que);
 	psw_restore_interrupt(&psw);
 
-	return thr;
+	kassert(reason == WQUE_REASON_WAKEUP);
+	kassert( !list_is_linked(&ent.link) );
+	
+	return;
 }

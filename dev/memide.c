@@ -14,13 +14,7 @@
 extern char _fsimg_start;
 extern char _fsimg_end;
 
-
-typedef struct _ide_block_chain{
-	mutex       mtx;
-	wait_queue  wq;
-}ide_block_chain;
-
-static ide_block_chain memide_reqs;
+static device_driver memide_driver;
 
 static int
 memide_read_sector(size_t offset, void *dest, size_t size) {
@@ -76,13 +70,13 @@ memide_write_sector(size_t offset, void *src, size_t size) {
 /** IDE read/write
     DIRTYなら書き込み, それ以外なら読み込み
  */
-int 
-iderw(blk_buf *b){
+static int 
+memide_rw(device_driver *drv, blk_buf *b){
 	size_t addr;
 
 	kassert(b->flags & B_BUSY);
 
-	mutex_hold(&memide_reqs.mtx);
+	mutex_hold(&drv->mtx);
 
 	addr = b->blockno * BSIZE;
 
@@ -91,8 +85,8 @@ iderw(blk_buf *b){
 	else
 		memide_read_sector(addr, &b->data[0], BSIZE);
 
-	mutex_release(&memide_reqs.mtx);
-	
+	mutex_release(&drv->mtx);
+
 	return 0;
 }
 
@@ -100,6 +94,6 @@ iderw(blk_buf *b){
 void
 memide_init(void){
 
-	mutex_init(&memide_reqs.mtx);
-	wque_init_wait_queue(&memide_reqs.wq);
+	memide_driver.blkrw = memide_rw;
+	register_device_driver(ROOT_DEV, &memide_driver, NULL);
 }

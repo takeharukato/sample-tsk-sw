@@ -14,17 +14,19 @@
 void
 kern_init(void) {
 	
+	devsw_init();
+	buffer_cache_init();
+	inode_cache_init();
+	fdtable_init();
+
 	idle_init_idle();
-
 	sched_init();
-
 	reaper_init_thread();
 
 	irq_initialize_manager();
 
-	buffer_cache_init();
-	inode_cache_init();
-	fdtable_init();
+	callout_init();
+
 #if defined(CONFIG_HAL)
 	hal_kernel_init();
 #endif /*  CONFIG_HAL  */

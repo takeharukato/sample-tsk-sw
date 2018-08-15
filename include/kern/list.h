@@ -10,7 +10,6 @@
 #define _KERN_LIST_H
 
 #include <kern/freestanding.h>
-
 #include <kern/kern_types.h>
 
 /** List entry

@@ -15,6 +15,7 @@ extern void *bsp_stack;
 void boot_main(void);
 void hal_kernel_init(void);
 void aarch64_uart_init(void);
+void aarch64_console_init(void);
 #endif /* ASM_FILE */
 
 #endif  /*  _HAL_BOOT64_H   */
