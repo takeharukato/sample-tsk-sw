@@ -24,7 +24,7 @@ static struct _aarch64_console{
 	wait_queue waiters;
 }aarch64_console;
 
-off_t 
+static off_t 
 aarch64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off, 
     size_t counts){
 	size_t   remains;
@@ -50,7 +50,7 @@ aarch64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off,
 	return (off_t)counts;
 }
 
-off_t
+static off_t
 aarch64_console_write(inode *ip, file_descriptor *f, void *src, off_t off, 
     size_t counts){
 	size_t remains;
@@ -76,7 +76,6 @@ aarch64_console_write(inode *ip, file_descriptor *f, void *src, off_t off,
 
 static int 
 aarch64_uart_handler(irq_no irq, struct _exception_frame *exc, void *private){
-	struct _aarch64_timer_config *cfg = (struct _aarch64_timer_config *)private;
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
@@ -110,7 +109,7 @@ aarch64_console_init(void){
 	    IRQ_ATTR_NESTABLE | IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_EDGE, 
 	    2, NULL, aarch64_uart_handler);
 
-	*UART_IMSC |= ( UART_IMSC_RXIM );
+	*UART_IMSC |= ( UART_IMSC_RXIM | UART_IMSC_TXIM );
 
 	register_device_driver(CONS_DEV, &console, NULL);
 }

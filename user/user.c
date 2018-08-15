@@ -62,10 +62,10 @@ threadC(void *arg) {
 		kprintf("stat for CON: ino:%u mode:%u size:%u\n", 
 		    con_stat.ino, con_stat.mode, con_stat.size);
 		fs_write(fd, "hello console\n", strlen("hello console\n"));
-		while( fs_read( fd, &c[0], 1) == 1 ) {
 
+		while( fs_read( fd, &c[0], 1) == 1 ) 
 			fs_write( fd, &c[0], 1);
-		}
+
 		fs_close(fd);
 	}
 }

@@ -75,14 +75,26 @@
 /*
  * ラインステータス
  */
+#define UART_LSR_RXRDY       (0x01)
 #define UART_LSR_TXHOLD      (0x20)
+
+/*
+ * Interrupt Enable Register 
+ */
+#define UART_INTR_RDA   (0x01) /*< Enable Received Data Available Interrupt */
+#define UART_INTR_TXE   (0x02) /*< Enable Transmitter Holding Register Empty Interrupt */
+
+
 /*
  * パラメタ
  */
 #define UART_DEFAULT_BAUD     (115200)
 #define UART_SERIAL_BUFSIZ      (4096)
+
+#define X64_UART_IRQ            (1)
 #if !defined(ASM_FILE)
 void uart8250_init(void);
 void uart8250_putc(int _ch);
+void x64_console_init(void);
 #endif  /* !ASM_FILE */
 #endif  /*  _HAL_UART_H   */

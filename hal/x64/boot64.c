@@ -40,6 +40,7 @@ hal_kernel_init(void){
 
 	x64_init_pic();
 	x64_init_timer();
+	x64_console_init();
 
 	memide_init();
 }
