@@ -355,6 +355,18 @@ thr_get_current_tid(void) {
 	return current->tid;
 }
 
+int
+thr_is_round_robin_thread(thread_t *thr) {
+	int rc;
+	psw_t psw;
+
+	psw_disable_and_save_interrupt(&psw);
+	rc = ( (&thr->attr)->prio == 0 );
+	psw_restore_interrupt(&psw);
+
+	return rc;
+}
+
 void
 thr_delay(uint32_t expire_ms){
 	uptime_cnt rel_expire;

@@ -124,11 +124,13 @@ get_current_thread_info(void) {
 
 void thr_thread_switch(thread_t *, thread_t *);
 void thr_unlink_thread(thread_t *);
-int thr_create_thread(tid_t ,thread_t **, thread_attr_t *, void (*start)(void *), void *);
-void thr_exit_thread(int );
+int thr_is_round_robin_thread(thread_t *);
 int thr_destroy_thread(thread_t *);
 void thr_thread_start(void (*)(void *), void   *);
 tid_t thr_get_tid(thread_t *);
+
+int thr_create_thread(tid_t ,thread_t **, thread_attr_t *, void (*start)(void *), void *);
+void thr_exit_thread(int );
 tid_t thr_get_current_tid(void);
 void thr_delay(uint32_t _expire_ms);
 

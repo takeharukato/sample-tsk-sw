@@ -67,6 +67,9 @@ timer_update_thread_time(void){
 	if ( current == idle_refer_idle_thread() )
 		goto out;
 
+	if ( !thr_is_round_robin_thread(current) )
+		goto out;
+
 	if ( current->slice > 0 )
 		--current->slice;
 
