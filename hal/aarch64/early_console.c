@@ -29,7 +29,6 @@ aarch64_kputchar(int ch){
 void
 aarch64_uart_init(void) {
 
-
 	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
 
 	/*
