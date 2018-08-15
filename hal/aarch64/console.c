@@ -21,7 +21,8 @@ static device_driver console={
 };
 
 static struct _aarch64_console{
-	wait_queue waiters;
+	wait_queue rx_waiters;
+	wait_queue tx_waiters;
 }aarch64_console;
 
 static off_t 
@@ -37,7 +38,7 @@ aarch64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off,
 		while( *UART_FR & UART_FR_RXFE ){
 
 			psw_disable_and_save_interrupt(&psw);
-			reason = wque_wait_on_queue(&aarch64_console.waiters);
+			reason = wque_wait_on_queue(&aarch64_console.rx_waiters);
 			psw_restore_interrupt(&psw);
 			kassert( reason == WQUE_REASON_WAKEUP);
 		}
@@ -64,7 +65,7 @@ aarch64_console_write(inode *ip, file_descriptor *f, void *src, off_t off,
 		while( *UART_FR & UART_FR_TXFF ){
 			
 			psw_disable_and_save_interrupt(&psw);
-			reason = wque_wait_on_queue(&aarch64_console.waiters);
+			reason = wque_wait_on_queue(&aarch64_console.tx_waiters);
 			psw_restore_interrupt(&psw);
 			kassert( reason == WQUE_REASON_WAKEUP);
 		}
@@ -76,10 +77,22 @@ aarch64_console_write(inode *ip, file_descriptor *f, void *src, off_t off,
 
 static int 
 aarch64_uart_handler(irq_no irq, struct _exception_frame *exc, void *private){
-	psw_t psw;
+	psw_t                    psw;
+	uint32_t                 reg;
+	struct _aarch64_console *inf;
+
+	inf = (struct _aarch64_console *)private;
 
 	psw_disable_and_save_interrupt(&psw);
-	wque_wakeup(&aarch64_console.waiters, WQUE_REASON_WAKEUP);
+
+	reg = *UART_FR; 
+
+	if ( !( reg & UART_FR_RXFE ) ) 
+		wque_wakeup(&inf->rx_waiters, WQUE_REASON_WAKEUP);
+
+	if ( !( reg & UART_FR_TXFF ) ) 
+		wque_wakeup(&inf->tx_waiters, WQUE_REASON_WAKEUP);
+
 	psw_restore_interrupt(&psw);
 	
 	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
@@ -90,7 +103,8 @@ aarch64_uart_handler(irq_no irq, struct _exception_frame *exc, void *private){
 void 
 aarch64_console_init(void){
 
-	wque_init_wait_queue(&aarch64_console.waiters);
+	wque_init_wait_queue(&aarch64_console.rx_waiters);
+	wque_init_wait_queue(&aarch64_console.tx_waiters);
 
 	*UART_ICR = UART_CLR_ALL_INTR;  /* Clear all interrupts */
 
@@ -107,7 +121,7 @@ aarch64_console_init(void){
 
 	irq_register_handler(AARCH64_UART_IRQ , 
 	    IRQ_ATTR_NESTABLE | IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_EDGE, 
-	    2, NULL, aarch64_uart_handler);
+	    2, &aarch64_console, aarch64_uart_handler);
 
 	*UART_IMSC |= ( UART_IMSC_RXIM | UART_IMSC_TXIM );
 

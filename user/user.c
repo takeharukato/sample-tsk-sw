@@ -15,9 +15,7 @@ threadA(void *arg) {
 	while(1) {
 		
 		kprintf("threadA\n");
-		thr_delay(1000);
-		sched_rotate_queue();
-		sched_schedule();
+		thr_delay(500);
 	}
 }
 
@@ -27,9 +25,7 @@ threadB(void *arg) {
 	while(1) {
 
 		kprintf("threadB\n");
-		thr_delay(2000);
-		sched_rotate_queue();
-		sched_schedule();
+		thr_delay(1000);
 	}
 }
 

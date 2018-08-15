@@ -23,7 +23,8 @@ static device_driver console={
 };
 
 static struct _x64_console{
-	wait_queue waiters;
+	wait_queue rx_waiters;
+	wait_queue tx_waiters;
 }x64_console;
 
 static off_t 
@@ -39,7 +40,7 @@ x64_console_read(inode *ip, file_descriptor *f, void *dst, off_t off,
 		while( !( in_port_byte(CON_COMBASE + UART_LSR) & UART_LSR_RXRDY ) ) {
 
 			psw_disable_and_save_interrupt(&psw);
-			reason = wque_wait_on_queue(&x64_console.waiters);
+			reason = wque_wait_on_queue(&x64_console.rx_waiters);
 			psw_restore_interrupt(&psw);
 			kassert( reason == WQUE_REASON_WAKEUP);
 		}
@@ -66,7 +67,7 @@ x64_console_write(inode *ip, file_descriptor *f, void *src, off_t off,
 		while( !( in_port_byte(CON_COMBASE + UART_LSR) & UART_LSR_TXHOLD ) ) {
 			
 			psw_disable_and_save_interrupt(&psw);
-			reason = wque_wait_on_queue(&x64_console.waiters);
+			reason = wque_wait_on_queue(&x64_console.tx_waiters);
 			psw_restore_interrupt(&psw);
 			kassert( reason == WQUE_REASON_WAKEUP);
 		}
@@ -78,18 +79,23 @@ x64_console_write(inode *ip, file_descriptor *f, void *src, off_t off,
 
 static int 
 x64_uart_handler(irq_no irq, struct _exception_frame *exc, void *private){
-	uint8_t  intr_id;
-	psw_t        psw;
+	uint8_t           intr_id;
+	psw_t                 psw;
+	struct _x64_console  *inf;
 
-	intr_id = in_port_byte(CON_COMBASE + UART_IIR);
-	//kprintf("IIR:%x\n", intr_id);
+	inf = (struct _x64_console *)private;
 
-	if ( uart_getiir(intr_id) != 0 ) {
+	psw_disable_and_save_interrupt(&psw);
 
-		psw_disable_and_save_interrupt(&psw);
-		wque_wakeup(&x64_console.waiters, WQUE_REASON_WAKEUP);
-		psw_restore_interrupt(&psw);
-	}
+	intr_id = uart_getiir(in_port_byte(CON_COMBASE + UART_IIR));
+
+	if ( intr_id & UART_IIR_RDI )
+		wque_wakeup(&inf->rx_waiters, WQUE_REASON_WAKEUP);
+
+	if ( intr_id & UART_IIR_THRI )
+		wque_wakeup(&inf->tx_waiters, WQUE_REASON_WAKEUP);
+
+	psw_restore_interrupt(&psw);
 
 	return IRQ_HANDLED;
 }
@@ -98,7 +104,8 @@ void
 x64_console_init(void){
 	uint16_t baud_setting;
 
-	wque_init_wait_queue(&x64_console.waiters);
+	wque_init_wait_queue(&x64_console.rx_waiters);
+	wque_init_wait_queue(&x64_console.tx_waiters);
 
 	baud_setting = UART_SERIAL_FREQ / UART_INTERNAL_BIAS / UART_DEFAULT_BAUD;
 	out_port_byte(CON_COMBASE + UART_INTR, 0);  /*  disable interrupt  */
@@ -110,7 +117,7 @@ x64_console_init(void){
 
 	irq_register_handler(UART_COM_IRQ , 
 	    IRQ_ATTR_NESTABLE | IRQ_ATTR_EXCLUSIVE | IRQ_ATTR_EDGE, 
-	    0, NULL, x64_uart_handler);
+	    0, &x64_console, x64_uart_handler);
 
 	out_port_byte(CON_COMBASE + UART_FIFO, 0x0);  /* disable FIFO */
 	out_port_byte(CON_COMBASE + UART_INTR, UART_INTR_RDA|UART_INTR_TXE);  /*  送受信割り込み使用  */
