@@ -15,6 +15,7 @@ threadA(void *arg) {
 	while(1) {
 		
 		kprintf("threadA\n");
+		thr_delay(1000);
 		sched_rotate_queue();
 		sched_schedule();
 	}
@@ -26,6 +27,7 @@ threadB(void *arg) {
 	while(1) {
 
 		kprintf("threadB\n");
+		thr_delay(2000);
 		sched_rotate_queue();
 		sched_schedule();
 	}
@@ -76,8 +78,7 @@ user_init(void) {
 	thread_attr_t attr;
 
 	memset(&attr, 0, sizeof(thread_attr_t));
-	attr.prio = 1;
-
+	attr.prio = 2;
 	thr_create_thread(1, &thrA, NULL, threadA, NULL);
 	thr_create_thread(2, &thrB, NULL, threadB, NULL);
 	thr_create_thread(3, &thrC, &attr, threadC, (void *)0x5a5a5a5a5a);
