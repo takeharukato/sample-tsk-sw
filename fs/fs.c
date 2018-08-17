@@ -112,6 +112,7 @@ create(char *path, imode_t type, dev_id dev){
 int
 fs_dup(int fd){
 	file_descriptor *f, *new;
+	int new_fd;
 
 	if ( ( fd < 0 ) || ( THR_FDS_NR <= fd ) )
 		return -EINVAL;
@@ -121,13 +122,13 @@ fs_dup(int fd){
 		return -EBADF;
 
 	
-	fd = alloc_new_fd(f);
-	if( fd < 0 )
-		return fd;
+	new_fd = alloc_new_fd(f);
+	if( new_fd < 0 )
+		return new_fd;
 
 	fdtable_duplicate_fd(f, &new);
 
-	return fd;
+	return new_fd;
 }
 
 int

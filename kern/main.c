@@ -14,6 +14,10 @@
 void
 kern_init(void) {
 	
+	/*
+	 * File system should be initialized before thread creation (including kernel thread)
+	 * because thr_thread_start() opens stdin, stdout, stderr.
+	 */
 	devsw_init();
 	buffer_cache_init();
 	inode_cache_init();

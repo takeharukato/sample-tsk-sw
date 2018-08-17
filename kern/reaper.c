@@ -18,8 +18,13 @@ static reaper_thread_info_t reaper_info;
 static void
 reaper(void *nouse) {
 	thread_t *thr;
-	psw_t psw;
+	int        fd;
+	psw_t     psw;
 
+	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) { /*  Ensure all file descriptors are closed. */
+
+		fs_close(fd);
+	}
 	
 	for(;;) {
 		psw_disable_and_save_interrupt(&psw);

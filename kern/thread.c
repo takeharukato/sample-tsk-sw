@@ -65,6 +65,25 @@ thr_delay_callout(void *private){
  */
 void
 thr_thread_start(void (*fn)(void *), void *arg){
+	int fd, stdin_fd, stdout_fd, stderr_fd;
+
+	/*
+	 * Because this is thread based multi-task operating system,
+	 * we should some initialization in crt0 of multi-process operating system,
+	 */
+
+	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) { /*  Ensure all file descriptors are closed. */
+
+		fs_close(fd);
+	}
+
+	stdin_fd = fs_open("/CON", O_RDWR);
+	stdout_fd = fs_dup(stdin_fd);
+	stderr_fd = fs_dup(stdin_fd);
+
+	kassert( stdin_fd == 0 );
+	kassert( stdout_fd == 1 );
+	kassert( stderr_fd == 2 );
 
 	psw_enable_interrupt();  /* Enable interrupt by cpu flag  */
 	fn(arg);                 /* Call specified thread.  */
@@ -315,8 +334,14 @@ free_stack_out:
 void
 thr_exit_thread(int code){
 	psw_t psw;
+	int    fd;
 
 	psw_disable_and_save_interrupt(&psw);
+
+	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) { /*  Ensure all file descriptors are closed. */
+
+		fs_close(fd);
+	}
 
 	rdq_remove_thread(current);   /* Remove this thread from the ready_que  */
 	current->exit_code = (exit_code_t)code; /* Set terminate code  */
