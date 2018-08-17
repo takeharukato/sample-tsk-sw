@@ -26,7 +26,7 @@ clr_thread_info(thread_info_t *tinfo) {
 static void
 set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 	thread_attr_t *attr = &thr->attr;
-	thread_info_t *tinfo;
+	thread_info_t             *tinfo;
 
 	attr->stack_top = stack_top;
 	attr->stack_size = size;
@@ -53,10 +53,8 @@ static void
 thr_delay_callout(void *private){
 	wait_queue *que = (wait_queue *)private;
 
-	if ( !is_wque_empty(que) ) {
-
+	if ( !is_wque_empty(que) ) 
 		wque_wakeup(que, WQUE_REASON_WAKEUP);
-	}
 }
 
 /** Start a thread
@@ -72,10 +70,9 @@ thr_thread_start(void (*fn)(void *), void *arg){
 	 * we should some initialization in crt0 of multi-process operating system,
 	 */
 
-	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) { /*  Ensure all file descriptors are closed. */
-
+	/*  Ensure all file descriptors are closed. */
+	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) 
 		fs_close(fd);
-	}
 
 	stdin_fd = fs_open("/CON", O_RDWR);
 	stdout_fd = fs_dup(stdin_fd);
@@ -163,7 +160,7 @@ thr_remove_thread_queue(thread_queue_t *que, thread_t *thr){
  */
 int 
 thr_thread_queue_empty(thread_queue_t *que) {
-	int rc;
+	int    rc;
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
@@ -181,7 +178,7 @@ thr_thread_queue_empty(thread_queue_t *que) {
 thread_t *
 thr_thread_queue_get_top(thread_queue_t *que) {
 	thread_t *thr;
-	psw_t psw;
+	psw_t     psw;
 	
 	psw_disable_and_save_interrupt(&psw);
 
@@ -201,8 +198,8 @@ thr_thread_queue_get_top(thread_queue_t *que) {
  */
 int
 thr_destroy_thread(thread_t *thr){
-	int rc;
-	psw_t psw;
+	int                           rc;
+	psw_t                        psw;
 	thread_attr_t *attr = &thr->attr;
 
 	psw_disable_and_save_interrupt(&psw);
@@ -289,10 +286,10 @@ thr_create_thread(tid_t id, thread_t **thrp, thread_attr_t *attrp,
 	 * Setup thread attribute
 	 */
 	if ( (attrp != NULL) &&
-	    ( (attrp->prio < RDQ_PRIORITY_MAX) && (attrp->prio > RDQ_USER_RR_IDX) ) )
+	    ( (attrp->prio < RDQ_PRIORITY_MAX) && (attrp->prio > RDQ_USER_RR_PRIORITY) ) )
 		(&thr->attr)->prio = attrp->prio;  /*  Set thread priority  */
 	else
-		(&thr->attr)->prio = 0;
+		(&thr->attr)->prio = RDQ_USER_RR_PRIORITY; /* Round Robin */
 
         /* 
 	 *  Setup start address of the thread function.
@@ -338,10 +335,9 @@ thr_exit_thread(int code){
 
 	psw_disable_and_save_interrupt(&psw);
 
-	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) { /*  Ensure all file descriptors are closed. */
-
+	/*  Ensure all file descriptors are closed. */
+	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd)
 		fs_close(fd);
-	}
 
 	rdq_remove_thread(current);   /* Remove this thread from the ready_que  */
 	current->exit_code = (exit_code_t)code; /* Set terminate code  */
@@ -353,9 +349,9 @@ thr_exit_thread(int code){
 					   */
 	psw_restore_interrupt(&psw);
 
-	sched_schedule();  /*  This thread release its cpu, 
-			       thus we should call scheduler to find 
-			       the next runnable thread */
+	sched_schedule();  /*  This thread releases the cpu, 
+			       We should call scheduler to find 
+			       a next runnable thread. */
 
 	return;
 }
@@ -382,11 +378,11 @@ thr_get_current_tid(void) {
 
 int
 thr_is_round_robin_thread(thread_t *thr) {
-	int rc;
+	int    rc;
 	psw_t psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	rc = ( (&thr->attr)->prio == 0 );
+	rc = ( (&thr->attr)->prio == RDQ_USER_RR_PRIORITY );
 	psw_restore_interrupt(&psw);
 
 	return rc;
@@ -398,7 +394,7 @@ thr_delay(uint32_t expire_ms){
 	call_out_ent      ent;
 	wait_queue    dly_que;
 	wq_reason      reason;
-	psw_t psw;
+	psw_t             psw;
 
 	wque_init_wait_queue(&dly_que);
 	rel_expire = expire_ms / CONFIG_TIMER_INTERVAL_MS;

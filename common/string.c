@@ -85,7 +85,7 @@ memmove(void *dst, const void *src, size_t len){
  */
 size_t
 strlen(const char *str) {
-	const char *cp = str;
+	char *cp = (char *)str;
 	size_t len;
 
 	for(len = 0; *cp != '\0'; ++cp, ++len);

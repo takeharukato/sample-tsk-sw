@@ -13,8 +13,6 @@
 
 #include <kern/kern_types.h>
 
-int  find_msr_bit_in_size(size_t );
-int  find_lsr_bit_in_size(size_t );
-int  find_msr_bit(int );
-int  find_lsr_bit(int );
+int  find_msr_bit(int , int *);
+int  find_lsr_bit(int , int *);
 #endif  /*  _KERN_BITOPS_H  */

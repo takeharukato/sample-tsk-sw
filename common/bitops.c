@@ -9,95 +9,68 @@
 
 #include <kern/kernel.h>
 
-/**  size_t型で与えられたサイズ中のMSB(1となっている最上位ビットの意味)の位置を算出する
-     @param[in] x サイズ
-     @retval 0 xが0だった
-     @retval MSBの位置(再下位ビットを1として返却)
-     @note xが0のケースを考慮して, 再下位ビットを1としてMSBを返却する
+/**  int型で与えられた変数x中のMSB(1となっている最上位ビットの意味)の位置を算出する
+     @param[in]     x 調査対象の変数
+     @param[out] *res MSB bit position
+     @retval 0     正常終了
+     @retval ESRCH xが0だった
  */
 int 
-find_msr_bit_in_size(size_t x) {
-	int i = 0;
+find_msr_bit(int x, int *res) {
+	int rc = 0;
+	int  i = 0;
 
-	if (x == 0)
+	rc = ESRCH;
+	if ( x == 0 ) {
+		
+		*res = 0;
 		goto out;
+	}
 
 	for(i = (sizeof(x)*BIT_PER_BYTE - 1); i >= 0; --i) {
+
 		/*  最上位ビットから順番にビットが立っているか検査する  */
-		if (x & (1UL << i) ) /* 1になっているビットを検出  */
-			return i + 1;
+		if (x & (1UL << i) ) { /* 1になっているビットを検出  */
+
+			*res = i;
+			rc = 0;
+			break;
+		}
 	}
 
 out:
-	return 0;  /* xが0である  */
+	return rc;
 }
 
-
-/**  size_t型で与えられたサイズ中のLSB(1となっている最下位ビットの意味)の位置を算出する
-     @param[in] x サイズ
-     @retval 0 xが0だった
-     @retval LSBの位置(再下位ビットを1として返却)
-     @note xが0のケースを考慮して, 再下位ビットを1としてMSBを返却する
+/**  int型で与えられた変数中のLSB(1となっている最下位ビットの意味)の位置を算出する
+     @param[in]  x 調査対象の変数
+     @param[out] *res LSB bit position
+     @retval 0 正常終了
+     @retval ESRCH xが0だった
  */
 int 
-find_lsr_bit_in_size(size_t x) {
-	int i = 0;
+find_lsr_bit(int x, int *res) {
+	int rc = 0;
+	int  i = 0;
 
-	if (x == 0)
+	rc = ESRCH;
+	if ( x == 0 ) {
+		
+		*res = 0;
 		goto out;
+	}
 
-	for(i = 0; i <= (sizeof(x)*BIT_PER_BYTE - 1); ++i) {
+	for(i = 0; sizeof(x)*BIT_PER_BYTE > i; ++i) {
+
 		/*  最下位ビットから順番にビットが立っているか検査する  */
-		if (x & (1UL << i) ) /* 1になっているビットを検出  */
-			return i + 1;
+		if (x & (1UL << i) ) { /* 1になっているビットを検出  */
+
+			*res = i;
+			rc = 0;
+			break;
+		}
 	}
 
 out:
-	return 0;  /* xが0である  */
-}
-
-/**  int型で与えられたサイズ中のMSB(1となっている最上位ビットの意味)の位置を算出する
-     @param[in] x サイズ
-     @retval 0 xが0だった
-     @retval MSBの位置(再下位ビットを1として返却)
-     @note xが0のケースを考慮して, 再下位ビットを1としてMSBを返却する
- */
-int 
-find_msr_bit(int x) {
-	int i = 0;
-
-	if (x == 0)
-		goto out;
-
-	for(i = (sizeof(x)*BIT_PER_BYTE - 1); i >= 0; --i) {
-		/*  最上位ビットから順番にビットが立っているか検査する  */
-		if (x & (1UL << i) ) /* 1になっているビットを検出  */
-			return i + 1;
-	}
-
-out:
-	return 0;  /* xが0である  */
-}
-
-/**  int型で与えられたサイズ中のLSB(1となっている最下位ビットの意味)の位置を算出する
-     @param[in] x サイズ
-     @retval 0 xが0だった
-     @retval LSBの位置(再下位ビットを1として返却)
-     @note xが0のケースを考慮して, 再下位ビットを1としてMSBを返却する
- */
-int 
-find_lsr_bit(int x) {
-	int i = 0;
-
-	if (x == 0)
-		goto out;
-
-	for(i = 0; i <= (sizeof(x)*BIT_PER_BYTE - 1); ++i) {
-		/*  最下位ビットから順番にビットが立っているか検査する  */
-		if (x & (1UL << i) ) /* 1になっているビットを検出  */
-			return i + 1;
-	}
-
-out:
-	return 0;  /* xが0である  */
+	return rc;
 }

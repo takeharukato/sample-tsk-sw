@@ -16,8 +16,8 @@ static thread_ready_queue_t rd_queue;
  */
 void 
 rdq_add_thread(thread_t *thr){
-	psw_t psw;
-	thread_attr_t *attr = &thr->attr;
+	psw_t                             psw;
+	thread_attr_t      *attr = &thr->attr;
 	thread_ready_queue_t *rdq = &rd_queue;
 
 	psw_disable_and_save_interrupt(&psw);
@@ -31,8 +31,8 @@ rdq_add_thread(thread_t *thr){
  */
 void 
 rdq_remove_thread(thread_t *thr){
-	psw_t psw;
-	thread_attr_t *attr = &thr->attr;
+	psw_t                             psw;
+	thread_attr_t      *attr = &thr->attr;
 	thread_ready_queue_t *rdq = &rd_queue;
 
 	psw_disable_and_save_interrupt(&psw);
@@ -46,11 +46,11 @@ rdq_remove_thread(thread_t *thr){
  */
 void 
 rdq_rotate_queue(void) {
-	psw_t psw;
+	psw_t                             psw;
 	thread_ready_queue_t *rdq = &rd_queue;
 
 	psw_disable_and_save_interrupt(&psw);
-	list_rotate(&rdq->head[RDQ_USER_RR_IDX]);
+	list_rotate(&rdq->head[RDQ_USER_RR_PRIORITY]);
 	psw_restore_interrupt(&psw);
 }
 
@@ -61,21 +61,23 @@ rdq_rotate_queue(void) {
  */
 thread_t *
 rdq_find_runnable_thread(void){
-	psw_t psw;
-	thread_t *thr;
-	int idx;
+	psw_t                             psw;
+	thread_t                         *thr;
+	int                           idx, rc;
 	thread_ready_queue_t *rdq = &rd_queue;
 
 	psw_disable_and_save_interrupt(&psw);
 
-	idx = find_msr_bit(rdq->bitmap);
-	if (idx == 0) {
+	rc = find_msr_bit(rdq->bitmap, &idx);
+	if ( rc != 0 ) {
+
 		thr = NULL;
 		goto out;
 	}
 
-	thr = CONTAINER_OF(list_ref_top(&rdq->head[rdq_index2prio(idx)]), thread_t, link);
-	
+	kassert( !list_is_empty( &rdq->head[idx] ) );
+	thr = CONTAINER_OF( list_ref_top(&rdq->head[idx]), thread_t, link);
+
 out:
 	psw_restore_interrupt(&psw);
 	
@@ -87,11 +89,10 @@ out:
  */
 void
 rdq_init_ready_queue(void) {
-	int i;
+	int                                 i;
 	thread_ready_queue_t *rdq = &rd_queue;
 
 	rdq->bitmap = 0;  /*< 動作可能なスレッドがない状態なので0に設定する  */
-	for(i = 0; i < RDQ_PRIORITY_MAX; ++i){
+	for(i = 0; i < RDQ_PRIORITY_MAX; ++i)
 		init_list_head(&rdq->head[i]);  /*< 各優先度のキューを初期化する  */
-	}
 }
