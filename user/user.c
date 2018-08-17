@@ -14,8 +14,9 @@ threadA(void *arg) {
 	
 	while(1) {
 		
-		kprintf("threadA\n");
-		thr_delay(500);
+		//kprintf("threadA\n");
+		fs_write(1, "threadA\n", strlen("threadA\n")+1);
+		thr_delay(100);
 	}
 }
 
@@ -24,8 +25,9 @@ threadB(void *arg) {
 
 	while(1) {
 
-		kprintf("threadB\n");
-		thr_delay(1000);
+		//kprintf("threadB\n");
+		fs_write(1, "threadB\n", strlen("threadB\n")+1);
+		thr_delay(300);
 	}
 }
 
@@ -43,11 +45,11 @@ threadC(void *arg) {
 	if ( fd >= 0 ) {
 		
 		fs_fstat(fd, &s1);
-		fs_write(fd, "hello world", strlen("hello world"));
+		fs_write(fd, "hello world", strlen("hello world")+1);
 		fs_fstat(fd, &s2);
 
 		fs_lseek(fd, 0, SEEK_SET);
-		fs_read(fd, data, strlen("hello world"));
+		fs_read(fd, data, strlen("hello world")+1);
 
 		fs_close(fd);
 		kprintf("FS: size1:%u size2:%u %s\n", s1.size, s2.size, data);

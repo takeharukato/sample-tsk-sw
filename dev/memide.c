@@ -77,6 +77,8 @@ memide_rw(device_driver *drv, blk_buf *b){
 	kassert(b->flags & B_BUSY);
 
 	mutex_hold(&drv->mtx);
+	if ( drv->dev != b->dev )
+		goto error_out;
 
 	addr = b->blockno * BSIZE;
 
@@ -84,7 +86,7 @@ memide_rw(device_driver *drv, blk_buf *b){
 		memide_write_sector(addr, &b->data[0], BSIZE);
 	else
 		memide_read_sector(addr, &b->data[0], BSIZE);
-
+error_out:
 	mutex_release(&drv->mtx);
 
 	return 0;

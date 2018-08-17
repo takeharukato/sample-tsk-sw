@@ -118,15 +118,18 @@ fd_file_read(file_descriptor  *f, void *addr, size_t n, io_cnt_t *rd_cnt){
 	if ( f->f_inode->i_mode == FS_IMODE_DEV ) {
 
 		drv = devsw_get_handle( f->f_inode->i_rdev );
-		kassert ( drv != NULL );
-
-		if ( drv->dev == 0 ) {
+		if ( ( drv == NULL ) || ( drv->dev == 0 ) ){
 
 			rc = ENODEV;
 			goto unlock_out;
 		}
+		inode_unlock(f->f_inode);
 
 		*rd_cnt = drv->read( f->f_inode, f, addr, f->f_offset, n);
+
+		inode_lock(f->f_inode);
+		devsw_put_handle( drv->dev );
+
 		rc = 0;
 		goto unlock_out;
 	}
@@ -162,15 +165,19 @@ fd_file_write(file_descriptor  *f, void *addr, size_t n, io_cnt_t *wr_cnt){
 	if ( f->f_inode->i_mode == FS_IMODE_DEV ) {
 
 		drv = devsw_get_handle( f->f_inode->i_rdev );
-		kassert ( drv != NULL );
-
-		if ( drv->dev == 0 ) {
+		if ( ( drv == NULL ) || ( drv->dev == 0 ) ) {
 
 			rc = ENODEV;
 			goto unlock_out;
 		}
-		
+		inode_unlock(f->f_inode);
+
 		*wr_cnt = drv->write( f->f_inode, f, addr, f->f_offset, n);
+
+		inode_lock(f->f_inode);
+		devsw_put_handle( drv->dev );
+
+
 		rc = 0;
 		goto unlock_out;
 	}

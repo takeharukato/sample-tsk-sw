@@ -86,6 +86,7 @@ buffer_cache_blk_read(dev_id dev, blk_no blockno){
 		drv = devsw_get_handle( b->dev );
 		if ( drv->blkrw != NULL )
 			drv->blkrw(drv, b); /* Read buffer */
+		devsw_put_handle( b->dev );
 	}
 
 	return b;
@@ -102,6 +103,7 @@ buffer_cache_blk_write(blk_buf *b){
 	drv = devsw_get_handle( b->dev );
 	if ( drv->blkrw != NULL )
 		drv->blkrw(drv, b);  /* Write buffer */
+	devsw_put_handle( b->dev );
 
 	return b;
 }

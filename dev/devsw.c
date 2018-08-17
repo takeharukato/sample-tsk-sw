@@ -24,13 +24,15 @@ register_device_driver(dev_id dev, device_driver *drv, void *private){
 
 	mutex_hold(&dsp->mtx);
 
-	if ( drvp->dev > 0 ) {
+	if ( ( drvp->dev > 0 ) || ( drvp->drv_count > 0 ) ) {
 
 		rc = EBUSY;
 		goto error_out;
 	}
 	
 	drvp->dev = dev;
+	drvp->drv_count = 0;
+
 	drvp->private = drv->private;
 
 	drvp->open = drv->open;
@@ -38,6 +40,7 @@ register_device_driver(dev_id dev, device_driver *drv, void *private){
 	drvp->write = drv->write;
 	drvp->blkrw = drv->blkrw;
 	drvp->close = drv->close;
+	drvp->state = DEVSW_DRIVER_STATE_RUN;
 
 	rc = 0;
 
@@ -66,13 +69,34 @@ unregister_device_driver(dev_id dev){
 		goto error_out;
 	}
 
+	++drvp->drv_count;  /* To avoid the race with register_device_driver */
+
+	drvp->state |= DEVSW_DRIVER_STATE_UNREG;
+	drvp->state &= ~DEVSW_DRIVER_STATE_RUN;
+
+	mutex_release(&dsp->mtx);
+	do{
+		mutex_hold(&dsp->mtx);
+
+		if ( drvp->drv_count == 1 ) 
+			break;  /* No one uses this device */
+
+		mutex_release(&dsp->mtx);
+	}while(1);
+
+	kassert( drvp->drv_count == 1 );
+
 	drvp->dev = 0;
+	drvp->drv_count = 0;
 	drvp->private = NULL;
 	drvp->open = NULL;
 	drvp->read = NULL;
 	drvp->write = NULL;
 	drvp->blkrw = NULL;
 	drvp->close = NULL;
+
+	drvp->state &= ~DEVSW_DRIVER_STATE_UNREG;
+	kassert( drvp->state == DEVSW_DRIVER_STATE_NONE );
 
 	rc = 0;
 
@@ -84,19 +108,42 @@ error_out:
 
 device_driver *
 devsw_get_handle(dev_id dev){
-
 	devsw          *dsp = &devices;
 	device_driver            *drvp;
 
-	if ( dev >= DEVSW_DEVICES_NR )
-		return NULL;
-
+	kassert( DEVSW_DEVICES_NR >= dev );
 
 	mutex_hold(&dsp->mtx);
+
 	drvp = &dsp->drv[dev];
+
+	if ( (drvp->state & DEVSW_DRIVER_STATE_RUN) == 0 ) 
+		goto error_out;
+	++drvp->drv_count;
+
+error_out:
 	mutex_release(&dsp->mtx);
 
 	return drvp;
+}
+
+void
+devsw_put_handle(dev_id dev){
+	devsw          *dsp = &devices;
+	device_driver            *drvp;
+
+	kassert( DEVSW_DEVICES_NR >= dev );
+
+	mutex_hold(&dsp->mtx);
+
+	drvp = &dsp->drv[dev];
+
+	kassert( drvp->drv_count > 0 );
+	--drvp->drv_count;
+
+	mutex_release(&dsp->mtx);
+
+	return;
 }
 
 void
@@ -112,6 +159,7 @@ devsw_init(void) {
 		drvp = &dsp->drv[i];
 
 		mutex_init(&drvp->mtx);
+
 		drvp->dev = 0;
 		drvp->private = NULL;
 		drvp->open = NULL;
