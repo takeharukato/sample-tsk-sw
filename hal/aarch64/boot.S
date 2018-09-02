@@ -179,7 +179,7 @@ setup_mmu:
 	add	x0, x0, x1
 
 	//
-	// 0-1GiB block is translated by the second page table
+	// 1GiB block from QEMU_VIRT_MEM_BASE is translated by the second page table
 	//
 	ldr	x1, =pre_ttbr0_l2tbl
 	ldr	x2, =0xFFFFF000
