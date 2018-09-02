@@ -83,6 +83,9 @@ aarch64_setup_mmu(void) {
 	memset( &kpgtbl->entries[0], 0, PAGE_SIZE);
 
 	attr= AARCH64_MAIR_VAL;
+#if defined(DEBUG_SHOW_KERNEL_MAP)
+	kprintf("MAIR_VAL: 0x%lx\n", AARCH64_MAIR_VAL);
+#endif  /*  DEBUG_SHOW_KERNEL_MAP  */
 	set_memory_attribute(attr);
 
 	for ( paddr = QEMU_VIRT_FLASH_BASE; 
@@ -111,10 +114,16 @@ aarch64_setup_mmu(void) {
 	load_pgtbl((uintptr_t)kpgtbl);
 
 	reg = AARCH64_TCR_VAL;
+#if defined(DEBUG_SHOW_KERNEL_MAP)
+	kprintf("TCR_VAL: 0x%lx\n", AARCH64_TCR_VAL);
+#endif  /*  DEBUG_SHOW_KERNEL_MAP  */
 	set_translation_control_register(reg);
 
 	reg = get_system_control_register();
 	reg |=  AARCH64_SCTLR_VAL;
+#if defined(DEBUG_SHOW_KERNEL_MAP)
+	kprintf("SCTLR_VAL: 0x%lx reg: 0x%lx\n", AARCH64_SCTLR_VAL, reg);
+#endif  /*  DEBUG_SHOW_KERNEL_MAP  */
 	set_system_control_register(reg);
 
 	instruction_sync_barrier();

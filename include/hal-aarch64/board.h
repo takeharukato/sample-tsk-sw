@@ -9,7 +9,6 @@
 #if !defined(_HAL_BOARD_H)
 #define  _HAL_BOARD_H 
 
-#include <kern/freestanding.h>
 #include <hal/asm-macros.h>
 
 /* QEmu virt memory map
@@ -105,16 +104,6 @@
 #define GIC_PRI_MASK                (0x0f)
 
 #define UART_BASE                   (QEMU_VIRT_UART_BASE)
-#define UART_DR                     ((volatile uint32_t *)UART_BASE )
-#define UART_FR                     ((volatile uint32_t *)(UART_BASE + 0x18) )
-#define UART_IBRD                   ((volatile uint32_t *)(UART_BASE + 0x24) )
-#define UART_FBRD                   ((volatile uint32_t *)(UART_BASE + 0x28) )
-#define UART_LCRH                   ((volatile uint32_t *)(UART_BASE + 0x2c) )
-#define UART_CR                     ((volatile uint32_t *)(UART_BASE + 0x30) )
-#define UART_RIS                    ((volatile uint32_t *)(UART_BASE + 0x3c) )
-#define UART_IMSC                   ((volatile uint32_t *)(UART_BASE + 0x38) )
-#define UART_ICR                    ((volatile uint32_t *)(UART_BASE + 0x44) )
-
 #define AARCH64_UART_IRQ            (GIC_INTNO_SPI0+1)  /*< UART IRQ ( SPI no. 1) */
 #define AARCH64_TIMER_IRQ           (27) /*< Timer IRQ  */
 
@@ -180,4 +169,18 @@
 #define UART_FBRD_VAL  (0x8)
 #endif  /*  CONFIG_CON_SERIAL_BPS_230400  */
 
+#if !defined(ASM_FILE)
+
+#include <kern/freestanding.h>
+
+#define UART_DR                     ((volatile uint32_t *)UART_BASE )
+#define UART_FR                     ((volatile uint32_t *)(UART_BASE + 0x18) )
+#define UART_IBRD                   ((volatile uint32_t *)(UART_BASE + 0x24) )
+#define UART_FBRD                   ((volatile uint32_t *)(UART_BASE + 0x28) )
+#define UART_LCRH                   ((volatile uint32_t *)(UART_BASE + 0x2c) )
+#define UART_CR                     ((volatile uint32_t *)(UART_BASE + 0x30) )
+#define UART_RIS                    ((volatile uint32_t *)(UART_BASE + 0x3c) )
+#define UART_IMSC                   ((volatile uint32_t *)(UART_BASE + 0x38) )
+#define UART_ICR                    ((volatile uint32_t *)(UART_BASE + 0x44) )
+#endif  /* !ASM_FILE  */
 #endif  /*  _HAL_BOARD_H   */

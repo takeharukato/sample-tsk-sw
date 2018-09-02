@@ -8,12 +8,8 @@
 /**********************************************************************/
 #if !defined(_HAL_KMAP_H)
 
-#include <kern/freestanding.h>
-
+#include <kern/param.h>
 #include <hal/asm-macros.h>
-#include <hal/aarch64.h>
-#include <hal/board.h>
-#include <hal/pgtbl.h>
 
 #define KERN_VMA_BASE               (ULL_C(0x0000000000000000))
 #define PHY_TO_KERN_STRAIGHT(phy)   ( (phy) + KERN_VMA_BASE  )
@@ -23,6 +19,10 @@
 #if !defined(ASM_FILE)
 
 #include <kern/freestanding.h>
+
+#include <hal/aarch64.h>
+#include <hal/board.h>
+#include <hal/pgtbl.h>
 
 #define KERN_STRAIGHT_PAGE_START(addr)					\
 	( (uintptr_t)( ( (uintptr_t)(addr) ) &				\

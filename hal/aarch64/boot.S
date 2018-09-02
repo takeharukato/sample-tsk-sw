@@ -13,12 +13,15 @@
 #include <hal/thread_info.h>
 #include <hal/asm-offset.h>	
 #include <hal/aarch64.h>
+#include <hal/pgtbl.h>
+#include <hal/board.h>
+#include <hal/kmap.h>
 
 .extern bsp_stack
-.extern pre_ttbr0_l0tbl
 .extern pre_ttbr0_l1tbl
-.extern pre_ttbr1_l0tbl
+.extern pre_ttbr0_l2tbl
 .extern pre_ttbr1_l1tbl
+.extern pre_ttbr1_l2tbl
 
 .global _start
 start:	
@@ -143,6 +146,73 @@ clear_bss_loop:
 	str     xzr, [x1], #8
 	sub     w2, w2, #1
 	cbnz    w2, clear_bss_loop
+
+setup_mmu:
+	// Initialize translation table control registers
+	eor	x1, x1, x1
+	ldr	x1, =AARCH64_TCR_VAL // 4GB space 4KB granularity
+	 // Inner-shareable.
+	msr 	tcr_el1, x1 // Normal Inner and Outer Cacheable.
+	ldr	x1, =AARCH64_MAIR_VAL // ATTR0 Device-nGnRnE ATTR1 Device.
+	msr	mair_el1, x1 // ATTR2 Normal Non-Cacheable.
+	 // ATTR3 Normal Cacheable.
+	adr 	x0, pre_ttbr0_l1tbl // ttb0_base must be a 4KB-aligned address.
+	msr	ttbr0_el1, x0
+
+	// get level1 index of VMA_BASE
+	ldr	x1, =( KERN_VMA_BASE)
+	lsr	x1, x1, #LEVEL1_INDEX_SHIFT
+	and	x1, x1, #LEVEL1_INDEX_MASK
+	lsl	x1, x1, #3
+	add	x0, x0, x1
+
+	// The first entry is 1GB block from 0x00000000 to 0x3FFFFFFF.
+	// AttrIdx=000 Device-nGnRnE.
+	ldr	x2, =0x00000741
+	str	x2, [x0]
+	
+	// get level1 index of QEMU_VIRT_MEM_BASE
+	ldr	x1, =( KERN_VMA_BASE + QEMU_VIRT_MEM_BASE)
+	lsr	x1, x1, #LEVEL1_INDEX_SHIFT
+	and	x1, x1, #LEVEL1_INDEX_MASK
+	lsl	x1, x1, #3
+	add	x0, x0, x1
+
+	//
+	// 0-1GiB block is translated by the second page table
+	//
+	ldr	x1, =pre_ttbr0_l2tbl
+	ldr	x2, =0xFFFFF000
+	and	x2, x1, x2 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.
+	orr	x2, x2, 0x3
+	str	x2, [x0], #8
+
+	// Set level 2 translation table.
+	ldr	x2, =QEMU_VIRT_MEM_BASE // Physical base address
+	ldr	x3, =0x70d     // Executable Inner and Outer Shareable.
+	orr	x2, x2, x3 	// R/W at all ELs secure memory.
+				// AttrIdx=011 Normal Cacheable.
+
+	ldr	x0, =pre_ttbr0_l2tbl // Base address of level2_pagetable.
+	mov 	x4, #512 	// Set 512 level2 block entries.
+	ldr	x5, =0x00200000 // Increase 2MB address each time.
+
+loop_2nd_pgtbl:
+	str	x2, [x0], #8 // Each entry occupies 2 words.
+	add	x2, x2, x5
+	subs	x4, x4, #1
+	bne	loop_2nd_pgtbl
+
+	//
+	//Enable MMU
+	//
+	ldr	x1, =AARCH64_TCR_VAL
+	msr	tcr_el1, x1
+
+	mrs	x1, sctlr_el1
+	ldr	x2, =AARCH64_SCTLR_VAL
+	orr	x1, x1, x2
+	msr	sctlr_el1, x1
 setup_bsp_stack:
 	/*
 	 * setup stack for a boot processor
