@@ -255,6 +255,15 @@ load_pgtbl(const uintptr_t pgtbl_addr) {
 
 	return;
 }
+
+static inline void 
+load_kpgtbl(const uintptr_t pgtbl_addr) {
+
+	__asm__ __volatile__ ("msr ttbr1_el1, %0" : : "r"(pgtbl_addr) : "memory");
+	instruction_sync_barrier();
+
+	return;
+}
 #endif  /*  !ASM_FILE  */
 
 #endif  /*  __HAL_PGTBL_H  */

@@ -23,6 +23,8 @@
 .extern pre_ttbr1_l1tbl
 .extern pre_ttbr1_l2tbl
 
+.section .boot_text, "ax"
+
 .global _start
 start:	
 _start:	
@@ -39,6 +41,7 @@ drop_el2:
 	/*
 	 * Drop into EL2 from EL3
 	 */
+	msr   cptr_el3, xzr // Disable trapping of accessing in EL3.
 	mov   x0, #(AARCH64_SCR_EL3_NS | AARCH64_SCR_EL3_RES | AARCH64_SCR_EL3_SMA | AARCH64_SCR_EL3_RW)
 	msr   scr_el3, x0
 	adr   x0, start_el2
@@ -51,6 +54,7 @@ drop_el1:
 	/*
 	 * Drop into EL1 from EL2
 	 */
+	msr   cptr_el2, xzr  // Disable trapping of accessing in EL2.
 	mov   x0, #( AARCH64_HCR_EL2_RW )
 	orr   x0, x0,#( AARCH64_HCR_EL2_SWIO ) 
 	msr   hcr_el2, x0
@@ -137,12 +141,12 @@ ap_wait_loop:
 
 clear_bss:
 	/* clear bss */
-	ldr     x1, =__bss_start
-	ldr     x2, =__bss_end
+	ldr     x1, =(__bss_start - KERN_VMA_BASE)
+	ldr     x2, =(__bss_end   - KERN_VMA_BASE)
 	sub	x2, x2, x1	/* x2 = __bss_end - __bss_start */
 	lsr	x2, x2, #3      /* x2 = x2 >> 3 ( x2 =x2 / 8 )  */
 clear_bss_loop:
-	cbz     w2, setup_bsp_stack
+	cbz     w2, setup_mmu
 	str     xzr, [x1], #8
 	sub     w2, w2, #1
 	cbnz    w2, clear_bss_loop
@@ -155,52 +159,65 @@ setup_mmu:
 	msr 	tcr_el1, x1 // Normal Inner and Outer Cacheable.
 	ldr	x1, =AARCH64_MAIR_VAL // ATTR0 Device-nGnRnE ATTR1 Device.
 	msr	mair_el1, x1 // ATTR2 Normal Non-Cacheable.
-	 // ATTR3 Normal Cacheable.
-	adr 	x0, pre_ttbr0_l1tbl // ttb0_base must be a 4KB-aligned address.
+	                     // ATTR3 Normal Cacheable.
+
+	adr 	x0, pre_ttbr0_l1tbl // pre_ttbr0_l1tbl must be a 4KB-aligned address.
 	msr	ttbr0_el1, x0
 
-	// get level1 index of VMA_BASE
-	ldr	x1, =( KERN_VMA_BASE)
-	lsr	x1, x1, #LEVEL1_INDEX_SHIFT
-	and	x1, x1, #LEVEL1_INDEX_MASK
-	lsl	x1, x1, #3
-	add	x0, x0, x1
+	adr 	x1, pre_ttbr1_l1tbl // pre_ttbr1_l1tbl must be a 4KB-aligned address.
+	msr	ttbr1_el1, x1
+
+	// get level1 index of zero
+	mov	x2, #0
+	lsr	x2, x2, #LEVEL1_INDEX_SHIFT
+	and	x2, x2, #LEVEL1_INDEX_MASK
+	lsl	x2, x2, #3
+	add	x0, x0, x2
+	add	x1, x1, x2
 
 	// The first entry is 1GB block from 0x00000000 to 0x3FFFFFFF.
 	// AttrIdx=000 Device-nGnRnE.
-	ldr	x2, =0x00000741
-	str	x2, [x0]
+	ldr	x3, =0x00000741
+	str	x3, [x0]
+	str	x3, [x1]	
 	
 	// get level1 index of QEMU_VIRT_MEM_BASE
-	ldr	x1, =( KERN_VMA_BASE + QEMU_VIRT_MEM_BASE)
-	lsr	x1, x1, #LEVEL1_INDEX_SHIFT
-	and	x1, x1, #LEVEL1_INDEX_MASK
-	lsl	x1, x1, #3
-	add	x0, x0, x1
+	ldr	x2, =QEMU_VIRT_MEM_BASE
+	lsr	x2, x2, #LEVEL1_INDEX_SHIFT
+	and	x2, x2, #LEVEL1_INDEX_MASK
+	lsl	x2, x2, #3
+	add	x0, x0, x2
+	add	x1, x1, x2
 
 	//
 	// 1GiB block from QEMU_VIRT_MEM_BASE is translated by the second page table
 	//
-	ldr	x1, =pre_ttbr0_l2tbl
-	ldr	x2, =0xFFFFF000
-	and	x2, x1, x2 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.
-	orr	x2, x2, 0x3
-	str	x2, [x0], #8
+	ldr	x2, =pre_ttbr0_l2tbl
+	ldr	x3, =pre_ttbr1_l2tbl
+	ldr	x4, =0xFFFFF000
+	and	x5, x2, x4 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.
+	and	x6, x3, x4 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.	
+	orr	x5, x5, 0x3
+	orr	x6, x6, 0x3	
+	str	x5, [x0], #8
+	str	x6, [x1], #8	
 
 	// Set level 2 translation table.
-	ldr	x2, =QEMU_VIRT_MEM_BASE // Physical base address
-	ldr	x3, =0x70d     // Executable Inner and Outer Shareable.
-	orr	x2, x2, x3 	// R/W at all ELs secure memory.
+	ldr	x3, =QEMU_VIRT_MEM_BASE // Physical base address
+	ldr	x4, =0x70d     // Executable Inner and Outer Shareable.
+	orr	x3, x3, x4 	// R/W at all ELs secure memory.
 				// AttrIdx=011 Normal Cacheable.
 
 	ldr	x0, =pre_ttbr0_l2tbl // Base address of level2_pagetable.
-	mov 	x4, #512 	// Set 512 level2 block entries.
-	ldr	x5, =0x00200000 // Increase 2MB address each time.
+	ldr	x1, =pre_ttbr1_l2tbl // Base address of level2_pagetable.	
+	mov 	x5, #512 	// Set 512 level2 block entries.
+	ldr	x6, =0x00200000 // Increase 2MB address each time.
 
 loop_2nd_pgtbl:
-	str	x2, [x0], #8 // Each entry occupies 2 words.
-	add	x2, x2, x5
-	subs	x4, x4, #1
+	str	x3, [x0], #8 // Each entry occupies 2 words.
+	str	x3, [x1], #8 // Each entry occupies 2 words.	
+	add	x3, x3, x6
+	subs	x5, x5, #1
 	bne	loop_2nd_pgtbl
 
 	//
@@ -224,6 +241,11 @@ setup_bsp_stack:
 	str	xzr, [sp, #TI_PREEMPT_OFFSET]  /* Clear preempt info  */ 
 	ldr	x0, =(THR_THREAD_INFO_MAGIC)  /*  Stack magic */
 	str	x0, [sp, #TI_MAGIC_OFFSET]  
+enable_fpu:
+	// Disable access trapping in EL1 and EL0.
+	mov	x1, #(0x3 << 20) // FPEN disables trapping to EL1.
+	msr	cpacr_el1, x1
+	isb
 jmp_boot_main:	
 	/*
 	 * Jump to boot_main

@@ -1,14 +1,23 @@
 OUTPUT_FORMAT("elf64-littleaarch64", "elf64-bigaarch64", "elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
+KERN_VMA_BASE = 0x0000000000000000;
+/* KERN_VMA_BASE = 0xffffffff00000000; */  /* for Straight map */
+KERN_BASE = 0x40000000;
+
 ENTRY(_start)
 SECTIONS
 {
-	. = 0x40000000;
-	.text : { *(.text) }
-	.data : { *(.data) }
+	. = KERN_BASE;
+	.boot : {
+              *(.boot_text)
+	      *(.boot_data)
+	}
+        . += KERN_VMA_BASE;
+	.text : AT(ADDR(.text) - KERN_VMA_BASE) { *(.text) }
+	.data : AT(ADDR(.data) - KERN_VMA_BASE) { *(.data) }
 	. = ALIGN(__PAGE_SIZE__);
         __bss_start = .;
-	.bss : {
+	.bss :  AT(ADDR(.bss) - KERN_VMA_BASE) {
  	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
 	bsp_stack = .;
 	. += (__PAGE_SIZE__ * __KSTACK_PAGES__);

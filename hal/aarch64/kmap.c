@@ -27,6 +27,8 @@ map_kernel_page(uintptr_t paddr, uintptr_t vaddr, uint64_t page_attr, void *kpgt
 	uintptr_t  lvl2addr;
 	void      *new_page;
 
+	vaddr = KERN_STRAIGHT_TO_PHY(vaddr);
+
 	ent1 = get_level1_ent(kpgtbl, vaddr);
 	if ( !AARCH64_PGTBL_PRESENT(ent1) ) {
 
@@ -111,7 +113,8 @@ aarch64_setup_mmu(void) {
 		    AARCH64_PGTBL_MEM_ATTR, (void *)kpgtbl);
 	}
 
-	load_pgtbl((uintptr_t)kpgtbl);
+	load_pgtbl((uintptr_t)KERN_STRAIGHT_TO_PHY(kpgtbl));
+	load_kpgtbl((uintptr_t)KERN_STRAIGHT_TO_PHY(kpgtbl));
 
 	reg = AARCH64_TCR_VAL;
 #if defined(DEBUG_SHOW_KERNEL_MAP)

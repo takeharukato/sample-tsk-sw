@@ -13,7 +13,7 @@
 #include <hal/asm-macros.h>
 #include <hal/asm-offset.h>
 
-.section ".text.boot"
+.section ".text"
 
 .extern hal_common_trap_handler
 	

@@ -12,8 +12,7 @@
 #include <hal/asm-macros.h>
 
 #define KERN_VMA_BASE               (ULL_C(0x0000000000000000))
-#define PHY_TO_KERN_STRAIGHT(phy)   ( (phy) + KERN_VMA_BASE  )
-#define KERN_STRAIGHT_TO_PHY(vaddr) ( (vaddr) - KERN_VMA_BASE)
+//#define KERN_VMA_BASE               (ULL_C(0xffffffff00000000)) /* for Straight map */
 #define KERN_STRAIGHT_PAGE_SIZE     (CONFIG_HAL_STRAIGHT_PAGE_SIZE)
 
 #if !defined(ASM_FILE)
@@ -23,6 +22,10 @@
 #include <hal/aarch64.h>
 #include <hal/board.h>
 #include <hal/pgtbl.h>
+
+#define PHY_TO_KERN_STRAIGHT(phy)   ( ((uintptr_t)(phy)) + (uintptr_t)KERN_VMA_BASE  )
+#define KERN_STRAIGHT_TO_PHY(vaddr) ( ((uintptr_t)(vaddr)) - (uintptr_t)KERN_VMA_BASE)
+
 
 #define KERN_STRAIGHT_PAGE_START(addr)					\
 	( (uintptr_t)( ( (uintptr_t)(addr) ) &				\

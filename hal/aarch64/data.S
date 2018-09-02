@@ -9,7 +9,7 @@
 #define ASM_FILE   1
 #include <kern/param.h>
 
-.data
+.section .boot_data, "ax"
 
 .p2align 12
 .global pre_ttbr0_l1tbl
