@@ -20,9 +20,11 @@ PIC_OPT_FLAGS=-fno-pie -fno-pic -fno-PIC
 CFLAGS=${OPT_FLAGS} ${PIC_OPT_FLAGS} $(shell echo ${CONFIG_HAL_CFLAGS}) $(shell echo ${CONFIG_HAL_OPT_FLAGS})
 LDFLAGS=
 
+GIT=git
+ARCHIVE_NAME=sample-tsk-sw
 FSIMG_FILE=${top}/fsimg.img
 
-.PHONY: clean distclean hal tools menuconfig gtags
+.PHONY: clean distclean hal tools menuconfig gtags dist
 
 .SUFFIXES: .o .c .S
 

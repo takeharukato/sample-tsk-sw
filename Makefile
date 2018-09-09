@@ -84,6 +84,10 @@ distclean:clean
 	done
 	${RM} \#* *~ .config* _config GPATH GRTAGS GSYMS GTAGS *.log
 
+dist: 
+	${RM} ${ARCHIVE_NAME}.tar.gz
+	${GIT} archive HEAD --format=tar.gz > ${ARCHIVE_NAME}.tar.gz
+
 gtags:
 	${GTAGS} -v
 
