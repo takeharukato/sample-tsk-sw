@@ -52,8 +52,10 @@
 #error "Include hal/board.h before this header file."
 #endif  /*   !_HAL_BOARD_H  */
 
-#define GIC_GICD_BASE               (GIC_BASE)  /*< GICD MMIO base address */
-#define GIC_GICC_BASE               (GIC_BASE + 0x10000) /*< GICC MMIO base address */
+#include <hal/kmap.h>
+
+#define GIC_GICD_BASE               PHY_TO_KERN_STRAIGHT(GIC_BASE)  /*< GICD MMIO base address */
+#define GIC_GICC_BASE               PHY_TO_KERN_STRAIGHT(GIC_BASE + 0x10000) /*< GICC MMIO base address */
 
 
 #define GIC_GICD_INT_PER_REG        (32)  /* 32 interrupts per reg. in IPRIORITYRn etc. */

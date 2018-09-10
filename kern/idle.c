@@ -16,8 +16,10 @@ thread_t *current = &idle_thread;   /* Current variable indicate the idle thread
  */
 void
 do_idle_loop(void) {
+#if defined(CONFIG_HAL)
 	thread_info_t *ti;
 	psw_t psw;
+#endif  /*  CONFIG_HAL  */
 
 #if !defined(CONFIG_HAL)
 	for( ; ; ) {

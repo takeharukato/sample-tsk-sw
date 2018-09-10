@@ -17,6 +17,10 @@
 
 static pgtbl_t  *kpgtbl;
 
+#if defined(CONFIG_UPPERHALF_KERNEL)
+static pgtbl_t  *upgtbl;
+#endif  /*  CONFIG_UPPERHALF_KERNEL  */
+
 /** map kernel area
  */
 void
@@ -84,6 +88,13 @@ aarch64_setup_mmu(void) {
 	kassert( PAGE_ALIGNED(kpgtbl) );
 	memset( &kpgtbl->entries[0], 0, PAGE_SIZE);
 
+#if defined(CONFIG_UPPERHALF_KERNEL)
+	upgtbl = kheap_sbrk(PAGE_SIZE);
+	kassert( upgtbl != HEAP_SBRK_FAILED );
+	kassert( PAGE_ALIGNED(upgtbl) );
+	memset( &upgtbl->entries[0], 0, PAGE_SIZE);
+#endif  /*  CONFIG_UPPERHALF_KERNEL  */
+
 	attr= AARCH64_MAIR_VAL;
 #if defined(DEBUG_SHOW_KERNEL_MAP)
 	kprintf("MAIR_VAL: 0x%lx\n", AARCH64_MAIR_VAL);
@@ -113,8 +124,12 @@ aarch64_setup_mmu(void) {
 		    AARCH64_PGTBL_MEM_ATTR, (void *)kpgtbl);
 	}
 
-	load_pgtbl((uintptr_t)KERN_STRAIGHT_TO_PHY(kpgtbl));
+#if defined(CONFIG_UPPERHALF_KERNEL)
 	load_kpgtbl((uintptr_t)KERN_STRAIGHT_TO_PHY(kpgtbl));
+	load_pgtbl((uintptr_t)KERN_STRAIGHT_TO_PHY(upgtbl));
+#else
+	load_pgtbl((uintptr_t)KERN_STRAIGHT_TO_PHY(kpgtbl));
+#endif  /*  CONFIG_UPPERHALF_KERNEL  */
 
 	reg = AARCH64_TCR_VAL;
 #if defined(DEBUG_SHOW_KERNEL_MAP)

@@ -49,6 +49,7 @@ set_thread_stack(thread_t *thr, void *stack_top, size_t size) {
 						  the bottom of the stack */
 }
 
+#if defined(CONFIG_HAL)
 static void
 thr_delay_callout(void *private){
 	wait_queue *que = (wait_queue *)private;
@@ -56,6 +57,7 @@ thr_delay_callout(void *private){
 	if ( !is_wque_empty(que) ) 
 		wque_wakeup(que, WQUE_REASON_WAKEUP);
 }
+#endif  /*  CONFIG_HAL  */
 
 /** Start a thread
     @param[in] fn start function of the thread
@@ -69,7 +71,7 @@ thr_thread_start(void (*fn)(void *), void *arg){
 	 * Because this is thread based multi-task operating system,
 	 * we should some initialization in crt0 of multi-process operating system,
 	 */
-
+#if defined(CONFIG_HAL)
 	/*  Ensure all file descriptors are closed. */
 	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) 
 		fs_close(fd);
@@ -81,6 +83,7 @@ thr_thread_start(void (*fn)(void *), void *arg){
 	kassert( stdin_fd == 0 );
 	kassert( stdout_fd == 1 );
 	kassert( stderr_fd == 2 );
+#endif  /*  CONFIG_HAL */
 
 	psw_enable_interrupt();  /* Enable interrupt by cpu flag  */
 	fn(arg);                 /* Call specified thread.  */
@@ -387,7 +390,16 @@ thr_is_round_robin_thread(thread_t *thr) {
 
 	return rc;
 }
+#if !defined(CONFIG_HAL)
+void
+thr_delay(uint32_t expire_ms){
 
+	sched_rotate_queue();
+	sched_schedule();
+
+	return;
+}
+#else
 void
 thr_delay(uint32_t expire_ms){
 	uptime_cnt rel_expire;
@@ -413,3 +425,4 @@ thr_delay(uint32_t expire_ms){
 	
 	return;
 }
+#endif  /*  !CONFIG_HAL  */

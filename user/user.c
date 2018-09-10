@@ -9,13 +9,19 @@
 
 #include <kern/kernel.h>
 
+thread_t *thrA, *thrB, *thrC;
+
 void
 threadA(void *arg) {
-	
+
+	kprintf("threadA=0x%lx\n", thrA);
 	while(1) {
 		
-		//kprintf("threadA\n");
+#if defined(CONFIG_HAL)
 		fs_write(1, "threadA\n", strlen("threadA\n")+1);
+#else
+		kprintf("threadA\n");
+#endif  /*  CONFIG_HAL  */
 		thr_delay(100);
 	}
 }
@@ -23,23 +29,28 @@ threadA(void *arg) {
 void
 threadB(void *arg) {
 
+	kprintf("threadB=0x%lx\n", thrB);
 	while(1) {
 
-		//kprintf("threadB\n");
+#if defined(CONFIG_HAL)
 		fs_write(1, "threadB\n", strlen("threadB\n")+1);
+#else
+		kprintf("threadB\n");
+#endif  /* CONFIG_HAL  */
 		thr_delay(300);
 	}
 }
 
 void
 threadC(void *arg) {
+#if defined(CONFIG_HAL)
 	int fd;
 	char data[64];
 	char c[1];
 	struct _stat s1, s2;
 	struct _stat con_stat;
 
-	kprintf("threadC\n");
+	kprintf("threadC=0x%lx\n", thrC);
 
 	fd = fs_open("/test.txt", O_RDWR|O_CREATE);
 	if ( fd >= 0 ) {
@@ -68,11 +79,13 @@ threadC(void *arg) {
 
 		fs_close(fd);
 	}
+#else
+	kprintf("threadC\n");
+#endif  /* CONFIG_HAL  */
 }
 
 void
 user_init(void) {
-	thread_t *thrA, *thrB, *thrC;
 	thread_attr_t attr;
 
 	memset(&attr, 0, sizeof(thread_attr_t));

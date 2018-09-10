@@ -4,35 +4,35 @@
  */
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
-KERN_VMA_BASE = 0x0000000000000000;
-KERN_BASE = 0x100000;
+__KERN_VMA_BASE = __KERN_VMA_BASE__;
+__KERN_BASE = 0x100000;
 
 ENTRY(start)
 SECTIONS
 {
-    . = KERN_BASE;
+    . = __KERN_BASE;
     _kernel_start = .;
     .boot : {
         *(.boot_text)
         *(.boot_data)
     }
 
-    . += KERN_VMA_BASE;
-    .text : AT(ADDR(.text) - KERN_VMA_BASE) {
+    . += __KERN_VMA_BASE;
+    .text : AT(ADDR(.text) - __KERN_VMA_BASE) {
         *(.text .rela.text .stub .text.* .gnu.linkonce.t.*)
         _rodata_start = .;
         *(.rodata .rodata.* .gnu.linkonce.r.*)
         _rodata_end = .;
     }
 
-    .data : AT(ADDR(.data) - KERN_VMA_BASE) {
+    .data : AT(ADDR(.data) - __KERN_VMA_BASE) {
         _data_start = .;
         *(.data)
         _data_end = .;
     }
 
     . = ALIGN(__PAGE_SIZE__);
-    .bss :  AT(ADDR(.bss) - KERN_VMA_BASE) {
+    .bss :  AT(ADDR(.bss) - __KERN_VMA_BASE) {
         __bss_start = .;
 
 	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
@@ -52,8 +52,8 @@ SECTIONS
     .payload : { *(.payload) }
     _payload_end = .;
     . = ALIGN(__PAGE_SIZE__);
-    _end = .  - KERN_VMA_BASE;
-    _kernel_end = . - KERN_VMA_BASE;
+    _end = .  - __KERN_VMA_BASE;
+    _kernel_end = . - __KERN_VMA_BASE;
     _kheap_start = .;
     . += (__KHEAP_SIZE__);
     _kheap_end = .;

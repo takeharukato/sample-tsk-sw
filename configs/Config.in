@@ -47,6 +47,12 @@ config CONFIG_TIMER_INTERVAL_MS_100MS
 
 endchoice
 
+config CONFIG_UPPERHALF_KERNEL
+    bool "Use Upper Half Kernel"
+    default n
+    help
+      Kernel virtual memory is placed onto upper half of virtual memory space.
+
 config CONFIG_TIMER_INTERVAL_MS
        int 
        default 1 if CONFIG_TIMER_INTERVAL_MS_1MS

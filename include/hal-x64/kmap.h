@@ -8,21 +8,29 @@
 /**********************************************************************/
 #if !defined(_HAL_KMAP_H)
 
+#include <kern/param.h>
+
 #include <hal/x64.h>
+#include <hal/asm-macros.h>
 
-#define KERN_HIGH_IO_AREA         (0xFE000000)
-#define KERN_HIGH_MEMORY_BASE     (0x100000000)
+#define KERN_HIGH_IO_AREA         (ULL_C(0xFE000000))
+#define KERN_HIGH_MEMORY_BASE     (ULL_C(0x100000000))
 
-#define KERN_VMA_BASE             (0x0000000000000000)  
-#define KERN_PHY_BASE             (0x0000000000000000)
+#if defined(CONFIG_HAL_KERN_VMA_BASE)
+#define KERN_VMA_BASE             (CONFIG_HAL_KERN_VMA_BASE)
+#else
+#define KERN_VMA_BASE             (ULL_C(0x0000000000000000))
+#endif  /*  CONFIG_HAL_KERN_VMA_BASE  */
 
-#define KERN_PHY_MIN              (0x0000000000000000)  /* 0 */
-#define KERN_PHY_MAX              (0x0000000040000000)  /* 1GiB */
+#define KERN_PHY_BASE             (ULL_C(0x0000000000000000))
 
-#define KERN_HIGH_IO_BASE         (0xFFFFFFFFFC000000)
-#define KERN_HIGH_IO_SIZE         (KERN_HIGH_MEMORY_BASE - KERN_HIGH_IO_AREA)
+#define KERN_PHY_MIN              (ULL_C(0x0000000000000000))
+#define KERN_PHY_MAX              (ULL_C(0x0000000040000000))  /* 1GiB */
+
+#define KERN_HIGH_IO_BASE         (ULL_C(0xFFFFFFFFFC000000))
+#define KERN_HIGH_IO_SIZE         (ULL_C(KERN_HIGH_MEMORY_BASE - KERN_HIGH_IO_AREA))
                                      
-#define KERN_MAX_HIGH_IO_PAGES    (KERN_HIGH_IO_SIZE / KERN_STRAIGHT_PAGE_SIZE)
+#define KERN_MAX_HIGH_IO_PAGES    (ULL_C(KERN_HIGH_IO_SIZE / KERN_STRAIGHT_PAGE_SIZE))
 
 #define PHY_TO_KERN_STRAIGHT(phy) ( ((uintptr_t)(phy)) + KERN_VMA_BASE)
 #define KERN_STRAIGHT_TO_PHY(va)  ( ((uintptr_t)(va)) - KERN_VMA_BASE)

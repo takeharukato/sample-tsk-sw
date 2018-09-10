@@ -11,9 +11,13 @@
 #include <kern/param.h>
 #include <hal/asm-macros.h>
 
-#define KERN_VMA_BASE               (ULL_C(0x0000000000000000))
-//#define KERN_VMA_BASE               (ULL_C(0xffffffff00000000)) /* for Straight map */
-#define KERN_STRAIGHT_PAGE_SIZE     (CONFIG_HAL_STRAIGHT_PAGE_SIZE)
+#if defined(CONFIG_HAL_KERN_VMA_BASE)
+#define KERN_VMA_BASE             (CONFIG_HAL_KERN_VMA_BASE)
+#else
+#define KERN_VMA_BASE             (ULL_C(0x0000000000000000))
+#endif  /*  CONFIG_HAL_KERN_VMA_BASE  */
+
+#define KERN_STRAIGHT_PAGE_SIZE   (CONFIG_HAL_STRAIGHT_PAGE_SIZE)
 
 #if !defined(ASM_FILE)
 

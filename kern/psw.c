@@ -14,11 +14,13 @@
  */
 void
 psw_disable_and_save_interrupt(psw_t *pswp) {
+#if defined(CONFIG_HAL)
 	psw_t psw;
 
 	__save_psw(psw);
 	psw_disable_interrupt();
 	*pswp = psw;
+#endif  /*  CONFIG_HAL  */
 }
 
 /** Restore processor status word
@@ -26,8 +28,10 @@ psw_disable_and_save_interrupt(psw_t *pswp) {
  */
 void
 psw_restore_interrupt(psw_t *pswp) {
+#if defined(CONFIG_HAL)
 	psw_t psw;
 
 	psw = *pswp;
 	__restore_psw(psw);
+#endif  /*  CONFIG_HAL  */
 }

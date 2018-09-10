@@ -173,14 +173,16 @@
 
 #include <kern/freestanding.h>
 
-#define UART_DR                     ((volatile uint32_t *)UART_BASE )
-#define UART_FR                     ((volatile uint32_t *)(UART_BASE + 0x18) )
-#define UART_IBRD                   ((volatile uint32_t *)(UART_BASE + 0x24) )
-#define UART_FBRD                   ((volatile uint32_t *)(UART_BASE + 0x28) )
-#define UART_LCRH                   ((volatile uint32_t *)(UART_BASE + 0x2c) )
-#define UART_CR                     ((volatile uint32_t *)(UART_BASE + 0x30) )
-#define UART_RIS                    ((volatile uint32_t *)(UART_BASE + 0x3c) )
-#define UART_IMSC                   ((volatile uint32_t *)(UART_BASE + 0x38) )
-#define UART_ICR                    ((volatile uint32_t *)(UART_BASE + 0x44) )
+#include <hal/kmap.h>
+
+#define UART_DR     ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT(UART_BASE))
+#define UART_FR     ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x18) ))
+#define UART_IBRD   ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x24) ))
+#define UART_FBRD   ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x28) ))
+#define UART_LCRH   ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x2c) ))
+#define UART_CR     ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x30) ))
+#define UART_RIS    ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x3c) ))
+#define UART_IMSC   ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x38) ))
+#define UART_ICR    ((volatile uint32_t *)PHY_TO_KERN_STRAIGHT((UART_BASE + 0x44) ))
 #endif  /* !ASM_FILE  */
 #endif  /*  _HAL_BOARD_H   */
