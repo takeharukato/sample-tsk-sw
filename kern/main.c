@@ -25,10 +25,6 @@ kern_init(void) {
 	fdtable_init();
 #endif  /*  CONFIG_HAL  */
 
-	idle_init_idle();
-	sched_init();
-	reaper_init_thread();
-
 #if defined(CONFIG_HAL)
 	irq_initialize_manager();
 
@@ -36,6 +32,11 @@ kern_init(void) {
 
 	hal_kernel_init();
 #endif /*  CONFIG_HAL  */
+
+	idle_init_idle();
+	sched_init();
+
+	reaper_init_thread();
 
 	user_init();
 

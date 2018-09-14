@@ -76,7 +76,7 @@ wque_wait_on_queue(wait_queue *wq) {
 	
 	ep->thr->status = THR_TSTATE_WAIT;
 
-	sched_schedule() ;
+	sched_schedule();  /*  Reschedule because current task is slept. */
 
 	wque_remove_entry(wq, ep);
 	reason = wq->reason;
@@ -106,7 +106,7 @@ wque_wait_on_event_with_mutex(wait_queue *wq, struct _mutex *mtx) {
 
 	mutex_release(mtx); 	/* We must hold the mutex during queue operations */
 
-	sched_schedule() ;
+	sched_schedule();       /*  Reschedule because current task is slept. */
 
 	mutex_hold(mtx);   	/* We must hold the mutex during queue operations */
 
@@ -137,6 +137,7 @@ wque_wakeup(wait_queue *wq, wq_reason reason) {
 		ep->thr = NULL;
 	}
 	wq->reason = reason;
+	sched_schedule();    /*  Reschedule because change the top priority task */
 	psw_restore_interrupt(&psw);
 }
 
