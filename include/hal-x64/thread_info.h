@@ -92,6 +92,15 @@ ti_clr_preempt_active(thread_info_t *tinfo) {
 	tinfo->preempt &= ~THR_PRMPT_CTRL_PREEMPT_ACTIVE;
 }
 
+/** スケジュール実行中フラグが立っているか確認する
+    @param[in] tinfo スレッド情報のアドレス
+ */
+static inline int
+ti_check_preempt_active(thread_info_t *tinfo) {
+
+	return (tinfo->preempt & THR_PRMPT_CTRL_PREEMPT_ACTIVE);
+}
+
 static inline void *
 hal_get_sp(void) {
 	uint64_t sp;

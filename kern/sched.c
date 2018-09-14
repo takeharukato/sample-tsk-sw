@@ -88,11 +88,11 @@ sched_schedule(void) {
 
 	current->status = THR_TSTATE_RUN ;
 out:
+	psw_restore_interrupt(&psw);	
+
 #if defined(CONFIG_HAL)
 	ti_clr_preempt_active(ti);  /* Clear preempt-active flag. */
 #endif  /* CONFIG_HAL */
-
-	psw_restore_interrupt(&psw);	
 }
 
 #if defined(CONFIG_HAL)
@@ -101,20 +101,23 @@ sched_delay_disptach(void) {
 	thread_info_t *ti;
 
 	ti = get_current_thread_info();
+	
 	/*
 	 * Delay dispatching
 	 */
 	if  ( ( ti_refer_preempt_count(ti) > 0 ) ||
 	    ( ti_refer_irq_count(ti) > 0 ) )
 		return; /* Dispatching is NOT allowed */
-		
-	if ( ti_check_need_dispatch(ti) ) {
-		
-		/* Clear a delay scheduling request */
-		ti_clr_delay_dispatch(ti);
-		sched_schedule(); 
-	}
 	
+	if ( ti_check_preempt_active(ti) )
+		return;
+	
+	if ( !ti_check_need_dispatch(ti) ) 
+		return;
+
+	ti_clr_delay_dispatch(ti); /* Clear a delay scheduling request */
+	sched_schedule(); 
+
 	return;
 }
 #endif  /* CONFIG_HAL */
