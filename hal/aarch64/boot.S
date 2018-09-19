@@ -18,8 +18,10 @@
 #include <hal/kmap.h>
 
 .extern bsp_stack
+.extern pre_ttbr0_l0tbl
 .extern pre_ttbr0_l1tbl
 .extern pre_ttbr0_l2tbl
+.extern pre_ttbr1_l0tbl
 .extern pre_ttbr1_l1tbl
 .extern pre_ttbr1_l2tbl
 
@@ -160,12 +162,41 @@ setup_mmu:
 	ldr	x1, =AARCH64_MAIR_VAL // ATTR0 Device-nGnRnE ATTR1 Device.
 	msr	mair_el1, x1 // ATTR2 Normal Non-Cacheable.
 	                     // ATTR3 Normal Cacheable.
-
-	adr 	x0, pre_ttbr0_l1tbl // pre_ttbr0_l1tbl must be a 4KB-aligned address.
+	//
+	// Level0 page table
+	//
+	adr 	x0, pre_ttbr0_l0tbl // pre_ttbr0_l0tbl must be a 4KB-aligned address.
 	msr	ttbr0_el1, x0
 
-	adr 	x1, pre_ttbr1_l1tbl // pre_ttbr1_l1tbl must be a 4KB-aligned address.
+	adr 	x1, pre_ttbr1_l0tbl // pre_ttbr1_l0tbl must be a 4KB-aligned address.
 	msr	ttbr1_el1, x1
+
+	// get level0 index of from zero address to 512GiB
+	mov	x2, #0
+	lsr	x2, x2, #LEVEL0_INDEX_SHIFT
+	and	x2, x2, #LEVEL0_INDEX_MASK
+	lsl	x2, x2, #3
+	add	x0, x0, x2
+	add	x1, x1, x2
+
+	//
+	// First entry points level1 page table
+	//
+	ldr	x2, =pre_ttbr0_l1tbl
+	ldr	x3, =pre_ttbr1_l1tbl
+	ldr	x4, =0xFFFFF000
+	and	x5, x2, x4 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.
+	and	x6, x3, x4 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.	
+	orr	x5, x5, 0x3 //Valid page table entry
+	orr	x6, x6, 0x3 //Valid page table entry
+	str	x5, [x0], #8 //TTBR0
+	str	x6, [x1], #8 //TTBR1	
+
+	//
+	// Level1 page table
+	//
+	adr 	x0, pre_ttbr0_l1tbl // pre_ttbr0_l1tbl must be a 4KB-aligned address.
+	adr 	x1, pre_ttbr1_l1tbl // pre_ttbr1_l1tbl must be a 4KB-aligned address.
 
 	// get level1 index of zero
 	mov	x2, #0
@@ -180,7 +211,7 @@ setup_mmu:
 	ldr	x3, =0x00000741
 	str	x3, [x0]
 	str	x3, [x1]	
-	
+
 	// get level1 index of QEMU_VIRT_MEM_BASE
 	ldr	x2, =QEMU_VIRT_MEM_BASE
 	lsr	x2, x2, #LEVEL1_INDEX_SHIFT
@@ -197,10 +228,10 @@ setup_mmu:
 	ldr	x4, =0xFFFFF000
 	and	x5, x2, x4 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.
 	and	x6, x3, x4 // NSTable=0 APTable=0 XNTable=0 PXNTable=0.	
-	orr	x5, x5, 0x3
-	orr	x6, x6, 0x3	
-	str	x5, [x0], #8
-	str	x6, [x1], #8	
+	orr	x5, x5, 0x3 //Valid page table entry
+	orr	x6, x6, 0x3 //Valid page table entry	
+	str	x5, [x0], #8 //TTBR0
+	str	x6, [x1], #8 //TTBR1
 
 	// Set level 2 translation table.
 	ldr	x3, =QEMU_VIRT_MEM_BASE // Physical base address
@@ -220,6 +251,7 @@ loop_2nd_pgtbl:
 	subs	x5, x5, #1
 	bne	loop_2nd_pgtbl
 
+enable_mmu_for_kernel:
 	//
 	//Enable MMU
 	//

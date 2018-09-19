@@ -19,16 +19,22 @@
 #define LEVEL2_INDEX_SHIFT       (21)
 #define LEVEL3_INDEX_SHIFT       (12)
 
+#define LEVEL0_INDEX_MASK       (0x1ff)
 #define LEVEL1_INDEX_MASK       (0x1ff)
 #define LEVEL2_INDEX_MASK       (0x1ff)
 #define LEVEL3_INDEX_MASK       (0x1ff)
+
+#define LEVEL0_INDEX(vaddr)     ( ( (vaddr) >> LEVEL0_INDEX_SHIFT   ) & LEVEL0_INDEX_MASK)
 #define LEVEL1_INDEX(vaddr)     ( ( (vaddr) >> LEVEL1_INDEX_SHIFT   ) & LEVEL1_INDEX_MASK)
 #define LEVEL2_INDEX(vaddr)     ( ( (vaddr) >> LEVEL2_INDEX_SHIFT   ) & LEVEL2_INDEX_MASK)
 #define LEVEL3_INDEX(vaddr)     ( ( (vaddr) >> LEVEL3_INDEX_SHIFT   ) & LEVEL3_INDEX_MASK)
+
 #define PGTBL_ENTRY_SIZE        (8)
 #define PGTBL_ENTRY_MAX         ( PAGE_SIZE / (PGTBL_ENTRY_SIZE) )
+
 #define AARCH64_PGTBL_PG2PFN_4KB(x)  ( (x) >> LEVEL3_INDEX_SHIFT )
 #define AARCH64_PGTBL_PG2PFN_2MIB(x) ( (x) >> LEVEL2_INDEX_SHIFT )
+
 /** 
  * See D4.3.1 VMSAv8-64 translation table level 0, level 1, and level 2 descriptor formats in
  * ARM Architecture Reference Manual ARMv8, for ARMv8-A architecture profile
@@ -148,9 +154,14 @@
 	( ( (uintptr_t)( ( (uintptr_t)(addr) ) &			\
 		( (uintptr_t)(KERN_STRAIGHT_PAGE_SIZE) - (uintptr_t)1 ) ) ) == 0 )
 
+typedef uintptr_t lvl0_ent;
 typedef uintptr_t lvl1_ent;
 typedef uintptr_t lvl2_ent;
 typedef uintptr_t lvl3_ent;
+
+typedef struct _level0_tbl {
+	lvl0_ent entries[PGTBL_ENTRY_MAX];
+}level0_tbl;
 
 typedef struct _level1_tbl {
 	lvl1_ent entries[PGTBL_ENTRY_MAX];
@@ -166,12 +177,16 @@ typedef struct _level3_tbl {
 
 typedef level1_tbl pgtbl_t;
 
-static inline lvl1_ent
-get_level1_ent(pgtbl_t *kpgtbl, uintptr_t vaddr) {
-	level1_tbl *lvl1;
+static inline lvl0_ent
+get_level0_ent(level0_tbl *lvl0tbl, uintptr_t vaddr) {
 
-	lvl1 = (level1_tbl *)kpgtbl;
-	return lvl1->entries[LEVEL1_INDEX(vaddr)];
+	return lvl0tbl->entries[LEVEL0_INDEX(vaddr)];
+}
+
+static inline lvl1_ent
+get_level1_ent(level1_tbl *lvl1tbl, uintptr_t vaddr) {
+
+	return lvl1tbl->entries[LEVEL1_INDEX(vaddr)];
 }
 
 static inline lvl2_ent
@@ -187,6 +202,12 @@ get_level3_ent(level3_tbl *lvl3tbl, uintptr_t vaddr) {
 }
 
 static inline uintptr_t
+get_level0_ent_addr(uintptr_t ent) {
+
+	return ( PAGE_START(ent) & ~AARCH64_PGTBL_BLK_ATTR_MASK );
+}
+
+static inline uintptr_t
 get_level1_ent_addr(uintptr_t ent) {
 
 	return ( PAGE_START(ent) & ~AARCH64_PGTBL_BLK_ATTR_MASK );
@@ -199,10 +220,14 @@ get_level12_ent_attr(uintptr_t ent) {
 }
 
 static inline void
-set_level1_ent(pgtbl_t *kpgtbl, uintptr_t vaddr, uintptr_t val) {
-	level1_tbl *lvl1;
+set_level0_ent(level0_tbl *lvl0, uintptr_t vaddr, uintptr_t val) {
 
-	lvl1 = (level1_tbl *)kpgtbl;
+	lvl0->entries[LEVEL0_INDEX(vaddr)] = val;
+}
+
+static inline void
+set_level1_ent(level1_tbl *lvl1, uintptr_t vaddr, uintptr_t val) {
+
 	lvl1->entries[LEVEL1_INDEX(vaddr)] = val;
 }
 

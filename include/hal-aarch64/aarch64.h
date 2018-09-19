@@ -243,6 +243,9 @@
 #define AARCH64_TCR_TSZ_4G          (ULL_C(0x20))   /*< Size offset of the memory 
 						region addressed by TTBR0/TTBR1.
 						The region size is 2^32 bytes */
+#define AARCH64_TCR_TSZ_128T        (ULL_C(0x11))   /*< Size offset of the memory 
+						region addressed by TTBR0/TTBR1.
+						The region size is 2^47 bytes */
 
 /* Memory Attribute Indirection Register
  * See 4.3.69 Memory Attribute Indirection Register, EL1 in
@@ -318,15 +321,15 @@
 		( AARCH64_TCR_SH_INNER_SHARE << AARCH64_TCR_EL1_SH1_SHIFT )  | \
 		( AARCH64_TCR_ORGN_WBRAWA << AARCH64_TCR_EL1_ORGN1_SHIFT )   | \
 		( AARCH64_TCR_IRGN_WBRAWA << AARCH64_TCR_EL1_IRGN1_SHIFT )   | \
-		( AARCH64_TCR_EPD_ENABLE << AARCH64_TCR_EL1_EPD1_SHIFT )    | \
+		( AARCH64_TCR_EPD_ENABLE << AARCH64_TCR_EL1_EPD1_SHIFT )     | \
 		( AARCH64_TCR_A1_TTBR0 << AARCH64_TCR_EL1_A1_SHIFT )         | \
-		( AARCH64_TCR_TSZ_4G << AARCH64_TCR_EL1_T1SZ_SHIFT )         | \
+		( AARCH64_TCR_TSZ_128T << AARCH64_TCR_EL1_T1SZ_SHIFT )       | \
 		( AARCH64_TCR_TG0_4KB << AARCH64_TCR_EL1_TG0_SHIFT )         | \
 		( AARCH64_TCR_SH_INNER_SHARE  << AARCH64_TCR_EL1_SH0_SHIFT ) | \
 		( AARCH64_TCR_ORGN_WBRAWA << AARCH64_TCR_EL1_ORGN0_SHIFT )   | \
 		( AARCH64_TCR_IRGN_WBRAWA << AARCH64_TCR_EL1_IRGN0_SHIFT )   | \
 		( AARCH64_TCR_EPD_ENABLE  << AARCH64_TCR_EL1_EPD0_SHIFT )    | \
- 	        ( AARCH64_TCR_TSZ_4G << AARCH64_TCR_EL1_T0SZ_SHIFT )  )
+ 	        ( AARCH64_TCR_TSZ_128T << AARCH64_TCR_EL1_T0SZ_SHIFT )  )
 #else
 #define AARCH64_TCR_VAL ( ( ULL_C(0x0) << AARCH64_TCR_EL1_TBI0_SHIFT )       | \
 		( AARCH64_TCR_IPS_4GB << AARCH64_TCR_EL1_IPS_SHIFT )         | \
@@ -336,13 +339,13 @@
 		( AARCH64_TCR_IRGN_WBRAWA << AARCH64_TCR_EL1_IRGN1_SHIFT )   | \
 		( AARCH64_TCR_EPD_DISABLE << AARCH64_TCR_EL1_EPD1_SHIFT )    | \
 		( AARCH64_TCR_A1_TTBR0 << AARCH64_TCR_EL1_A1_SHIFT )         | \
-		( AARCH64_TCR_TSZ_4G << AARCH64_TCR_EL1_T1SZ_SHIFT )         | \
+		( AARCH64_TCR_TSZ_128T << AARCH64_TCR_EL1_T1SZ_SHIFT )       | \
 		( AARCH64_TCR_TG0_4KB << AARCH64_TCR_EL1_TG0_SHIFT )         | \
 		( AARCH64_TCR_SH_INNER_SHARE  << AARCH64_TCR_EL1_SH0_SHIFT ) | \
 		( AARCH64_TCR_ORGN_WBRAWA << AARCH64_TCR_EL1_ORGN0_SHIFT )   | \
 		( AARCH64_TCR_IRGN_WBRAWA << AARCH64_TCR_EL1_IRGN0_SHIFT )   | \
 		( AARCH64_TCR_EPD_ENABLE  << AARCH64_TCR_EL1_EPD0_SHIFT )    | \
- 	        ( AARCH64_TCR_TSZ_4G << AARCH64_TCR_EL1_T0SZ_SHIFT )  )
+ 	        ( AARCH64_TCR_TSZ_128T << AARCH64_TCR_EL1_T0SZ_SHIFT )  )
 #endif  /*  CONFIG_UPPERHALF_KERNEL  */
 /* Mandatory reserved bits, Instruction cache enable, 
  * Stack Alignment Check Enable for EL0, Stack Alignment Check Enable,

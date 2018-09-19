@@ -12,6 +12,11 @@
 .section .boot_data, "ax"
 
 .p2align 12
+.global pre_ttbr0_l0tbl
+pre_ttbr0_l0tbl:
+    .zero   PAGE_SIZE
+
+.p2align 12
 .global pre_ttbr0_l1tbl
 pre_ttbr0_l1tbl:
     .zero   PAGE_SIZE
@@ -19,6 +24,11 @@ pre_ttbr0_l1tbl:
 .p2align 12
 .global pre_ttbr0_l2tbl
 pre_ttbr0_l2tbl:
+    .zero   PAGE_SIZE
+
+.p2align 12
+.global pre_ttbr1_l0tbl
+pre_ttbr1_l0tbl:
     .zero   PAGE_SIZE
 
 .p2align 12
