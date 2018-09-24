@@ -22,7 +22,7 @@ threadA(void *arg) {
 #else
 		kprintf("threadA\n");
 #endif  /*  CONFIG_HAL  */
-		thr_delay(100);
+		thr_delay(1000);
 	}
 }
 
@@ -37,7 +37,7 @@ threadB(void *arg) {
 #else
 		kprintf("threadB\n");
 #endif  /* CONFIG_HAL  */
-		thr_delay(300);
+		thr_delay(800);
 	}
 }
 

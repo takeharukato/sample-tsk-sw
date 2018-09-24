@@ -127,6 +127,9 @@ wque_wakeup(wait_queue *wq, wq_reason reason) {
 	wait_queue_entry   *ep;
 
 	psw_disable_and_save_interrupt(&psw);
+	if ( list_is_empty(&wq->head) )
+		goto out;
+
 	while(!list_is_empty(&wq->head)) {
 		ep = CONTAINER_OF(list_get_top(&wq->head), wait_queue_entry, link);
 
@@ -138,6 +141,7 @@ wque_wakeup(wait_queue *wq, wq_reason reason) {
 	}
 	wq->reason = reason;
 	sched_schedule();    /*  Reschedule because change the top priority task */
+out:
 	psw_restore_interrupt(&psw);
 }
 
