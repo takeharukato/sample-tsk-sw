@@ -159,6 +159,9 @@ irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception
 			list_del(lp);
 			kfree(entp);
 			rc = 0;
+
+			if ( list_is_empty(&linep->handlers) )
+				linep->ctrlrp->disable_irq(linep->ctrlrp, irq);
 			goto restore_irq_out;
 		}
 	}
