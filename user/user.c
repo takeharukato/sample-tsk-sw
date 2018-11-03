@@ -37,7 +37,7 @@ threadB(void *arg) {
 #else
 		kprintf("threadB\n");
 #endif  /* CONFIG_HAL  */
-		thr_delay(800);
+		thr_delay(500);
 	}
 }
 

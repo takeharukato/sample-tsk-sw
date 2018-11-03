@@ -7,6 +7,7 @@
 /*                                                                    */
 /**********************************************************************/
 #if !defined(_HAL_KMAP_H)
+#define _HAL_KMAP_H
 
 #include <kern/param.h>
 
@@ -28,9 +29,9 @@
 #define KERN_PHY_MAX              (ULL_C(0x0000000040000000))  /* 1GiB */
 
 #define KERN_HIGH_IO_BASE         (ULL_C(0xFFFFFFFFFC000000))
-#define KERN_HIGH_IO_SIZE         (ULL_C(KERN_HIGH_MEMORY_BASE - KERN_HIGH_IO_AREA))
+#define KERN_HIGH_IO_SIZE         (KERN_HIGH_MEMORY_BASE - KERN_HIGH_IO_AREA)
                                      
-#define KERN_MAX_HIGH_IO_PAGES    (ULL_C(KERN_HIGH_IO_SIZE / KERN_STRAIGHT_PAGE_SIZE))
+#define KERN_MAX_HIGH_IO_PAGES    (KERN_HIGH_IO_SIZE / KERN_STRAIGHT_PAGE_SIZE)
 
 #define PHY_TO_KERN_STRAIGHT(phy) ( ((uintptr_t)(phy)) + KERN_VMA_BASE)
 #define KERN_STRAIGHT_TO_PHY(va)  ( ((uintptr_t)(va)) - KERN_VMA_BASE)
@@ -79,6 +80,7 @@ typedef struct _kmap_info{
 #define KERN_STRAIGHT_PAGE_END(addr)		\
 	( KERN_STRAIGHT_PAGE_NEXT((addr)) - 1 )
 
+void map_kernel_page(uintptr_t _paddr, uintptr_t _vaddr, uint64_t _page_attr, void *_kpgtbl);
 void x64_map_kernel(size_t mem_max);
-#endif  /*  ASM_FILE  */
+#endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_KMAP_H   */

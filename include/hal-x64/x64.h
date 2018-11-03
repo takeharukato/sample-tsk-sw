@@ -61,6 +61,10 @@
 #define CR4_PCID_ENABLE         (1 << 17)
 #define CR4_OS_XSAVE            (1 << 18)
 
+#define X64_MSR_APIC_BASE            (0x1b)
+#define X64_MSR_APIC_BASE_ENABLE_BIT (11)
+
+
 #define PAGE_SHIFT               (CONFIG_HAL_PAGE_SHIFT)               /*  4KiB  */
 #define KERN_STRAIGHT_PAGE_SIZE  (CONFIG_HAL_STRAIGHT_PAGE_SIZE)         /*  2MiB  */
 

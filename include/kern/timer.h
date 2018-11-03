@@ -13,6 +13,8 @@
 #include <kern/kern_types.h>
 #include <kern/list.h>
 
+#define TIMER_MS_PER_US (1000)  /*<  1ms seconds == 1000 mirco seconds */
+
 typedef struct _uptime_counter{
 	uptime_cnt  uptime;
 }uptime_counter;

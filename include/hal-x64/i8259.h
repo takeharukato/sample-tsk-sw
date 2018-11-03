@@ -240,6 +240,9 @@
 #define I8259_OCW3_RST_SPCMSK  (0x40)   /*  Reset Special mask*/
 #define I8259_OCW3_SET_SPCMSK  (0x60)   /*  Set Special mask*/
 #define pic_mk_ocw3code(func) ( (func) | (I8259_OCW3_CONSTANT) )
+
+#define X64_I8259_SPURIOUS_IRQ  (7)
+
 #if !defined(ASM_FILE)
 #include <kern/freestanding.h>
 

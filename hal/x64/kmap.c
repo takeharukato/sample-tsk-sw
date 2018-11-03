@@ -20,6 +20,34 @@ extern void *kmap_pml4;
 
 static kmap_info kmap_pgtbl={&kmap_pml4, (void *)PHY_TO_KERN_STRAIGHT(&kmap_pml4)};
 
+static void 
+map_high_io_area(void *kpgtbl) {
+	uintptr_t  cur_page;
+	uintptr_t cur_vaddr;
+	uintptr_t last_addr;	
+
+	/*
+	 * High I/O memory
+	 */
+	kprintf("High APIC I/O region : [%p, %p] to %p\n",
+	    (void *)KERN_HIGH_IO_AREA,
+	    (void *)( KERN_HIGH_IO_AREA + KERN_HIGH_IO_SIZE ),
+	    (void *)KERN_HIGH_IO_BASE );
+
+	last_addr = KERN_STRAIGHT_PAGE_END( KERN_HIGH_IO_AREA + 
+	    KERN_HIGH_IO_SIZE );
+
+	for( cur_page = KERN_STRAIGHT_PAGE_START( KERN_HIGH_IO_AREA ), 
+		     cur_vaddr = KERN_HIGH_IO_BASE;
+	     cur_page <= last_addr;
+	     cur_page += KERN_STRAIGHT_PAGE_SIZE, 
+		     cur_vaddr += KERN_STRAIGHT_PAGE_SIZE) {
+
+		map_kernel_page( cur_page,  cur_vaddr, PAGE_WRITABLE | PAGE_NONCACHABLE, 
+		    kpgtbl);
+	}
+}
+
 void
 map_kernel_page(uintptr_t paddr, uintptr_t vaddr, 
     uint64_t page_attr, void *kpgtbl) {
@@ -117,5 +145,6 @@ x64_map_kernel(size_t mem_max) {
 
 		map_kernel_page( cur_page,  cur_vaddr, PAGE_WRITABLE, kmap_pgtbl.phy_pml4 );
 	}
+	map_high_io_area(kmap_pgtbl.phy_pml4);
 	load_pgtbl((uintptr_t)kmap_pgtbl.phy_pml4);
 }

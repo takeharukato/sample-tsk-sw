@@ -108,6 +108,28 @@ strcmp(char const *s1, char const *s2){
 	return (int)( *s1 - *s2 );
 }
 
+/** メモリ m1 とm2の先頭nバイトを比較する 
+    @param[in] m1 比較対象のメモリ領域1
+    @param[in] m2 比較対象のメモリ領域2
+    @param[in] n  比較長
+    @retval 負の整数 s1がs2よりも小さい(s1 < s2)
+    @retval 0        s1とs2が等しい
+    @retval 正の整数 s1がs2よりも大きいさい(s1 > s2)
+ */
+int 
+memcmp(const void *m1, const void *m2, size_t n){
+	const unsigned char *s1, *s2;
+	signed char rc = 0;
+
+	for(s1 = m1, s2 = m2; n > 0; ++s1, ++s2, --n) {
+		rc = *s1 - *s2;
+		if (rc != 0)
+			break;
+	}
+
+	return (int)rc;
+}
+
 /** 文字列 s1 とs2の先頭n文字を比較する 
     @param[in] s1 比較対象のメモリ領域1
     @param[in] s2 比較対象のメモリ領域2

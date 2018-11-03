@@ -39,6 +39,9 @@ hal_kernel_init(void){
 	idle->tinfo->thr = idle;
 
 	x64_init_pic();
+	x64_acpi_init();
+	x64_lapic_init();
+
 	x64_init_timer();
 	x64_console_init();
 

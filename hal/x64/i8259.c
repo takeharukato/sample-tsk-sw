@@ -24,6 +24,11 @@ static int init_i8259_pic(struct _irq_ctrlr *_ctrlr);
 static void finalize_i8259_pic(struct _irq_ctrlr *_ctrlr);
 static int i8259_find_pending_irq(struct _exception_frame *_exc, irq_no *_irqp);
 
+static irq_finder i8259_find_irq = {
+	__LIST_ENT_INITIALIZER(i8259_find_irq.link),
+	i8259_find_pending_irq
+};
+
 static irq_ctrlr i8259_ctrlr = {
 	.config_irq = i8259_config_irq,
 	.enable_irq = i8259_enable_irq,
@@ -244,7 +249,7 @@ x64_init_pic(void){
 
 	init_i8259_pic(&i8259_ctrlr);
 
-	irq_register_pending_irq_finder(i8259_find_pending_irq);
+	irq_register_pending_irq_finder(&i8259_find_irq);
 
 	for(i = 0; I8259_MAX_IRQ_NR > i; ++i) 
 		irq_register_ctrlr(i, &i8259_ctrlr);

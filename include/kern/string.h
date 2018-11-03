@@ -17,6 +17,7 @@
 void *memset(void *, int , size_t );
 void *memcpy(void *, const void *, size_t );
 void *memmove(void *, const void *, size_t );
+int memcmp(const void *_m1, const void *_m2, size_t _n);
 size_t strlen(const char *);
 int strcmp(char const *_s1, char const *_s2);
 int strncmp(const char *_s1, const char *_s2, size_t _n);

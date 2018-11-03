@@ -53,6 +53,20 @@
 
 //#define INSTALL_TEST_HANDLER
 
+static int gic_pl390_config_irq(struct _irq_ctrlr *_ctrlr __attribute__((unused)), 
+				irq_no _irq, irq_attr _attr, irq_prio _prio);
+static void gic_pl390_enable_irq(struct _irq_ctrlr *_ctrlr __attribute__((unused)),
+				 irq_no _irq);
+static void gic_pl390_disable_irq(struct _irq_ctrlr *_ctrlr __attribute__((unused)),
+				 irq_no _irq);
+
+static void gic_pl390_eoi(struct _irq_ctrlr *_ctrlr __attribute__((unused)), irq_no _irq);
+static int gic_pl390_initialize(struct _irq_ctrlr *_ctrlr);
+static void gic_pl390_finalize(struct _irq_ctrlr *_ctrlr);
+
+static int gic_pl390_find_pending_irq(struct _exception_frame *_exc __attribute__((unused)),
+				      irq_no *_irqp);
+
 static irq_ctrlr arm_gic_ctrlr = {
 	.config_irq = gic_pl390_config_irq,
 	.enable_irq = gic_pl390_enable_irq,
@@ -61,6 +75,11 @@ static irq_ctrlr arm_gic_ctrlr = {
 	.initialize = gic_pl390_initialize,
 	.finalize = gic_pl390_finalize,
 	.private = NULL
+};
+
+static irq_finder arm_gic_find_irq = {
+	__LIST_ENT_INITIALIZER(arm_gic_find_irq.link),
+	gic_pl390_find_pending_irq
 };
 
 /** Initialize GIC Controller
@@ -423,7 +442,7 @@ aarch64_init_interrupt(void){
 
 	aarch64_setup_vector();
 
-	irq_register_pending_irq_finder(gic_pl390_find_pending_irq);
+	irq_register_pending_irq_finder(&arm_gic_find_irq);
 
 	for(i = 0; GIC_INT_MAX > i; ++i) 
 		irq_register_ctrlr(i, &arm_gic_ctrlr);

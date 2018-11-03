@@ -26,6 +26,9 @@ typedef struct _list_head{
 	struct _list *next;       /*<  Next pointer      */
 }list_head_t;
 
+#define __LIST_ENT_INITIALIZER(le)  \
+	{(struct _list *)&le, (struct _list *)&le}
+
 #define __LIST_HEAD_INITIALIZER(lh)  \
 	{(struct _list *)&lh, (struct _list *)&lh}
 

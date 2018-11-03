@@ -17,6 +17,9 @@
 #include "hal/raw_console.h"
 #include "hal/boot64.h"
 #include "hal/segments.h"
-
+#include "hal/kmap.h"
+#include "hal/acpi.h"
+#include "hal/lapic.h"
+#include "hal/tsc.h"
 
 #endif  /*  _HAL_HAL_H  */

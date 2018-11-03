@@ -10,7 +10,7 @@
 #define  _HAL_I8254_H 
 
 #include <kern/kernel.h>
-
+#define X64_I8254_TIMER_IRQ  (0)
 #define I8254_INPFREQ        (1193182UL)  /*<  input clock 1193180 Hz */
 #define I8254_PORT_CHANNEL0  (0x40)  /*< I/O port for timer channel 0 */
 #define I8254_PORT_CHANNEL1  (0x41)  /*< I/O port for timer channel 1 */

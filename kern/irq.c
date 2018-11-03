@@ -11,32 +11,6 @@
 
 static irq_manage irqMgr;
 
-/** Initialize IRQ manager
- */
-int
-irq_initialize_manager(void) {
-	irq_no                    i;
-	irq_manage *mgr = (&irqMgr);
-	irq_line             *linep;
-	psw_t                   psw;
-
-	psw_disable_and_save_interrupt(&psw);
-
-	mgr->find_pending = NULL;
-	for(i = 0; NR_IRQS > i; ++i) {
-		
-		linep = &mgr->irqs[i];
-		linep->nr = i;
-		linep->attr = (IRQ_ATTR_SHARED | IRQ_ATTR_LEVEL);
-		linep->prio = 0;
-		init_list_head(&linep->handlers);
-		linep->ctrlrp = NULL;
-	}
-	psw_restore_interrupt(&psw);
-
-	return 0;
-}
-
 /** Register a controller
     @param[in] irq IRQ number
     @param[in] ctrlrp a pointer to controler data
@@ -201,12 +175,14 @@ restore_irq_out:
     @param[in] find_pending a handler used for finding a pending interrupt
  */
 void
-irq_register_pending_irq_finder(int (*find_pending)(struct _exception_frame *_exc, irq_no *_irqp)){
+irq_register_pending_irq_finder(struct _irq_finder *finder_ent){
 	psw_t                    psw;
 	irq_manage  *mgr = (&irqMgr);
 
+	
 	psw_disable_and_save_interrupt(&psw);
-	mgr->find_pending = find_pending;
+	kassert( !list_is_linked(&finder_ent->link) );
+	list_add(&mgr->find_irqs, &finder_ent->link);
 	psw_restore_interrupt(&psw);
 	
 	return ;
@@ -215,12 +191,12 @@ irq_register_pending_irq_finder(int (*find_pending)(struct _exception_frame *_ex
 /** Unregister a handler used for finding a pending interrupt
  */
 void 
-irq_unregister_pending_irq_finder(void){
+irq_unregister_pending_irq_finder(struct _irq_finder *finder_ent){
 	psw_t                    psw;
-	irq_manage  *mgr = (&irqMgr);
 
 	psw_disable_and_save_interrupt(&psw);
-	mgr->find_pending = NULL;
+	kassert( list_is_linked(&finder_ent->link) );
+	list_del(&finder_ent->link);
 	psw_restore_interrupt(&psw);
 	
 	return;
@@ -238,24 +214,25 @@ irq_handle_irq(struct _exception_frame *exc) {
 	irq_line              *linep;
 	list_t                   *lp;
 	irq_handler_ent        *entp;
+	irq_finder           *finder;
 	psw_t                    psw;
 
 	psw_disable_and_save_interrupt(&psw);
-	
-	if ( mgr->find_pending == NULL ) {
 
-		/* FIXME: We should fall into panic in this case. */
-		rc = ENOENT;
-		goto restore_irq_out;
+	list_for_each(lp, mgr, find_irqs) {
+
+		finder = CONTAINER_OF(lp, irq_finder, link);
+		if ( finder->find_pending == NULL ) 
+			continue;  /* FIXME: We should fall into panic in this case. */
+
+		rc = finder->find_pending(exc, &irq);
+		if ( rc == IRQ_FOUND ) 
+			goto found_irq;
 	}
+	rc = ESRCH;   /* Spurious interrupt */
+	goto restore_irq_out;
 
-	rc = mgr->find_pending(exc, &irq);
-	if ( rc != IRQ_FOUND )  {
-
-		rc = ESRCH;   /* Spurious interrupt */
-		goto restore_irq_out;
-	}
-	
+found_irq:
 	linep = &mgr->irqs[irq];
 
 	if ( ( linep->ctrlrp == NULL ) 
@@ -299,4 +276,31 @@ restore_irq_out:
 	psw_restore_interrupt(&psw);
 
 	return rc;
+}
+
+/** Initialize IRQ manager
+ */
+int
+irq_initialize_manager(void) {
+	irq_no                    i;
+	irq_manage *mgr = (&irqMgr);
+	irq_line             *linep;
+	psw_t                   psw;
+
+	psw_disable_and_save_interrupt(&psw);
+
+	init_list_head(&mgr->find_irqs);
+
+	for(i = 0; NR_IRQS > i; ++i) {
+		
+		linep = &mgr->irqs[i];
+		linep->nr = i;
+		linep->attr = (IRQ_ATTR_SHARED | IRQ_ATTR_LEVEL);
+		linep->prio = 0;
+		init_list_head(&linep->handlers);
+		linep->ctrlrp = NULL;
+	}
+	psw_restore_interrupt(&psw);
+
+	return 0;
 }

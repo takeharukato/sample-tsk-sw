@@ -60,9 +60,14 @@ typedef struct _irq_line{
 	irq_ctrlr    *ctrlrp;
 }irq_line;
 
-typedef struct _irq_manage{
+typedef struct _irq_finder{
+	struct _list                                                 link;
 	int (*find_pending)(struct _exception_frame *_exc, irq_no *_irqp);
-	irq_line irqs[NR_IRQS];
+}irq_finder;
+
+typedef struct _irq_manage{
+	list_head_t       find_irqs;
+	irq_line      irqs[NR_IRQS];
 }irq_manage;
 
 int irq_initialize_manager(void);
@@ -70,7 +75,7 @@ int irq_register_ctrlr(irq_no _irq, irq_ctrlr *_ctrlrp);
 int irq_unregister_ctrlr(irq_no _irq);
 int irq_register_handler(irq_no _irq, irq_attr _attr, irq_prio _prio, void *_private, int (*_handler)(irq_no _irq, struct _exception_frame *_exc, void *_private));
 int irq_unregister_handler(irq_no irq, int (*handler)(irq_no _irq, struct _exception_frame *_exc, void *_private));
-void irq_register_pending_irq_finder(int (*_find_pending)(struct _exception_frame *_exc, irq_no *_irqp));
-void irq_unregister_pending_irq_finder(void);
+void irq_register_pending_irq_finder(struct _irq_finder *_ent);
+void irq_unregister_pending_irq_finder(struct _irq_finder *_ent);
 int irq_handle_irq(struct _exception_frame *_exc);
 #endif  /*  _KERN_IRQ_H   */
