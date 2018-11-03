@@ -16,7 +16,6 @@
    * X64版
       qemu-system-x86_64 -m 128 -nographic -nographic -serial
       mon:stdio -cdrom kernel.iso
-      れます。
 	  各オプションの意味は以下の通りです:
 	  * -m 128     128MiBメモリ搭載環境として起動
 	  * -nographic グラフィック画面を出さない
