@@ -21,9 +21,9 @@ static lapic lapic_regs = {.paddr = LAPIC_DEFAULT_ADDR, .kaddr = (void *)PHY_TO_
 
 #define LAPIC_CALIBRATION_LOOP (10)
 /* FIXME: Calibration 関連のデータ構造をまとめておくこと(lapic_regs) */
-static uint64_t        tsc_per_us;
-static uint64_t        tcr_per_us;
-static int      calibration_count;
+static uint64_t            tsc_per_us;
+static uint64_t            tcr_per_us;
+static volatile int calibration_count;
 
 static uint32_t
 lapic_read(uint32_t offset){

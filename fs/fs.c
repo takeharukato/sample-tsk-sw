@@ -375,8 +375,7 @@ fs_lseek(int fd, off_t off, int where) {
 	if ( f == NULL )
 		return -EBADF;
 
-	if ( where == SEEK_SET )
-		new = off;
+	new = off;
 	if ( where == SEEK_CUR )
 		new = f->f_offset + off;
 

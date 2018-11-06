@@ -140,7 +140,7 @@ read_sdt_at(uintptr_t addr, acpi_sdt_header *tb, size_t size,  const char *name)
 }
 
 static void * 
-madt_get_typed_item(acpi_madt_hdr * hdr, uint8_t type, unsigned int *idxp){
+madt_get_typed_item(acpi_madt_hdr *hdr, uint8_t type, unsigned int *idxp){
 	void            *t, *end;
 	acpi_madt_item_hdr *hdrp;
 	int                    i;
@@ -195,9 +195,9 @@ acpi_get_lapic(unsigned int *idxp){
 
 	idx = *idxp;
 
+	madt_hdr = (acpi_madt_hdr *)acpi_get_table_base(ACPI_SDT_TRANS_TYPE_APIC);
 	if (idx == 0) {
 
-		madt_hdr = (acpi_madt_hdr *)acpi_get_table_base(ACPI_SDT_TRANS_TYPE_APIC);
 		if (madt_hdr == NULL)
 			goto error_out;
 	}
@@ -226,9 +226,9 @@ acpi_get_ioapic(unsigned int *idxp){
 	kassert(idxp != NULL);
 	idx = *idxp;
 
+	madt_hdr = (acpi_madt_hdr *)acpi_get_table_base(ACPI_SDT_TRANS_TYPE_APIC);
 	if (idx == 0) {
 
-		madt_hdr = (acpi_madt_hdr *)acpi_get_table_base(ACPI_SDT_TRANS_TYPE_APIC);
 		if (madt_hdr == NULL)
 			goto error_out;
 	}

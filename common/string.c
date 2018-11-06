@@ -139,7 +139,7 @@ memcmp(const void *m1, const void *m2, size_t n){
  */
 int 
 strncmp(const char *s1, const char *s2, size_t n){
-	signed char rc;
+	signed char rc = 0;
 
 	for(; *s1 != '\0'; ++s1, ++s2, --n) {
 
