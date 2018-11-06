@@ -579,6 +579,7 @@ inode_read(inode *ip, void *dst, off_t off, size_t counts) {
 
 	for(remains = counts; remains > 0; ) {
 
+		blk = 0;
 		bmap(ip, off / BSIZE, &blk);
 		bp = buffer_cache_blk_read(ip->i_dev, blk);
 	    
@@ -615,7 +616,8 @@ inode_write(inode *ip, void *src, off_t off, size_t counts) {
 		return -ENXIO;
 
 	for(remains = counts; remains > 0; ) {
-
+		
+		blk = 0;
 		bmap(ip, off / BSIZE, &blk);
 		bp = buffer_cache_blk_read(ip->i_dev, blk);
 	    

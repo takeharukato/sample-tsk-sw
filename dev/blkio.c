@@ -25,6 +25,7 @@ buffer_cache_blk_get(dev_id dev, blk_no blockno){
 
 	psw_disable_and_save_interrupt(&psw);
 	do{
+		rc = WQUE_REASON_DESTROY;
 		mutex_hold(&global_buffer_cache.mtx);
 		list_for_each(lp, &global_buffer_cache, head){  
 

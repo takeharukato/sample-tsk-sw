@@ -29,6 +29,7 @@
 #define NO_MALLINFO     (0)
 #define NO_MALLOC_STATS (1)  /* Avoid using printf family */
 #define LACKS_TIME_H    (1)  /* Avoid using time(3) */
+#define LACKS_STDLIB_H     (1)  /* Avoid using SSE */
 #define USE_KMALLOC_PREFIX (1)
 
 #if defined (USE_KMALLOC_PREFIX)

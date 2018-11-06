@@ -216,6 +216,7 @@ thr_destroy_thread(thread_t *thr){
 	kfree(attr->stack_top);  /* Free its stack          */
 	kfree(thr);              /* Free thread structure   */
 
+	rc = 0;
 out:	
 	psw_restore_interrupt(&psw);
 

@@ -72,6 +72,7 @@ b vector28
 b vector29
 b vector30
 b vector31
+b vector240
 end
 
 define x64_setup

@@ -47,7 +47,7 @@ kernel.elf: kernel-dbg.elf
 kernel-dbg.elf: include/kern/autoconf.h ${FSIMG_FILE} subsystem
 ifeq ($(CONFIG_HAL),y)
 	${CC} -static ${PIC_OPT_FLAGS} ${LDFLAGS}  $(shell echo ${CONFIG_HAL_LDFLAGS}) 	\
-		-nostdlib -T hal/hal/kernel.lds			\
+		-nostdlib -Wl,-T hal/hal/kernel.lds			\
 		-o $@ ${start_obj} 				\
 		-Wl,--start-group ${kernlibs} ${hallibs} -Wl,--end-group
 else
