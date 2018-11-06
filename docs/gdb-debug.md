@@ -128,20 +128,21 @@ x64版のカーネルをデバッグする際の手順の例を以下に示し�
 
 ```shell-session
 $ x64-elf-gdb
-GNU gdb (GDB) 7.10
-Copyright (C) 2015 Free Software Foundation, Inc.
+GNU gdb (GDB) 8.2
+Copyright (C) 2018 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later
 <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.  Type "show
-copying"
-and "show warranty" for details.
-This GDB was configured as "x86_64-redhat-linux".
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "--host=x86_64-pc-linux-gnu
+--target=x86_64-elf".
 Type "show configuration" for configuration details.
 For bug reporting instructions, please see:
 <http://www.gnu.org/software/gdb/bugs/>.
 Find the GDB manual and other documentation resources online at:
-<http://www.gnu.org/software/gdb/documentation/>.
+    <http://www.gnu.org/software/gdb/documentation/>.
+
 For help, type "help".
 Type "apropos word" to search for commands related to "word".
 (gdb) x64_target
@@ -150,58 +151,60 @@ The target architecture is assumed to be i386:x86-64:intel
 (gdb) remote_target
 0x0000000000000000 in ?? ()
 (gdb) set_x64_vectors
-Breakpoint 1 at 0xffff8000001168f0: file vector.S, line 14.
-Breakpoint 2 at 0xffff8000001168f9: file vector.S, line 21.
-Breakpoint 3 at 0xffff800000116902: file vector.S, line 28.
-Breakpoint 4 at 0xffff80000011690b: file vector.S, line 35.
-Breakpoint 5 at 0xffff800000116914: file vector.S, line 42.
-Breakpoint 6 at 0xffff80000011691d: file vector.S, line 49.
-Breakpoint 7 at 0xffff800000116926: file vector.S, line 56.
-Breakpoint 8 at 0xffff80000011692f: file vector.S, line 63.
-Breakpoint 9 at 0xffff800000116938: file vector.S, line 70.
-Breakpoint 10 at 0xffff80000011693f: file vector.S, line 76.
-Breakpoint 11 at 0xffff800000116948: file vector.S, line 83.
-Breakpoint 12 at 0xffff80000011694f: file vector.S, line 89.
-Breakpoint 13 at 0xffff800000116956: file vector.S, line 95.
-Breakpoint 14 at 0xffff80000011695d: file vector.S, line 101.
-Breakpoint 15 at 0xffff800000116964: file vector.S, line 107.
-Breakpoint 16 at 0xffff80000011696b: file vector.S, line 113.
-Breakpoint 17 at 0xffff800000116974: file vector.S, line 120.
-Breakpoint 18 at 0xffff80000011697d: file vector.S, line 127.
-Breakpoint 19 at 0xffff800000116984: file vector.S, line 133.
-Breakpoint 20 at 0xffff80000011698d: file vector.S, line 140.
-Breakpoint 21 at 0xffff800000116996: file vector.S, line 147.
-Breakpoint 22 at 0xffff80000011699f: file vector.S, line 154.
-Breakpoint 23 at 0xffff8000001169a8: file vector.S, line 161.
-Breakpoint 24 at 0xffff8000001169b1: file vector.S, line 168.
-Breakpoint 25 at 0xffff8000001169ba: file vector.S, line 175.
-Breakpoint 26 at 0xffff8000001169c3: file vector.S, line 182.
----Type <return> to continue, or q <return> to quit---
-Breakpoint 27 at 0xffff8000001169cc: file vector.S, line 189.
-Breakpoint 28 at 0xffff8000001169d5: file vector.S, line 196.
-Breakpoint 29 at 0xffff8000001169de: file vector.S, line 203.
-Breakpoint 30 at 0xffff8000001169e7: file vector.S, line 210.
-Breakpoint 31 at 0xffff8000001169f0: file vector.S, line 217.
-Breakpoint 32 at 0xffff8000001169f9: file vector.S, line 224.
+Breakpoint 67 at 0xffff80000011a760: file vector.S, line 14.
+Breakpoint 68 at 0xffff80000011a769: file vector.S, line 21.
+Breakpoint 69 at 0xffff80000011a772: file vector.S, line 28.
+Breakpoint 70 at 0xffff80000011a77b: file vector.S, line 35.
+Breakpoint 71 at 0xffff80000011a784: file vector.S, line 42.
+Breakpoint 72 at 0xffff80000011a78d: file vector.S, line 49.
+Breakpoint 73 at 0xffff80000011a796: file vector.S, line 56.
+Breakpoint 74 at 0xffff80000011a79f: file vector.S, line 63.
+Breakpoint 75 at 0xffff80000011a7a8: file vector.S, line 70.
+Breakpoint 76 at 0xffff80000011a7af: file vector.S, line 76.
+Breakpoint 77 at 0xffff80000011a7b8: file vector.S, line 83.
+Breakpoint 78 at 0xffff80000011a7bf: file vector.S, line 89.
+Breakpoint 79 at 0xffff80000011a7c6: file vector.S, line 95.
+Breakpoint 80 at 0xffff80000011a7cd: file vector.S, line 101.
+Breakpoint 81 at 0xffff80000011a7d4: file vector.S, line 107.
+Breakpoint 82 at 0xffff80000011a7db: file vector.S, line 113.
+Breakpoint 83 at 0xffff80000011a7e4: file vector.S, line 120.
+Breakpoint 84 at 0xffff80000011a7ed: file vector.S, line 127.
+Breakpoint 85 at 0xffff80000011a7f4: file vector.S, line 133.
+Breakpoint 86 at 0xffff80000011a7fd: file vector.S, line 140.
+Breakpoint 87 at 0xffff80000011a806: file vector.S, line 147.
+Breakpoint 88 at 0xffff80000011a80f: file vector.S, line 154.
+Breakpoint 89 at 0xffff80000011a818: file vector.S, line 161.
+Breakpoint 90 at 0xffff80000011a821: file vector.S, line 168.
+Breakpoint 91 at 0xffff80000011a82a: file vector.S, line 175.
+Breakpoint 92 at 0xffff80000011a833: file vector.S, line 182.
+--Type <RET> for more, q to quit, c to continue without paging--
+Breakpoint 93 at 0xffff80000011a83c: file vector.S, line 189.
+Breakpoint 94 at 0xffff80000011a845: file vector.S, line 196.
+Breakpoint 95 at 0xffff80000011a84e: file vector.S, line 203.
+Breakpoint 96 at 0xffff80000011a857: file vector.S, line 210.
+Breakpoint 97 at 0xffff80000011a860: file vector.S, line 217.
+Breakpoint 98 at 0xffff80000011a869: file vector.S, line 224.
+Breakpoint 99 at 0xffff80000011b112: file vector.S, line 1687.
 (gdb) b boot_main
-Breakpoint 33 at 0xffff800000114f85: file boot64.c, line 37.
+Breakpoint 100 at 0xffff800000118120: file boot64.c, line 55.
 (gdb) continue
 Continuing.
 
-Breakpoint 33, boot_main (magic=0, mbaddr=0) at boot64.c:37
-37          uint64_t __attribute__ ((unused)) mbaddr) {
+Breakpoint 100, boot_main (magic=920085129,
+mbaddr=18446603336222360616) at boot64.c:55
+55          uint64_t __attribute__ ((unused)) mbaddr) {
 ```
 
 ## x64版のgdbのコンパイル手順
 GDBのリモートデバッグ機能とQEmuを接続するためには,
-`tools/gdb/gdb-7.10-qemu-x86-64.patch`をGDBに適用してGDBを
+`tools/gdb/gdb-8.2-qemu-x86-64.patch`をGDBに適用してGDBを
 構築し直す必要があります。
 
 QEmuのリモートデバッグ機能に対応したGDBの構築方法を以下に示します。
 
-1. `http://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz` からGDBのソースアーカイブを取得します。
-1. `tar xf gdb-7.10.tar.gz` を実行してソースを展開します。
-1. `pushd gdb-7.10`を実行して, ソースディレクトリに移動します。
+1. `http://ftp.gnu.org/gnu/gdb/gdb-8.2.tar.gz` からGDBのソースアーカイブを取得します。
+1. `tar xf gdb-8.2.tar.gz` を実行してソースを展開します。
+1. `pushd gdb-8.2`を実行して, ソースディレクトリに移動します。
 1. `./configure --prefix=${HOME}/cross/x64
    --program-prefix="x64-elf-"`を実行します。
 1. `make` を実行します。
