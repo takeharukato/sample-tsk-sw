@@ -32,7 +32,7 @@ include/kern/autoconf.h: .config
 	${RM} -f $@
 	tools/kconfig/conf-header.sh .config > $@
 
-kernel.asm: kernel.elf
+kernel.asm: kernel-dbg.elf
 	${RM} $@
 	${OBJDUMP} -S $< > $@
 
