@@ -8,6 +8,7 @@
 /**********************************************************************/
 
 #include <kern/kernel.h>
+#include <hal/exception.h>
 
 /** Clear specified thread information
     @param[in] tinfo A pointer of the thread information
@@ -390,6 +391,7 @@ thr_is_round_robin_thread(thread_t *thr) {
 
 	return rc;
 }
+
 #if !defined(CONFIG_HAL)
 void
 thr_delay(uint32_t expire_ms){
@@ -424,5 +426,11 @@ thr_delay(uint32_t expire_ms){
 	kassert( !list_is_linked(&ent.link) );
 	
 	return;
+}
+
+void
+thr_handle_task_exception_handler(exception_frame *exc){
+
+	sched_delay_disptach();  /*  遅延ディスパッチ  */
 }
 #endif  /*  !CONFIG_HAL  */

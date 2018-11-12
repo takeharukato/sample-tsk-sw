@@ -18,12 +18,19 @@ config CONFIG_HEAP_SIZE
 	help
 	  This sets the value of kernel heap memory size
 
-config CONFIG_KSTACK_PAGE_NR
-	int "kernel stack pages(UNIT:pages)"
+config CONFIG_TSTACK_PAGE_NR
+	int "Task stack pages(UNIT:pages)"
 	default 1
 	range 1 4
 	help
-	  This sets the value of kernel stack size
+	  This sets the value of default task stack size
+
+config CONFIG_ISTACK_PAGE_NR
+	int "Interrupt stack pages(UNIT:pages)"
+	default 1
+	range 1 4
+	help
+	  This sets the value of interrupt stack size
 
 choice
     prompt "Timer Interval"

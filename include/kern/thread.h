@@ -122,6 +122,8 @@ get_current_thread_info(void) {
 	return current->tinfo;
 }
 
+struct _exception_frame;
+
 void thr_thread_switch(thread_t *, thread_t *);
 void thr_unlink_thread(thread_t *);
 int thr_is_round_robin_thread(thread_t *);
@@ -141,5 +143,5 @@ int thr_thread_queue_empty(thread_queue_t *);
 thread_t *thr_thread_queue_get_top(thread_queue_t *);
 
 thread_info_t *thr_refer_thread_info(thread_t *);
-
+void thr_handle_task_exception_handler(struct _exception_frame *);
 #endif  /*  _KERN_THREAD_H */
