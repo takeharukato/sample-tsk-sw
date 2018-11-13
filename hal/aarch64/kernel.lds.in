@@ -18,10 +18,15 @@ SECTIONS
 	. = ALIGN(__PAGE_SIZE__);
         __bss_start = .;
 	.bss :  AT(ADDR(.bss) - __KERN_VMA_BASE) {
- 	. = ALIGN(__PAGE_SIZE__ * __KSTACK_PAGES__);
+ 	. = ALIGN(__PAGE_SIZE__ * __TSTACK_PAGES__);
 	bsp_stack = .;
-	. += (__PAGE_SIZE__ * __KSTACK_PAGES__);
+	. += (__PAGE_SIZE__ * __TSTACK_PAGES__);
 	bsp_stack_end = .;
+	. = ALIGN(__PAGE_SIZE__ * __ISTACK_PAGES__);
+	_intr_stack_start = .; 
+	intr_stack = .;
+	. += (__PAGE_SIZE__ * __ISTACK_PAGES__);
+	_intr_stack_end = .;
 	*(.bss COMMON) }
 	. = ALIGN(__PAGE_SIZE__);
         __bss_end = .;

@@ -89,7 +89,7 @@ hal_common_trap_handler(exception_frame *exc){
 		ti_update_preempt_count(ti, THR_IRQCNT_SHIFT, -1);
 	}
 
-	sched_delay_disptach();  /*  遅延ディスパッチ  */
-
 	return;
 }
+
+
