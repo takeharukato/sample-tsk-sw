@@ -59,7 +59,10 @@ static void gic_pl390_enable_irq(struct _irq_ctrlr *_ctrlr __attribute__((unused
 				 irq_no _irq);
 static void gic_pl390_disable_irq(struct _irq_ctrlr *_ctrlr __attribute__((unused)),
 				 irq_no _irq);
-
+static void gic_pl390_get_priority(struct _irq_ctrlr *_ctrlr __attribute__((unused)),
+				   irq_prio *_prio);
+static void gic_pl390_set_priority(struct _irq_ctrlr *_ctrlr __attribute__((unused)), 
+				   irq_prio _prio);
 static void gic_pl390_eoi(struct _irq_ctrlr *_ctrlr __attribute__((unused)), irq_no _irq);
 static int gic_pl390_initialize(struct _irq_ctrlr *_ctrlr);
 static void gic_pl390_finalize(struct _irq_ctrlr *_ctrlr);
@@ -71,6 +74,8 @@ static irq_ctrlr arm_gic_ctrlr = {
 	.config_irq = gic_pl390_config_irq,
 	.enable_irq = gic_pl390_enable_irq,
 	.disable_irq = gic_pl390_disable_irq,
+	.get_priority = gic_pl390_get_priority,
+	.set_priority = gic_pl390_set_priority,
 	.eoi = gic_pl390_eoi,
 	.initialize = gic_pl390_initialize,
 	.finalize = gic_pl390_finalize,
@@ -315,7 +320,7 @@ gicd_config(irq_no irq, unsigned int config){
     @param[in] ctrlr   IRQ controller information
     @param[in] irq     IRQ number
     @param[in] attr    IRQ attribution
-    @param[in] prio    Interrupt priority(Architecture Common Expression)
+    @param[in] prio    Interrupt priority (Architecture Common Expression)
       0 ... The highest
      15 ... The lowest
  */
@@ -357,6 +362,26 @@ static void
 gic_pl390_disable_irq(struct _irq_ctrlr *ctrlr __attribute__((unused)), irq_no irq) {
 
 	gicd_disable_int(irq);
+}
+
+/** Get priority level
+    @param[out] prio The address where the current interrupt priority will be stored.
+ */
+static void
+gic_pl390_get_priority(struct _irq_ctrlr *ctrlr __attribute__((unused)), irq_prio *prio) {
+	uint32_t cur_prio;
+
+	cur_prio = aarch64_get_intr_priority();
+	*prio = cur_prio & 0xff;
+}
+
+/** Set priority level
+    @param[in] prio interrupt priority to be set.
+ */
+static void 
+gic_pl390_set_priority(struct _irq_ctrlr *ctrlr __attribute__((unused)), irq_prio prio) {
+
+	aarch64_set_intr_priority(prio & 0xff);
 }
 
 /** Send End of Interrupt to IRQ line for GIC
@@ -414,6 +439,22 @@ gic_pl390_find_pending_irq(struct _exception_frame *exc __attribute__((unused)),
 	rc = IRQ_NOT_FOUND ;
 found:
 	return rc;
+}
+
+/** Get current interrupt priority 
+ */
+uint32_t
+aarch64_get_intr_priority(void){
+
+	return *REG_GIC_GICC_PMR;
+}
+
+/** Set interrupt priority 
+ */
+void
+aarch64_set_intr_priority(uint32_t prio){
+
+	*REG_GIC_GICC_PMR = prio;
 }
 
 /** Raise Interrupt(Debugging use)

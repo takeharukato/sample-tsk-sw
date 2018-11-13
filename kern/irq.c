@@ -213,6 +213,7 @@ irq_handle_irq(struct _exception_frame *exc) {
 	int                       rc;
 	int               is_handled;
 	irq_no                   irq;
+	irq_prio                prio;
 	irq_manage  *mgr = (&irqMgr);
 	irq_line              *linep;
 	list_t                   *lp;
@@ -238,17 +239,20 @@ irq_handle_irq(struct _exception_frame *exc) {
 found_irq:
 	linep = &mgr->irqs[irq];
 
-	if ( ( linep->ctrlrp == NULL ) 
-	     || ( linep->ctrlrp->disable_irq == NULL ) 
-	     || ( linep->ctrlrp->enable_irq == NULL ) 
-	     || ( linep->ctrlrp->eoi == NULL ) ) {
+	kassert( ( linep->ctrlrp != NULL ) &&
+		 ( ( linep->ctrlrp->disable_irq != NULL )  || 
+		   ( ( linep->ctrlrp->get_priority != NULL ) && 
+		     ( linep->ctrlrp->set_priority != NULL ) ) ) &&
+		( linep->ctrlrp->enable_irq != NULL )  &&
+		 ( linep->ctrlrp->eoi != NULL ) );
 
-		/* FIXME: We should fall into panic in this case. */
-		rc = ENOENT;
-		goto restore_irq_out;
+	if ( linep->ctrlrp->set_priority == NULL )
+		linep->ctrlrp->disable_irq(linep->ctrlrp, irq); /* Mask this irq line */
+	else {
+
+		linep->ctrlrp->get_priority(linep->ctrlrp, &prio);  /* Get mask level */
+		linep->ctrlrp->set_priority(linep->ctrlrp, linep->prio);  /* Set mask level */
 	}
-
-	linep->ctrlrp->disable_irq(linep->ctrlrp, irq); /* Mask this irq line */
 	linep->ctrlrp->eoi(linep->ctrlrp, irq); /* Send EOI for this irq line */
 
 	list_for_each(lp, linep, handlers){
@@ -273,7 +277,10 @@ found_irq:
 	rc = ESRCH;   /* Spurious interrupt */
 
 handled_out:
-	linep->ctrlrp->enable_irq(linep->ctrlrp, irq); /* unmask this irq line */
+	if ( linep->ctrlrp->set_priority == NULL )
+		linep->ctrlrp->enable_irq(linep->ctrlrp, irq); /* unmask this irq line */
+	else
+		linep->ctrlrp->set_priority(linep->ctrlrp, prio);  /* Restore mask level */
 
 restore_irq_out:
 	psw_restore_interrupt(&psw);

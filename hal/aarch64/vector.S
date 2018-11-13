@@ -118,7 +118,7 @@
 .macro restore_trapframe
 
 	/*
-	 * Drop exception type, esr, 
+	 * Drop exception type, esr
 	 */
 	add	sp, sp, #16
 	/*

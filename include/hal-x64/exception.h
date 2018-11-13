@@ -42,6 +42,9 @@
 #define PGFLT_ECODE_RSV      (8)  /*<  予約                    */
 #define PGFLT_ECODE_INSTPREF (16) /*<  命令プリフェッチ        */
 
+#if !defined(ASM_FILE)
+#include <stdint.h>
+
 typedef struct _exception_frame{
 	uint64_t rax;
 	uint64_t rbx;
@@ -66,4 +69,6 @@ typedef struct _exception_frame{
 	uint64_t rsp;
 	uint64_t ss;
 }exception_frame;
+int  hal_exception_irq_enabled(struct _exception_frame *_exc);
+#endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_EXCEPTION_H   */

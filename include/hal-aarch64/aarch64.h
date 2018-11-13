@@ -432,5 +432,7 @@ hal_suspend_cpu(void){
 }
 #endif  /*  CONFIG_HAL  */
 void aarch64_setup_vector(void);
+uint32_t aarch64_get_intr_priority(void);
+void aarch64_set_intr_priority(uint32_t _prio);
 #endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_AARCH64_H   */

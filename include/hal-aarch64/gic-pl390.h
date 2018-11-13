@@ -216,11 +216,4 @@
 #define REG_GIC_GICD_CPENDSGIR(n)     ((volatile uint32_t *)(uintptr_t)GIC_GICD_CPENDSGIR(n))
 #define REG_GIC_GICD_SPENDSGIR(n)     ((volatile uint32_t *)(uintptr_t)GIC_GICD_SPENDSGIR(n))
 
-static int gic_pl390_config_irq(struct _irq_ctrlr *_ctrlr, 
-    irq_no _irq, irq_attr _attr, irq_prio _prio);
-static void gic_pl390_enable_irq(struct _irq_ctrlr *_ctrlr, irq_no _irq);
-static void gic_pl390_disable_irq(struct _irq_ctrlr *_ctrlr, irq_no _irq);
-static void gic_pl390_eoi(struct _irq_ctrlr *_ctrlr, irq_no _irq);
-static int gic_pl390_initialize(struct _irq_ctrlr *_ctrlr);
-static void gic_pl390_finalize(struct _irq_ctrlr *_ctrlr);
 #endif  /*  _HAL_GIC_PL390_H   */

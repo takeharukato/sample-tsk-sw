@@ -32,6 +32,8 @@ static irq_finder i8259_find_irq = {
 static irq_ctrlr i8259_ctrlr = {
 	.config_irq = i8259_config_irq,
 	.enable_irq = i8259_enable_irq,
+	.get_priority = NULL,
+	.set_priority = NULL,
 	.disable_irq = i8259_disable_irq,
 	.eoi = i8259_eoi_irq,
 	.initialize = init_i8259_pic,
@@ -103,6 +105,7 @@ i8259_disable_irq(struct _irq_ctrlr *ctrlr __attribute__((unused)), irq_no no) {
 
 	return ;
 }
+
 
 /** Intel i8259で指定したIRQのi8259の割込みに対するEnd of Interruptを発行する
     @param[in] irq 割込み番号

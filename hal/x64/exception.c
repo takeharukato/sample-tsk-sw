@@ -9,6 +9,7 @@
 
 #include <kern/kernel.h>
 
+#include <hal/x64.h>
 #include <hal/exception.h>
 
 /** トラップ名
@@ -39,6 +40,12 @@ static const char *trapnames[] = {
 	"Security Exception",
 	"Reserved",
 };
+
+int
+hal_exception_irq_enabled(struct _exception_frame *exc){
+
+	return (exc->rflags & X64_RFLAGS_IF);
+}
 
 void
 hal_handle_exception(exception_frame *exc) {
@@ -77,8 +84,12 @@ hal_common_trap_handler(exception_frame *exc){
 	if ( exc->trapno < X86_NR_EXCEPTIONS ) {
 		
 		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, 1);
-		psw_enable_interrupt();
+
+		if (hal_exception_irq_enabled(exc))
+			psw_enable_interrupt();
+
 		hal_handle_exception(exc);
+
 		psw_disable_interrupt();
 		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, -1);
 

@@ -9,7 +9,14 @@
 
 #include <kern/kernel.h>
 
+#include <hal/aarch64.h>
 #include <hal/exception.h>
+
+int
+hal_exception_irq_enabled(struct _exception_frame *exc){
+
+	return !(exc->exc_spsr & AARCH64_SPSR_DAIF_I_BIT);
+}
 
 void
 hal_handle_exception(exception_frame *exc) {
@@ -34,20 +41,24 @@ hal_handle_exception(exception_frame *exc) {
 
 void
 hal_common_trap_handler(exception_frame *exc){
-	thread_info_t *ti;
+	thread_info_t  *ti;
 
 	ti = get_current_thread_info();
-	if ( ( exc->exc_type & 0xf ) == 0x1 ) {
+	if ( ( exc->exc_type & 0xf ) == AARCH64_EXC_TYPE_EXCEPTION ) {
 		
 		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, 1);
-		psw_enable_interrupt();
-		hal_handle_exception(exc);
-		psw_disable_interrupt();
-		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, -1);
 
+		if (hal_exception_irq_enabled(exc))
+			psw_enable_interrupt();
+
+		hal_handle_exception(exc);
+
+		psw_disable_interrupt();
+
+		ti_update_preempt_count(ti, THR_EXCCNT_SHIFT, -1);
 	}
 
-	if ( ( exc->exc_type & 0xf ) == 0x2 ) {
+	if ( ( exc->exc_type & 0xf ) == AARCH64_EXC_TYPE_INTERRUPT ) {
 
 		ti_update_preempt_count(ti, THR_IRQCNT_SHIFT, 1);
 		irq_handle_irq(exc);

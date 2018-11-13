@@ -29,8 +29,12 @@
 #define AARCH64_EXC_FIQ_AARCH32   (0x33)
 #define AARCH64_EXC_SERR_AARCH32  (0x34)
 
+#define AARCH64_EXC_TYPE_EXCEPTION (0x1)
+#define AARCH64_EXC_TYPE_INTERRUPT (0x2)
+
 #if !defined(ASM_FILE)
 #include <stdint.h>
+
 typedef struct _exception_frame{
 	uint64_t exc_type;
 	uint64_t exc_esr;
@@ -69,9 +73,9 @@ typedef struct _exception_frame{
 	uint64_t x29;
 	uint64_t x30;
 }exception_frame;
-
-void hal_common_trap_handler(exception_frame *_exc);
-void hal_do_delay_dispatch(exception_frame *exc);
+int  hal_exception_irq_enabled(struct _exception_frame *_exc);
+void hal_common_trap_handler(struct _exception_frame *_exc);
+void hal_do_delay_dispatch(struct _exception_frame *exc);
 void hal_update_preempt_count(uint64_t _shift, int64_t _diff);
 #endif  /*  !ASM_FILE  */
 #endif  /*  _HAL_EXCEPTION_H   */

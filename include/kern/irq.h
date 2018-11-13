@@ -46,6 +46,8 @@ typedef struct _irq_ctrlr{
 	int (*config_irq)(struct _irq_ctrlr *_ctrlr, irq_no _irq, irq_attr _attr, irq_prio _prio);
 	void (*enable_irq)(struct _irq_ctrlr *_ctrlr, irq_no _irq);
 	void (*disable_irq)(struct _irq_ctrlr *_ctrlr, irq_no _irq);
+	void (*get_priority)(struct _irq_ctrlr *_ctrlr, irq_prio *_prio);
+	void (*set_priority)(struct _irq_ctrlr *_ctrlr, irq_prio _prio);
 	void (*eoi)(struct _irq_ctrlr *_ctrlr, irq_no _irq);
 	int (*initialize)(struct _irq_ctrlr *_ctrlr);
 	void (*finalize)(struct _irq_ctrlr *_ctrlr);
