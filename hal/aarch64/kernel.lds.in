@@ -22,6 +22,11 @@ SECTIONS
 	bsp_stack = .;
 	. += (__PAGE_SIZE__ * __TSTACK_PAGES__);
 	bsp_stack_end = .;
+	. = ALIGN(__PAGE_SIZE__ * __ISTACK_PAGES__);
+	_intr_stack_start = .; 
+	intr_stack = .;
+	. += (__PAGE_SIZE__ * __ISTACK_PAGES__);
+	_intr_stack_end = .;
 	*(.bss COMMON) }
 	. = ALIGN(__PAGE_SIZE__);
         __bss_end = .;
