@@ -43,7 +43,7 @@ static uint64_t
 clock_read_ctrl(void){
 	uint64_t cntv_ctrl;
 
-	asm volatile ("isb; mrs %0, cntv_ctl_el0; isb;" 
+	__asm__ __volatile__ ("isb; mrs %0, cntv_ctl_el0; isb;" 
 	    : "=r"(cntv_ctrl) :: "memory");
 
 	return cntv_ctrl;
@@ -52,7 +52,7 @@ clock_read_ctrl(void){
 static void
 clock_write_ctrl(uint64_t cntv_ctrl){
 
-	asm volatile ("isb; msr cntv_ctl_el0, %0; isb;" 
+	__asm__ __volatile__ ("isb; msr cntv_ctl_el0, %0; isb;" 
 	    :: "r"(cntv_ctrl) : "memory");
 	return ;
 }
@@ -61,7 +61,7 @@ static uint64_t
 clock_read_counter(void){
 	uint64_t cval;
 
-	asm volatile("mrs %0, cntvct_el0" : "=r" (cval));
+	__asm__ __volatile__ ("mrs %0, cntvct_el0" : "=r" (cval));
 
 	return cval;
 }
@@ -70,7 +70,7 @@ static uint64_t
 clock_read_tval(void){
 	uint64_t cntv_tval;
 
-	asm volatile ("isb; mrs %0, cntv_tval_el0; isb;" : "=r"(cntv_tval)
+	__asm__ __volatile__ ("isb; mrs %0, cntv_tval_el0; isb;" : "=r"(cntv_tval)
 	    :: "memory");
 	return cntv_tval;
 }
@@ -78,7 +78,7 @@ clock_read_tval(void){
 static void
 clock_write_tval(uint64_t cntv_tval){
 
-	asm volatile ("isb; msr cntv_tval_el0, %0; isb;" :: "r"(cntv_tval)
+	__asm__ __volatile__ ("isb; msr cntv_tval_el0, %0; isb;" :: "r"(cntv_tval)
 	    : "memory");
 }
 

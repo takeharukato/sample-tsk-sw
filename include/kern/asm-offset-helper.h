@@ -18,7 +18,7 @@
    @param[in] val size of structured data(e.g., sizeof(struct _xxxx))
  */
 #define DEFINE_SIZE(sym, val) 						  \
-        asm volatile("\n.ascii \"@ASM_OFFSET@" #sym " %0 " #val "\"" : : "i" (val)) \
+        __asm__ __volatile__ ("\n.ascii \"@ASM_OFFSET@" #sym " %0 " #val "\"" : : "i" (val)) \
 
 /** Define offset address
    @param[in] sym macro name
