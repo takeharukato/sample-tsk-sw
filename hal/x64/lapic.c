@@ -128,6 +128,24 @@ lapic_error_intr_handler(irq_no irq __attribute__((unused)),
 }
 
 static void
+lapic_mask_lapic_timer(void) {
+	uint32_t lvtt;
+
+	lvtt = lapic_read (LAPIC_LVTTR);
+	lvtt |= LAPIC_LVTT_MASK;
+	lapic_write (LAPIC_LVTTR, lvtt);
+}
+
+static void
+lapic_unmask_lapic_timer(void) {
+	uint32_t lvtt;
+
+	lvtt = lapic_read (LAPIC_LVTTR);
+	lvtt &= ~LAPIC_LVTT_MASK;
+	lapic_write (LAPIC_LVTTR, lvtt);
+}
+
+static void
 lapic_calibrate_clocks(uint32_t cpu){
 	uint32_t   divisor;
 	uint32_t lvtt, val;
@@ -172,9 +190,7 @@ lapic_calibrate_clocks(uint32_t cpu){
 	 * as something is wrong with the clock IRQ 0 and we cannot calibrate
 	 * the clock which mean that we cannot run processes
 	 */
-	lvtt = lapic_read (LAPIC_LVTTR);
-	lvtt |= LAPIC_LVTT_MASK;
-	lapic_write (LAPIC_LVTTR, lvtt);
+	lapic_mask_lapic_timer();
 
 	/*
 	 * Calibration
@@ -203,8 +219,7 @@ lapic_enable_irq(struct _irq_ctrlr *ctrlr, irq_no no){
 
 	switch(no) {
 	case LAPIC_TIMER_INT_VECTOR:
-		val = lapic_read(LAPIC_LVTTR);
-		lapic_write(LAPIC_LVTTR, val & (~LAPIC_LVTT_MASK) );
+		lapic_unmask_lapic_timer();
 		break;
 	case LAPIC_ERROR_INT_VECTOR:
 		val = lapic_read(LAPIC_LVTER);
@@ -226,8 +241,7 @@ lapic_disable_irq(struct _irq_ctrlr *ctrlr, irq_no no){
 
 	switch(no) {
 	case LAPIC_TIMER_INT_VECTOR:
-		val = lapic_read(LAPIC_LVTTR);
-		lapic_write(LAPIC_LVTTR, val | LAPIC_LVTT_MASK);
+		lapic_mask_lapic_timer();
 		break;
 	case LAPIC_ERROR_INT_VECTOR:
 		val = lapic_read(LAPIC_LVTER);
@@ -278,9 +292,7 @@ finalize_lapic(struct _irq_ctrlr *ctrlr){
 	val = lapic_read(LAPIC_LVTER);
 	lapic_write(LAPIC_LVTER, val | LAPIC_ICR_INT_MASK);
 
-	val = lapic_read(LAPIC_LVTTR);
-	lapic_write(LAPIC_LVTTR, val | LAPIC_LVTT_MASK);
-
+	lapic_mask_lapic_timer();
 
 	if (lvt_nr >= 4) { /* Mask LAPIC Thermal Sensor Interrupt */
 
@@ -340,32 +352,41 @@ static irq_ctrlr lapic_ctrlr = {
 	.private = NULL
 };
 
-void 
-x64_lapic_set_timer_periodic(const uint32_t freq_us){
+static void
+lapic_setup_timer(const uint32_t usec, int periodic){
 	uint32_t lvtt;
 
 	lvtt = APIC_TDCR_1;
 	lapic_write(LAPIC_TIMER_DCR, lvtt);
 
-	/* configure timer as periodic */
-	lvtt = LAPIC_LVTT_TM | LAPIC_TIMER_INT_VECTOR;
+	/*
+	 * Setup LVTT to configure timer
+	 * Note: Mask interrupts during setting the timer 
+	 *       registers not to break the status of counter. 
+	 */
+	lapic_mask_lapic_timer();  
+
+	lvtt = LAPIC_TIMER_INT_VECTOR;
+	if ( periodic ) /* Configure timer as periodic */
+		lvtt |= LAPIC_LVTT_TM;
 	lapic_write(LAPIC_LVTTR, lvtt);
 
-	lapic_write(LAPIC_TIMER_ICR, freq_us * tcr_per_us);
-	
+	/*
+	 * Set up counter
+	 */
+	lapic_write(LAPIC_TIMER_ICR, usec * tcr_per_us);
+
+	lapic_unmask_lapic_timer(); /* Unset mask for interrupts. */
+}
+void 
+x64_lapic_set_timer_periodic(const uint32_t freq_us){
+
+	lapic_setup_timer(freq_us, 1);
 }
 void
 x64_lapic_set_timer_one_shot(const uint32_t usec){
-	uint32_t lvtt;
 
-	lapic_write(LAPIC_TIMER_ICR, usec * tcr_per_us);
-
-	lvtt = APIC_TDCR_1;
-	lapic_write(LAPIC_TIMER_DCR, lvtt);
-
-	/* configure timer as one-shot */
-	lvtt = LAPIC_TIMER_INT_VECTOR;
-	lapic_write(LAPIC_LVTTR, lvtt);
+	lapic_setup_timer(usec, 0);
 }
 
 int
