@@ -31,7 +31,8 @@ endif
 ifndef CROSS
 CROSS=
 endif
-CC         = $(CROSS)gcc
+
+CC        ?= $(CROSS)gcc
 AR         = $(CROSS)ar
 LD         = $(CROSS)ld
 NM         = $(CROSS)nm
@@ -49,7 +50,7 @@ STRIP_FLAGS ?= -x -R .note -R .comment
 UNIFDEF := $(top_builddir)extra/scripts/unifdef -UUCLIBC_INTERNAL
 
 # Select the compiler needed to build binaries for your development system
-HOSTCC     = gcc
+HOSTCC     ?= cc
 BUILD_CFLAGS = -O2 -Wall
 export ARCH := $(shell uname -m | $(SED) -e s/i.86/i386/ \
 				  -e s/sun.*/sparc/ -e s/sparc.*/sparc/ \
