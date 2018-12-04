@@ -1,12 +1,17 @@
 top=../..
 include ${top}/Makefile.inc
-
+UNAME := $(shell uname)
 QEMU ?= qemu-system-x86_64
 QEMU_KERNEL ?= ${top}/kernel.elf
 QEMU_OPT ?= -m ${CONFIG_HAL_MEMORY_SIZE_MB} -nographic -serial mon:stdio
 QEMU_DBG_OPT := -S -gdb tcp::1234
+ifeq (${UNAME}, FreeBSD)
+GRUB2_RESCUE=grub-mkrescue
+GRUB2_RESCUE_OPT=
+else
 GRUB2_RESCUE=grub2-mkrescue
 GRUB2_RESCUE_OPT=-d /usr/lib/grub/i386-pc
+endif
 
 CFLAGS += -I${top}/include
 ASM_OFFSET_CFLAGS = $(shell echo ${CFLAGS}|sed -e 's@-ggdb[0-9]*@@g')
