@@ -1,5 +1,5 @@
 CPU ?= `uname -m|sed -e "s/x86-64/x64/" -e "s/amd64/x64/" -e "s/x86_64/x64/" -e "s/i?86/ia32/"`
-HOST_CC=gcc
+HOST_CC ?= gcc
 CC=${CROSS_COMPILE}${HOST_CC}
 AR=${CROSS_COMPILE}ar
 LD=${CROSS_COMPILE}ld
