@@ -40,6 +40,7 @@ list_t *list_ref_tail(struct _list_head *);
 list_t *list_get_tail(struct _list_head *);
 void list_add_top(struct _list_head *, list_t *);
 void list_add(struct _list_head *, list_t *);
+void list_insert_at(struct _list *, struct _list *);
 void list_del(list_t *);
 
 void init_list_node(list_t *);
