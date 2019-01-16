@@ -109,29 +109,42 @@ callout_add(call_out_ent *entp, uptime_cnt rel_expire){
 		return EINVAL;
 
 	psw_disable_and_save_interrupt(&psw);
+
 	abs_expire = jiffies.uptime + rel_expire;
+	entp->expire = abs_expire;
+	init_list_node(&entp->link);
 
-	lp = list_ref_top(&callouts.head);
-	do{
-
+	/*
+	 * 挿入位置を探す
+	 */
+	for( lp = list_ref_top(&callouts.head), next_ent = lp->next;
+	     lp != (list_t *)&callouts.head;
+	     lp = next_ent ) {
+		
 		next_ent = lp->next;
 		cur = CONTAINER_OF(lp, call_out_ent, link);
-
-		if ( ( cur->expire > abs_expire) ||
-		     ( next_ent == (list_t *)&callouts.head ) ) {
-			
-			
-			entp->expire = abs_expire;
-			entp->link.prev = next_ent->prev;
-			entp->link.next = next_ent;
-			next_ent->prev->next = &entp->link;
-			next_ent->prev = &entp->link;
+		if ( cur->expire >= abs_expire )
 			break;
-		}
+	}
 
-		lp = next_ent;
-	}while ( lp != (list_t *)&callouts.head );
+	/*
+	 * リストが空か要求されたタイマ発火時間が最長だった場合
+	 */
+	if ( lp == (list_t *)&callouts.head ) {
 
+		list_add(&callouts.head, &entp->link);  /* リストの末尾に追加  */
+		goto out;
+	}
+
+	/*
+	 * 検索位置にノードを追加
+	 */
+	entp->link.prev = cur->link.prev;
+	entp->link.next = &cur->link;
+	cur->link.prev->next = &entp->link;
+	cur->link.prev = &entp->link;
+
+out:
 	psw_restore_interrupt(&psw);
 
 	return 0;
