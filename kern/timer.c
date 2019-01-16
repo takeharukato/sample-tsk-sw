@@ -123,26 +123,21 @@ callout_add(call_out_ent *entp, uptime_cnt rel_expire){
 		
 		next_ent = lp->next;
 		cur = CONTAINER_OF(lp, call_out_ent, link);
-		if ( cur->expire >= abs_expire )
-			break;
+		if ( cur->expire >= abs_expire ) {
+
+			/*
+			 * 検索位置の前にノードを追加
+			 */
+			list_insert_at(&cur->link, &entp->link);
+			goto out;
+		}
 	}
 
 	/*
 	 * リストが空か要求されたタイマ発火時間が最長だった場合
+	 * リストの末尾に追加
 	 */
-	if ( lp == (list_t *)&callouts.head ) {
-
-		list_add(&callouts.head, &entp->link);  /* リストの末尾に追加  */
-		goto out;
-	}
-
-	/*
-	 * 検索位置にノードを追加
-	 */
-	entp->link.prev = cur->link.prev;
-	entp->link.next = &cur->link;
-	cur->link.prev->next = &entp->link;
-	cur->link.prev = &entp->link;
+	list_add(&callouts.head, &entp->link);  
 
 out:
 	psw_restore_interrupt(&psw);
