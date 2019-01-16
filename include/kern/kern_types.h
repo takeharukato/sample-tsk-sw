@@ -27,7 +27,7 @@ typedef int64_t            blk_no;  /*< Disk block number            */
 typedef int             blk_state;  /*< Disk block status            */
 typedef int              rw_flags;  /*< File access flags            */
 typedef int64_t           ref_cnt;  /*< In kernel reference count    */
-typedef int64_t             off_t;  /*< In kernel reference count    */
+typedef int64_t             off_t;  /*< In kernel offset counter     */
 typedef int64_t          io_cnt_t;  /*< In kernel I/O count(Note: minus means errors)    */
 typedef int32_t           imode_t;  /*< mode in inode    */
 typedef uint64_t       obj_size_t;  /*< object size                  */
