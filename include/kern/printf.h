@@ -12,7 +12,9 @@
 #include <kern/freestanding.h>
 
 #define PRFBUFLEN        (128)  /*< Buffer length                */
+int kvprintf(size_t , void *, char const *, int , va_list );
 int kprintf(const char *, ...);
+int ksnprintf(char *, size_t , const char *, ...);
 
 #define panic(fmt, args ...)				\
 	do{						\

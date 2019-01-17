@@ -6,19 +6,56 @@
 /*  User tasks                                                        */
 /*                                                                    */
 /**********************************************************************/
+#include <stdarg.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <sys/types.h>
 
 #include <kern/kernel.h>
 
 thread_t *thrA, *thrB, *thrC;
 
+int
+uprintf(const char *fmt, ...) {
+	va_list          ap;
+	size_t          len;
+	char buf[PRFBUFLEN];
+
+	va_start(ap, fmt);
+	len = kvprintf(PRFBUFLEN, buf, fmt, 10, ap);
+	va_end(ap);
+	buf[len] = '\0';
+
+	fs_write(1, buf, len);	
+
+	return len;
+}
+
+void
+cls(void) {
+
+	uprintf("\033[2J");
+}
+
+void
+locate(int x, int y) {
+
+	uprintf("\033[%d;%dH", y, x);
+}
+
 void
 threadA(void *arg) {
+	static int cnt;
 
+#if !defined(CONFIG_HAL)	
 	kprintf("threadA=0x%lx\n", thrA);
+#endif
 	while(1) {
-		
+
 #if defined(CONFIG_HAL)
-		fs_write(1, "threadA\n", strlen("threadA\n")+1);
+		locate(0, 0);
+		uprintf("threadA=0x%lx\n", thrA);
+		uprintf("threadA[%d]\n", ++cnt);
 #else
 		kprintf("threadA\n");
 #endif  /*  CONFIG_HAL  */
@@ -28,12 +65,17 @@ threadA(void *arg) {
 
 void
 threadB(void *arg) {
+	static int cnt;
 
+#if !defined(CONFIG_HAL)	
 	kprintf("threadB=0x%lx\n", thrB);
+#endif
 	while(1) {
 
 #if defined(CONFIG_HAL)
-		fs_write(1, "threadB\n", strlen("threadB\n")+1);
+		locate(0, 3);
+		uprintf("threadB=0x%lx\n", thrB);
+		uprintf("threadB[%d]\n", ++cnt);
 #else
 		kprintf("threadB\n");
 #endif  /* CONFIG_HAL  */
@@ -50,6 +92,7 @@ threadC(void *arg) {
 	struct _stat s1, s2;
 	struct _stat con_stat;
 
+	locate(0, 5);
 	kprintf("threadC=0x%lx\n", thrC);
 
 	fd = fs_open("/test.txt", O_RDWR|O_CREATE);
@@ -87,6 +130,11 @@ threadC(void *arg) {
 void
 user_init(void) {
 	thread_attr_t attr;
+	int  i;
+
+	cls();
+	for( i = 0; 50 > i; ++i)
+		kprintf("\n");
 
 	memset(&attr, 0, sizeof(thread_attr_t));
 	attr.prio = 2;

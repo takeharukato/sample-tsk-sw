@@ -161,7 +161,7 @@ ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
     @param[in] ap    可変引数リスト
     @retval 出力文字列長
  */
-static int
+int
 kvprintf(size_t len, void *buf, char const *fmt, int radix, va_list ap) {
 	char     nbuf[PRFBUFLEN];
 	const char            *p;
@@ -443,6 +443,26 @@ kprintf(const char *fmt, ...) {
 	buff[rc] = '\0';
 
 	kprint_string(buff);
+
+	return rc;
+}
+
+/** 書式付きカーネル内文字列整形関数
+    @param[out]  str  出力先アドレス
+    @param[size] size 最大出力長
+    @param[in]   fmt  書式指定文字列
+    @param[in]   ...  可変個引数
+    @retval 出力した文字列長
+ */
+int
+ksnprintf(char *str, size_t size, const char *fmt, ...) {
+	va_list ap;
+	int     rc;
+
+	va_start(ap, fmt);
+	rc = kvprintf(size, str, fmt, 10, ap);
+	va_end(ap);
+	str[rc] = '\0';
 
 	return rc;
 }
