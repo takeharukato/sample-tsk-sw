@@ -428,6 +428,7 @@ gic_pl390_find_pending_irq(struct _exception_frame *exc __attribute__((unused)),
 	irq_no i;
 
 	for( i = 0; GIC_INT_MAX > i; ++i) {
+
 		if ( gicd_probe_pending(i) ) {
 
 			rc = IRQ_FOUND;
