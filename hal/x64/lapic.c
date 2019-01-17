@@ -318,10 +318,12 @@ finalize_lapic(struct _irq_ctrlr *ctrlr){
 static int 
 lapic_find_pending_irq(struct _exception_frame *exc, irq_no *irqp){
 
-	kassert( ( LAPIC_INT_VECTOR_MIN <= exc->trapno ) &&
-		 ( exc->trapno <= LAPIC_INT_VECTOR_MAX ) );
+	if ( ( LAPIC_INT_VECTOR_MIN > exc->trapno ) ||
+	    ( exc->trapno > LAPIC_INT_VECTOR_MAX ) )
+		return IRQ_NOT_FOUND;		
 
 	switch(exc->trapno) {
+
 	case LAPIC_TIMER_INT_VECTOR:
 		break;
 	case LAPIC_ERROR_INT_VECTOR:

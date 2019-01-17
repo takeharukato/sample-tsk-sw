@@ -11,6 +11,94 @@
 
 static irq_manage irqMgr;
 
+/** Invoke irq handlers on an irq line
+    @param[in] irq_line An irq line to be handled 
+    @param[in] irq      Irq number
+    @param[in] exc      An exception frame 
+    @retval 0       some handlers were invoked
+    @retval ESRCH   Spurious interrupt
+ */
+static int
+invoke_irq_handler(irq_line *linep, irq_no irq, struct _exception_frame *exc){
+	int                rc;
+	list_t            *lp;
+	int        is_handled;
+	irq_handler_ent *entp;
+	psw_t             psw;
+
+	psw_disable_and_save_interrupt(&psw);
+
+	rc = ESRCH;   /* Spurious interrupt */
+	list_for_each(lp, linep, handlers){
+		
+		entp = CONTAINER_OF(lp, irq_handler_ent, link);
+		if ( entp->handler != NULL ) {
+			
+			if ( !( linep->attr & IRQ_ATTR_NON_NESTABLE) ) 
+				psw_enable_interrupt();
+			
+			is_handled = entp->handler(irq, exc, entp->private);
+			psw_disable_interrupt();
+			
+			if ( is_handled == IRQ_HANDLED ) 
+				rc = 0;
+		}
+	}
+
+	psw_restore_interrupt(&psw);
+
+	return rc;
+}
+
+/** Handle an irq line
+    @param[in] linep An irq line to be handled 
+    @param[in] irq      Irq number
+    @param[in] exc      An exception frame 
+    @retval 0       some handlers were invoked
+    @retval ESRCH   Spurious interrupt
+ */
+static int
+handle_irq_line(irq_line *linep, irq_no irq, struct _exception_frame *exc) {
+	int                rc;
+	irq_prio         prio;
+	int        is_handled;
+	psw_t             psw;
+
+	kassert( ( linep->ctrlrp != NULL ) &&
+	    ( ( linep->ctrlrp->disable_irq != NULL )  || 
+		( ( linep->ctrlrp->get_priority != NULL ) && 
+		    ( linep->ctrlrp->set_priority != NULL ) ) ) &&
+	    ( linep->ctrlrp->enable_irq != NULL )  &&
+	    ( linep->ctrlrp->eoi != NULL ) );
+
+	rc = ESRCH;   /* Spurious interrupt */
+
+	psw_disable_and_save_interrupt(&psw);
+
+	if ( linep->ctrlrp->set_priority == NULL )
+		linep->ctrlrp->disable_irq(linep->ctrlrp, irq); /* Mask this irq line */
+	else {
+
+		linep->ctrlrp->get_priority(linep->ctrlrp, &prio);  /* Get mask level */
+		linep->ctrlrp->set_priority(linep->ctrlrp, linep->prio); /* Set mask level */
+	}
+
+	linep->ctrlrp->eoi(linep->ctrlrp, irq); /* Send EOI for this irq line */
+
+	rc = invoke_irq_handler(linep, irq, exc);  /* Invoke handler */
+	if ( rc == 0 )
+		is_handled = 0;
+
+	if ( linep->ctrlrp->set_priority == NULL )
+		linep->ctrlrp->enable_irq(linep->ctrlrp, irq); /* unmask this irq line */
+	else
+		linep->ctrlrp->set_priority(linep->ctrlrp, prio);  /* Restore mask level */
+
+	psw_restore_interrupt(&psw);
+
+	return is_handled;
+}
+
 /** Register a controller
     @param[in] irq IRQ number
     @param[in] ctrlrp a pointer to controler data
@@ -211,81 +299,39 @@ irq_unregister_pending_irq_finder(struct _irq_finder *finder_ent){
 int
 irq_handle_irq(struct _exception_frame *exc) {
 	int                       rc;
-	int               is_handled;
 	irq_no                   irq;
-	irq_prio                prio;
 	irq_manage  *mgr = (&irqMgr);
 	irq_line              *linep;
 	list_t                   *lp;
-	irq_handler_ent        *entp;
 	irq_finder           *finder;
+	int               is_handled;
 	psw_t                    psw;
 
-	psw_disable_and_save_interrupt(&psw);
+	is_handled = ESRCH;   /* Spurious interrupt */
 
+	psw_disable_and_save_interrupt(&psw);
+	
+	/*
+	 * Find all pending interrupt requests and handle them
+	 */
 	list_for_each(lp, mgr, find_irqs) {
 
 		finder = CONTAINER_OF(lp, irq_finder, link);
-		if ( finder->find_pending == NULL ) 
-			continue;  /* FIXME: We should fall into panic in this case. */
+		kassert( finder->find_pending != NULL );
 
 		rc = finder->find_pending(exc, &irq);
-		if ( rc == IRQ_FOUND ) 
-			goto found_irq;
-	}
-	rc = ESRCH;   /* Spurious interrupt */
-	goto restore_irq_out;
+		if ( rc == IRQ_FOUND ) {
 
-found_irq:
-	linep = &mgr->irqs[irq];
-
-	kassert( ( linep->ctrlrp != NULL ) &&
-		 ( ( linep->ctrlrp->disable_irq != NULL )  || 
-		   ( ( linep->ctrlrp->get_priority != NULL ) && 
-		     ( linep->ctrlrp->set_priority != NULL ) ) ) &&
-		( linep->ctrlrp->enable_irq != NULL )  &&
-		 ( linep->ctrlrp->eoi != NULL ) );
-
-	if ( linep->ctrlrp->set_priority == NULL )
-		linep->ctrlrp->disable_irq(linep->ctrlrp, irq); /* Mask this irq line */
-	else {
-
-		linep->ctrlrp->get_priority(linep->ctrlrp, &prio);  /* Get mask level */
-		linep->ctrlrp->set_priority(linep->ctrlrp, linep->prio);  /* Set mask level */
-	}
-	linep->ctrlrp->eoi(linep->ctrlrp, irq); /* Send EOI for this irq line */
-
-	list_for_each(lp, linep, handlers){
-		
-		entp = CONTAINER_OF(lp, irq_handler_ent, link);
-		if ( entp->handler != NULL ) {
-
-			if ( !( linep->attr & IRQ_ATTR_NON_NESTABLE) ) 
-				psw_enable_interrupt();
-
-			is_handled = entp->handler(irq, exc, entp->private);
-			psw_disable_interrupt();
-
-			if ( is_handled == IRQ_HANDLED ) {
-
-				rc = 0;
-				goto handled_out;
-			}
+			linep = &mgr->irqs[irq];
+			rc = handle_irq_line(linep, irq, exc);  /* handle an irq line */
+			if ( rc == 0 )
+				is_handled = 0;
 		}
 	}
 
-	rc = ESRCH;   /* Spurious interrupt */
-
-handled_out:
-	if ( linep->ctrlrp->set_priority == NULL )
-		linep->ctrlrp->enable_irq(linep->ctrlrp, irq); /* unmask this irq line */
-	else
-		linep->ctrlrp->set_priority(linep->ctrlrp, prio);  /* Restore mask level */
-
-restore_irq_out:
 	psw_restore_interrupt(&psw);
 
-	return rc;
+	return is_handled;
 }
 
 /** Initialize IRQ manager
