@@ -81,4 +81,10 @@ config CONFIG_TIMER_TIME_SLICE
        help
 	  This sets the value of the timer slice for each thread in the round robin scheduling class by tick counts.
 
+config CONFIG_LIFEGAME
+    bool "Conway's Game of Life DEMO"
+    default n
+    help
+      Build Conway's Game of Life for demonstration.
+
 source "configs/hal/Config.in"

@@ -12,36 +12,9 @@
 #include <sys/types.h>
 
 #include <kern/kernel.h>
+#include <uprintf.h>
 
 thread_t *thrA, *thrB, *thrC;
-
-int
-uprintf(const char *fmt, ...) {
-	va_list          ap;
-	size_t          len;
-	char buf[PRFBUFLEN];
-
-	va_start(ap, fmt);
-	len = kvprintf(PRFBUFLEN, buf, fmt, 10, ap);
-	va_end(ap);
-	buf[len] = '\0';
-
-	fs_write(1, buf, len);	
-
-	return len;
-}
-
-void
-cls(void) {
-
-	uprintf("\033[2J");
-}
-
-void
-locate(int x, int y) {
-
-	uprintf("\033[%d;%dH", y, x);
-}
 
 void
 threadA(void *arg) {
@@ -59,7 +32,7 @@ threadA(void *arg) {
 #else
 		kprintf("threadA\n");
 #endif  /*  CONFIG_HAL  */
-		thr_delay(1000);
+		thr_delay(100);
 	}
 }
 
@@ -79,7 +52,7 @@ threadB(void *arg) {
 #else
 		kprintf("threadB\n");
 #endif  /* CONFIG_HAL  */
-		thr_delay(500);
+		thr_delay(50);
 	}
 }
 
