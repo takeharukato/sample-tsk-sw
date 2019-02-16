@@ -24,15 +24,18 @@
 thread_t *thrD;
 
 void
-show(void *u, int w, int h){
+show(void *u, int w, int h, int gen){
 	int (*univ)[w] = u;
 	int x,y;
 
 	uprintf("\033[H");
+	locate(0, 0);
 	for_y {
 		for_x uprintf(univ[y][x] ? "\033[07m  \033[m" : "  ");
 		uprintf("\033[E");
 	}
+	locate(64, 0);
+	uprintf("Generation: %02d", gen);
 }
  
 void
@@ -60,12 +63,21 @@ void
 game(int w, int h){
 	unsigned univ[h][w];
 	int x,y;
-	for_xy univ[y][x] = genrand_int31() < 0x7fffffff / 10 ? 1 : 0;
+	int   i;
+
 
 	while (1) {
-		show(univ, w, h);
-		evolve(univ, w, h);
-		thr_delay(200);
+		
+		for(i = 0; 100 > i; ++i) {
+
+			memset(univ, 0, sizeof (univ));
+
+			for_xy univ[y][x] = genrand_int31() < 0x7fffffff / 10 ? 1 : 0;
+
+			show(univ, w, h, i);
+			evolve(univ, w, h);
+			thr_delay(200);
+		}
 	}
 }
 
