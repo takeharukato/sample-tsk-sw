@@ -72,6 +72,9 @@ run-debug: hal kernel.elf
 docs:
 	${MAKE} -C docs ;\
 
+doxygen:
+	${MAKE} -C docs $@;\
+
 clean:
 	for dir in ${cleandirs} ; do \
 	${MAKE} -C $${dir} clean ;\

@@ -66,13 +66,14 @@ thr_delay_callout(void *private){
  */
 void
 thr_thread_start(void (*fn)(void *), void *arg){
+#if defined(CONFIG_HAL)
 	int fd, stdin_fd, stdout_fd, stderr_fd;
 
 	/*
 	 * Because this is thread based multi-task operating system,
 	 * we should some initialization in crt0 of multi-process operating system,
 	 */
-#if defined(CONFIG_HAL)
+
 	/*  Ensure all file descriptors are closed. */
 	for(fd = 0; MAX_FD_TABLE_SIZE > fd; ++fd) 
 		fs_close(fd);

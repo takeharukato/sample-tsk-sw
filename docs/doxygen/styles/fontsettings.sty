@@ -1,0 +1,60 @@
+%%%
+%%% Extra font settings for creating PDF from doxygen output by using dvipdfmx
+%%%
+%%% To use setting the below line into Doxyfile:
+%%%
+%%%   LATEX_EXTRA_STYLESHEET = fontsettings.sty
+%%%
+%%% Use doxygen to generate the refman.tex and compile it to DVI with uplatex.
+%%% Then execute dvipdfmx to convert PDF from DVI.
+%%%
+%%% MIT License
+%%%
+%%% Copyright (c) 2018 tsntsumi
+%%%
+%%% Permission is hereby granted, free of charge, to any person obtaining a copy
+%%% of this software and associated documentation files (the "Software"), to deal
+%%% in the Software without restriction, including without limitation the rights
+%%% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+%%% copies of the Software, and to permit persons to whom the Software is
+%%% furnished to do so, subject to the following conditions:
+%%%
+%%% The above copyright notice and this permission notice shall be included in all
+%%% copies or substantial portions of the Software.
+%%%
+%%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+%%% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+%%% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+%%% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+%%% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+%%% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+%%% SOFTWARE.
+%
+% To use japanese bold fonts with uplatex
+\DeclareFontShape{JY2}{hmc}{bc}{n}{<->ssub*hmc/bx/n}{}
+\DeclareFontShape{JT2}{hmc}{bc}{n}{<->ssub*hmc/bx/n}{}
+\DeclareFontShape{JY2}{hgt}{bc}{n}{<->ssub*hgt/bx/n}{}
+\DeclareFontShape{JT2}{hgt}{bc}{n}{<->ssub*hgt/bx/n}{}
+%
+\RequirePackage{letltxmacro}
+\LetLtxMacro\originaltitlepage\titlepage\relax
+\renewenvironment{titlepage}{%
+  \begin{originaltitlepage}\gtfamily\sffamily\bfseries%
+}{\end{originaltitlepage}}
+%
+\AtBeginDocument{%
+  % Change serif fonts in body text
+  \renewcommand{\kanjifamilydefault}{\mcdefault}
+  \renewcommand{\familydefault}{\rmdefault}
+  % Select sanserif fonts in section headers
+  \allsectionsfont{%
+    \gtfamily\sffamily%
+    \fontseries{bc}\selectfont%
+    \color{darkgray}%
+  }
+  \renewcommand{\DoxyLabelFont}{%
+    \gtfamily\sffamily%
+    \fontseries{bc}\selectfont%
+    \color{darkgray}%
+  }
+}

@@ -6,13 +6,17 @@
 top=..
 include ${top}/Makefile.inc
 CFLAGS += -I${top}/include
-subdirs=taskmonitor-book
+subdirs=taskmonitor-book doxygen
+
+.PHONY: doxygen
 
 all: 
 	for dir in ${subdirs} ; do \
 	${MAKE} -C $${dir} ;\
 	done
-	${RM} *.o 
+
+doxygen:
+	${MAKE} -C doxygen doxygen-doc
 
 clean:
 	for dir in ${subdirs} ; do \

@@ -1,0 +1,69 @@
+%%%
+%%% Extra settings for creating PDF from doxygen output by using dvipdfmx
+%%%
+%%% To use setting the below line into Doxyfile:
+%%%
+%%%   LATEX_EXTRA_STYLESHEET = doxygenjpext.sty
+%%%
+%%% Use doxygen to generate the refman.tex and compile it to DVI with uplatex.
+%%% Then execute dvipdfmx to convert PDF from DVI.
+%%%
+%%% MIT License
+%%%
+%%% Copyright (c) 2018 tsntsumi
+%%%
+%%% Permission is hereby granted, free of charge, to any person obtaining a copy
+%%% of this software and associated documentation files (the "Software"), to deal
+%%% in the Software without restriction, including without limitation the rights
+%%% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+%%% copies of the Software, and to permit persons to whom the Software is
+%%% furnished to do so, subject to the following conditions:
+%%%
+%%% The above copyright notice and this permission notice shall be included in all
+%%% copies or substantial portions of the Software.
+%%%
+%%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+%%% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+%%% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+%%% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+%%% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+%%% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+%%% SOFTWARE.
+%
+% Specifing the drivers to class and packages
+\PassOptionsToPackage{dvipdfmx}{adjustbox}
+\PassOptionsToPackage{dvipdfmx}{color}
+\PassOptionsToPackage{dvipdfmx}{xcolor}
+\PassOptionsToPackage{dvipdfmx}{graphicx}
+\PassOptionsToPackage{dvipdfm}{geometry}
+%
+% To fix font metric
+\usepackage[deluxe,jis2004,uplatex]{otf}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}% \usepackage{fix-cm}
+%
+% Load hyperref package with dvipdfmx and pxjahyper for japanese environment
+%\RequirePackage[dvipdfmx,pagebackref=true,unicode]{hyperref}
+\RequirePackage[dvipdfmx,pagebackref=true]{hyperref}
+\usepackage{pxjahyper}
+%
+\RequirePackage{xifthen}
+\RequirePackage{letltxmacro}
+%
+% Omit loading hyperref package with pdftex or ps2pdf
+\LetLtxMacro\originalusepackage\usepackage\relax
+\renewcommand\usepackage[2][]{%
+  \ifthenelse{\equal{#2}{hyperref}}{}{\originalusepackage[#1]{#2}}%
+}
+%
+\AtBeginDocument{%
+  % Overwriting and adding hyperref options
+  \hypersetup{%
+    bookmarks=true,bookmarksnumbered=true,% enable bookmarks
+    setpagesize=false}}%
+\@ifclassloaded{jsbook}{%
+  \AtBeginDocument{%
+    \LetLtxMacro\originalprintindex@fixaddcontentsline\printindex\relax
+    \renewcommand\printindex{%
+      \renewcommand\addcontentsline[3]{}%
+      \originalprintindex@fixaddcontentsline}}}{}
