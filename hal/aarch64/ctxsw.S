@@ -1,5 +1,5 @@
 /**********************************************************************/
-/*  Tiny -- The Inferior operating system Nucleus Yeah!!              */
+/*  OS kernel sample                                                  */
 /*  Copyright 2016 Takeharu KATO                                      */
 /*                                                                    */
 /*  thread context handling aarch64                                   */
